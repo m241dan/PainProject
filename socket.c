@@ -876,7 +876,7 @@ bool flush_output(D_SOCKET *dsock)
 
 void handle_new_connections(D_SOCKET *dsock, char *arg)
 {
-  D_MOBILE *p_new;
+  ACCOUNT *a_new;
   int i;
 
   switch(dsock->state)
@@ -899,24 +899,16 @@ void handle_new_connections(D_SOCKET *dsock, char *arg)
       log_string("%s is trying to connect.", arg);
 
       /* Check for a new Player */
-      if ((p_new = load_profile(arg)) == NULL)
+      if ((a_new = load_account( capitalize( arg ), TRUE ) ) == NULL) /* True because I only want to partially load the account, name and password only */
       {
-        if (StackSize(dmobile_free) <= 0)
-        {
-          if ((p_new = malloc(sizeof(*p_new))) == NULL)
-          {
-            bug("Handle_new_connection: Cannot allocate memory.");
-            abort();
-          }
-        }
+        if (StackSize(account_free) <= 0)
+           CREATE( a_new, ACCOUNT, 1 );
         else
-        {
-          p_new = (D_MOBILE *) PopStack(dmobile_free);
-        }
-        clear_mobile(p_new);
+          a_new = (ACCOUNT *) PopStack(account_free);
+        clear_account(a_new);
 
         /* give the player it's name */
-        p_new->name = strdup(arg);
+        a_new->name = strdup(arg);
 
         /* prepare for next step */
         text_to_buffer(dsock, "Please enter a new password: ");
@@ -931,8 +923,8 @@ void handle_new_connections(D_SOCKET *dsock, char *arg)
       text_to_buffer(dsock, (char *) dont_echo);
 
       /* socket <-> player */
-      p_new->socket = dsock;
-      dsock->player = p_new;
+      a_new->socket = dsock;
+      dsock->account = a_new;
       break;
     case STATE_NEW_PASSWORD:
       if (strlen(arg) < 5 || strlen(arg) > 12)
@@ -941,12 +933,12 @@ void handle_new_connections(D_SOCKET *dsock, char *arg)
         return;
       }
 
-      free(dsock->player->password);
-      dsock->player->password = strdup(crypt(arg, dsock->player->name));
+      free(dsock->account->password);
+      dsock->account->password = strdup(crypt(arg, dsock->account->name));
 
-      for (i = 0; dsock->player->password[i] != '\0'; i++)
+      for (i = 0; dsock->account->password[i] != '\0'; i++)
       {
-	if (dsock->player->password[i] == '~')
+	if (dsock->account->password[i] == '~')
 	{
 	  text_to_buffer(dsock, "Illegal password!\n\rPlease enter a new password: ");
 	  return;
@@ -957,79 +949,81 @@ void handle_new_connections(D_SOCKET *dsock, char *arg)
       dsock->state = STATE_VERIFY_PASSWORD;
       break;
     case STATE_VERIFY_PASSWORD:
-      if (!strcmp(crypt(arg, dsock->player->name), dsock->player->password))
+      if (!strcmp(crypt(arg, dsock->account->name), dsock->account->password))
       {
         text_to_buffer(dsock, (char *) do_echo);
 
         /* put him in the list */
-        AttachToList(dsock->player, dmobile_list);
+        AttachToList(dsock->account, account_list);
 
-        log_string("New player: %s has entered the game.", dsock->player->name);
+        log_string("New account: %s has entered the game.", dsock->account->name);
 
         /* and into the game */
-        dsock->state = STATE_PLAYING;
+        dsock->state = STATE_ACCOUNT_MENU;
         text_to_buffer(dsock, motd);
 
         /* initialize events on the player */
-        init_events_player(dsock->player);
+        /* commented out for now
+        init_events_player(dsock->player); */
 
         /* strip the idle event from this socket */
         strip_event_socket(dsock, EVENT_SOCKET_IDLE);
       }
       else
       {
-        free(dsock->player->password);
-        dsock->player->password = NULL;
+        free(dsock->account->password);
+        dsock->account->password = NULL;
         text_to_buffer(dsock, "Password mismatch!\n\rPlease enter a new password: ");
         dsock->state = STATE_NEW_PASSWORD;
       }
       break;
     case STATE_ASK_PASSWORD:
       text_to_buffer(dsock, (char *) do_echo);
-      if (!strcmp(crypt(arg, dsock->player->name), dsock->player->password))
+      if (!strcmp(crypt(arg, dsock->account->name), dsock->account->password))
       {
-        if ((p_new = check_reconnect(dsock->player->name)) != NULL)
+        if ((a_new = check_account_reconnect(dsock->account->name)) != NULL)
         {
           /* attach the new player */
-          free_mobile(dsock->player);
-          dsock->player = p_new;
-          p_new->socket = dsock;
+          free_account(dsock->account);
+          dsock->account = a_new;
+          a_new->socket = dsock;
 
-          log_string("%s has reconnected.", dsock->player->name);
+          log_string("%s has reconnected.", dsock->account->name);
 
           /* and let him enter the game */
-          dsock->state = STATE_PLAYING;
-          text_to_buffer(dsock, "You take over a body already in use.\n\r");
+          dsock->state = STATE_ACCOUNT_MENU;
+          text_to_buffer(dsock, "You take over an account already in use.\n\r");
 
           /* strip the idle event from this socket */
           strip_event_socket(dsock, EVENT_SOCKET_IDLE);
         }
-        else if ((p_new = load_player(dsock->player->name)) == NULL)
+        else if ((a_new = load_account(capitalize(dsock->account->name), FALSE)) == NULL) /* false because I want a full load of the account */
         {
-          text_to_socket(dsock, "ERROR: Your pfile is missing!\n\r");
-          free_mobile(dsock->player);
-          dsock->player = NULL;
+          text_to_socket(dsock, "ERROR: Your afile is missing!\n\r");
+          free_account(dsock->account);
+          dsock->account = NULL;
           close_socket(dsock, FALSE);
           return;
-        }
+       }
         else
         {
           /* attach the new player */
-          free_mobile(dsock->player);
-          dsock->player = p_new;
-          p_new->socket = dsock;
+          free_account(dsock->account);
+          dsock->account = a_new;
+          a_new->socket = dsock;
 
           /* put him in the active list */
-          AttachToList(p_new, dmobile_list);
+          AttachToList(a_new, account_list);
 
-          log_string("%s has entered the game.", dsock->player->name);
+          log_string("%s has entered the game.", dsock->account->name);
 
           /* and let him enter the game */
-          dsock->state = STATE_PLAYING;
+          dsock->state = STATE_ACCOUNT_MENU;
           text_to_buffer(dsock, motd);
 
 	  /* initialize events on the player */
-	  init_events_player(dsock->player);
+	  /* commented out for now
+          init_events_player(dsock->player); */
 
 	  /* strip the idle event from this socket */
 	  strip_event_socket(dsock, EVENT_SOCKET_IDLE);
@@ -1038,8 +1032,8 @@ void handle_new_connections(D_SOCKET *dsock, char *arg)
       else
       {
         text_to_socket(dsock, "Bad password!\n\r");
-        free_mobile(dsock->player);
-        dsock->player = NULL;
+        free_account(dsock->account);
+        dsock->account = NULL;
         close_socket(dsock, FALSE);
       }
       break;

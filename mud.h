@@ -120,11 +120,12 @@ typedef struct  dMobile       D_MOBILE;
 typedef struct  help_data     HELP_DATA;
 typedef struct  lookup_data   LOOKUP_DATA;
 typedef struct  event_data    EVENT_DATA;
-
+typedef struct game_account ACCOUNT;
 /* the actual structures */
 struct dSocket
 {
   D_MOBILE      * player;
+  ACCOUNT       * account;
   LIST          * events;
   char          * hostname;
   char            inbuf[MAX_BUFFER];
