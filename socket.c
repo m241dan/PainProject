@@ -899,7 +899,7 @@ void handle_new_connections(D_SOCKET *dsock, char *arg)
       log_string("%s is trying to connect.", arg);
 
       /* Check for a new Player */
-      if ((a_new = load_account( capitalize( arg ), TRUE ) ) == NULL) /* True because I only want to partially load the account, name and password only */
+      if ((a_new = load_account( arg, TRUE ) ) == NULL) /* True because I only want to partially load the account, name and password only */
       {
         if (StackSize(account_free) <= 0)
            CREATE( a_new, ACCOUNT, 1 );
@@ -961,6 +961,7 @@ void handle_new_connections(D_SOCKET *dsock, char *arg)
         /* and into the game */
         dsock->state = STATE_ACCOUNT_MENU;
         text_to_buffer(dsock, motd);
+        fwrite_account( dsock->account ); /* write the new account */
 
         /* initialize events on the player */
         /* commented out for now
@@ -997,7 +998,7 @@ void handle_new_connections(D_SOCKET *dsock, char *arg)
           /* strip the idle event from this socket */
           strip_event_socket(dsock, EVENT_SOCKET_IDLE);
         }
-        else if ((a_new = load_account(capitalize(dsock->account->name), FALSE)) == NULL) /* false because I want a full load of the account */
+        else if ((a_new = load_account( dsock->account->name, FALSE ) ) == NULL) /* false because I want a full load of the account */
         {
           text_to_socket(dsock, "ERROR: Your afile is missing!\n\r");
           free_account(dsock->account);
