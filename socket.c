@@ -854,11 +854,19 @@ bool flush_output(D_SOCKET *dsock)
     return TRUE;
 
   /* bust a prompt */
-  if (dsock->state == STATE_PLAYING && dsock->bust_prompt)
-  {
-    text_to_buffer(dsock, "\n\rSocketMud:> ");
-    dsock->bust_prompt = FALSE;
-  }
+   if( dsock->bust_prompt )
+   {
+      switch( dsock->state )
+      {
+         case STATE_PLAYING:
+            text_to_buffer( dsock, "\r\nSocketMud:> " );
+            break;
+         case STATE_ACCOUNT_MENU:
+            text_to_buffer( dsock, "\r\nAn Account Menu\r\n" );
+            break;
+      }
+      dsock->bust_prompt = FALSE;
+   }
 
   /* reset the top pointer */
   dsock->top_output = 0;
