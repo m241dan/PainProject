@@ -8,7 +8,6 @@
 #include <zlib.h>
 #include <pthread.h>
 #include <arpa/telnet.h>
-
 #include "list.h"
 #include "stack.h"
 
@@ -38,12 +37,9 @@
 #define EXE_FILE           "../src/SocketMud"     /* the name of the mud binary         */
 
 /* Connection states */
-#define STATE_NEW_NAME         0
-#define STATE_NEW_PASSWORD     1
-#define STATE_VERIFY_PASSWORD  2
-#define STATE_ASK_PASSWORD     3
-#define STATE_PLAYING          4
-#define STATE_CLOSED           5
+typedef enum {
+   STATE_NEW_NAME, STATE_NEW_PASSWORD, STATE_VERIFY_PASSWORD, STATE_ASK_PASSWORD, STATE_ACCOUNT_MENU, STATE_PLAYING, STATE_CLOSED, MAX_STATE
+} socket_states;
 
 /* Thread states - please do not change the order of these states    */
 #define TSTATE_LOOKUP          0  /* Socket is in host_lookup        */
@@ -64,7 +60,6 @@
 /* define simple types */
 typedef  unsigned char     bool;
 typedef  short int         sh_int;
-
 
 /******************************
  * End of standard definitons *
@@ -95,6 +90,21 @@ typedef  short int         sh_int;
     break;                            \
   }                                   \
 }
+/*
+ * A memory allocation macro, because its what I'm used to using
+ * Written by Davenge
+ */
+#define CREATE(result, type, number)                                    \
+do                                                                      \
+{                                                                       \
+   if (!((result) = (type *) calloc ((number), sizeof(type))))          \
+   {                                                                    \
+      perror("malloc failure");                                         \
+      fprintf(stderr, "Malloc failure @ %s:%d\n", __FILE__, __LINE__ ); \
+      abort();                                                          \
+   }                                                                    \
+} while(0)
+
 
 /***********************
  * End of Macros       *
@@ -166,8 +176,10 @@ typedef struct buffer_type
   int      size;        /* The allocated size of data    */
 } BUFFER;
 
+
 /* here we include external structure headers */
 #include "event.h"
+#include "account.h"
 
 /******************************
  * End of new structures      *
@@ -182,6 +194,8 @@ extern  LIST        *   dsock_list;       /* the linked list of active sockets  
 extern  STACK       *   dmobile_free;     /* the mobile free list               */
 extern  LIST        *   dmobile_list;     /* the mobile list of active mobiles  */
 extern  LIST        *   help_list;        /* the linked list of help files      */
+extern  STACK       *   account_free;     /* list of free accounts -Davenge     */
+extern  LIST        *   account_list;     /* list of active accounts -Davenge   */
 extern  const struct    typCmd tabCmd[];  /* the command table                  */
 extern  bool            shut_down;        /* used for shutdown                  */
 extern  char        *   greeting;         /* the welcome greeting               */
@@ -262,12 +276,16 @@ char   *one_arg               ( char *fStr, char *bStr );
 char   *strdup                ( const char *s );
 int     strcasecmp            ( const char *s1, const char *s2 );
 bool    is_prefix             ( const char *aStr, const char *bStr );
-char   *capitalize            ( char *txt );
+char   *capitalize_word       ( char *txt ); /* changed make my own styles of capitalize methods -Davenge */
 BUFFER *__buffer_new          ( int size );
 void    __buffer_strcat       ( BUFFER *buffer, const char *text );
 void    buffer_free           ( BUFFER *buffer );
 void    buffer_clear          ( BUFFER *buffer );
 int     bprintf               ( BUFFER *buffer, char *fmt, ... );
+char   *downcase	      ( const char *word );
+char   *capitalize            ( const char *word );
+bool   downcase_orig          ( char *word );
+bool   capitalize_orig        ( char *word );
 
 /*
  * help.c

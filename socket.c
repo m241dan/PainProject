@@ -27,6 +27,8 @@ STACK    * dsock_free = NULL;     /* the socket free list              */
 LIST     * dsock_list = NULL;     /* the linked list of active sockets */
 STACK    * dmobile_free = NULL;   /* the mobile free list              */
 LIST     * dmobile_list = NULL;   /* the mobile list of active mobiles */
+STACK    * account_free = NULL;   /* the account free list -Davenge    */
+LIST     * account_list = NULL;   /* the account list of active accounts -Davenge */
 
 /* mccp support */
 const unsigned char compress_will   [] = { IAC, WILL, TELOPT_COMPRESS,  '\0' };
@@ -56,6 +58,8 @@ int main(int argc, char **argv)
   dsock_list = AllocList();
   dmobile_free = AllocStack();
   dmobile_list = AllocList();
+  account_free = AllocStack();
+  account_list = AllocList();
 
   /* note that we are booting up */
   log_string("Program starting.");
