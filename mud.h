@@ -125,7 +125,6 @@ typedef struct game_account ACCOUNT;
 struct dSocket
 {
   D_MOBILE      * player;
-  ACCOUNT       * account;
   LIST          * events;
   char          * hostname;
   char            inbuf[MAX_BUFFER];
@@ -139,6 +138,11 @@ struct dSocket
   unsigned char   compressing;                 /* MCCP support */
   z_stream      * out_compress;                /* MCCP support */
   unsigned char * out_compress_buf;            /* MCCP support */
+
+  /* New Stuff */
+  ACCOUNT       * account; /* sockets now hold accounts */
+  LIST          * available_commands; /* going to change how command interpretation functions */
+
 };
 
 struct dMobile
@@ -167,7 +171,8 @@ struct typCmd
 {
   char      * cmd_name;
   void     (* cmd_funct)(D_MOBILE *dMOb, char *arg);
-  sh_int      level;
+  sh_int    level;
+  sh_int    state;
 };
 
 typedef struct buffer_type
@@ -287,7 +292,8 @@ char   *downcase	      ( const char *word );
 char   *capitalize            ( const char *word );
 bool   downcase_orig          ( char *word );
 bool   capitalize_orig        ( char *word );
-
+void   spit_equals            ( D_SOCKET *dsock, int amount );
+char   *produce_equals        ( int amount );
 /*
  * help.c
  */

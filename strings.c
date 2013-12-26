@@ -293,3 +293,31 @@ bool capitalize_orig( char * word )
 
    return TRUE;
 }
+
+/* some output stuff for pretty formatting
+ * Written by Davenge
+ */
+
+void spit_equals( D_SOCKET *dsock, int amount )
+{
+   int x;
+
+   for( x = 0; x < amount; x++ )
+      text_to_buffer( dsock, "=" );
+
+   return;
+}
+
+char *produce_equals( int amount )
+{
+   static char equals[MAX_BUFFER];
+   char *ptr;
+   int x;
+   ptr = equals;
+   equals[amount] = '\0';
+
+   for( x = 0; x < amount; x++, ptr++ )
+      *ptr = '=';
+
+   return equals;
+}

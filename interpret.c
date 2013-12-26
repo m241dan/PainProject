@@ -40,20 +40,23 @@ void handle_cmd_input(D_SOCKET *dsock, char *arg)
 const struct typCmd tabCmd [] =
 {
 
- /* command          function        Req. Level   */
- /* --------------------------------------------- */
+ /* command          function        Req. Level   State               */
+ /* ----------------------------------------------------------------- */
 
-  { "commands",      cmd_commands,   LEVEL_GUEST  },
-  { "compress",      cmd_compress,   LEVEL_GUEST  },
-  { "copyover",      cmd_copyover,   LEVEL_GOD    },
-  { "help",          cmd_help,       LEVEL_GUEST  },
-  { "linkdead",      cmd_linkdead,   LEVEL_ADMIN  },
-  { "say",           cmd_say,        LEVEL_GUEST  },
-  { "save",          cmd_save,       LEVEL_GUEST  },
-  { "shutdown",      cmd_shutdown,   LEVEL_GOD    },
-  { "quit",          cmd_quit,       LEVEL_GUEST  },
-  { "who",           cmd_who,        LEVEL_GUEST  },
+  { "commands",      cmd_commands,   LEVEL_GUEST, STATE_PLAYING },
+  { "compress",      cmd_compress,   LEVEL_GUEST, STATE_PLAYING },
+  { "copyover",      cmd_copyover,   LEVEL_GOD,   STATE_PLAYING },
+  { "help",          cmd_help,       LEVEL_GUEST, STATE_PLAYING },
+  { "linkdead",      cmd_linkdead,   LEVEL_ADMIN, STATE_PLAYING },
+  { "say",           cmd_say,        LEVEL_GUEST, STATE_PLAYING },
+  { "save",          cmd_save,       LEVEL_GUEST, STATE_PLAYING },
+  { "shutdown",      cmd_shutdown,   LEVEL_GOD,   STATE_PLAYING },
+  { "quit",          cmd_quit,       LEVEL_GUEST, STATE_PLAYING },
+  { "who",           cmd_who,        LEVEL_GUEST, STATE_PLAYING },
+  /* account commands */
+  { "quit",          act_quit,       LEVEL_BASIC, STATE_ACCOUNT_MENU },
 
   /* end of table */
   { "", 0 }
 };
+

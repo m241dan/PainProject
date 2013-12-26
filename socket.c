@@ -862,7 +862,7 @@ bool flush_output(D_SOCKET *dsock)
             text_to_buffer( dsock, "\r\nSocketMud:> " );
             break;
          case STATE_ACCOUNT_MENU:
-            text_to_buffer( dsock, "\r\nAn Account Menu\r\n" );
+            account_prompt( dsock );
             break;
       }
       dsock->bust_prompt = FALSE;
