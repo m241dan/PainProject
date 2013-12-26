@@ -19,8 +19,9 @@ void cmd_say(D_MOBILE *dMob, char *arg)
   communicate(dMob, arg, COMM_LOCAL);
 }
 
-void cmd_quit(D_MOBILE *dMob, char *arg)
+void cmd_quit(void *passed, char *arg)
 {
+  D_MOBILE *dMob = (D_MOBILE *)passed;
   char buf[MAX_BUFFER];
 
   /* log the attempt */

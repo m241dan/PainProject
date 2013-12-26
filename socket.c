@@ -861,7 +861,7 @@ bool flush_output(D_SOCKET *dsock)
          case STATE_PLAYING:
             text_to_buffer( dsock, "\r\nSocketMud:> " );
             break;
-         case STATE_ACCOUNT_MENU:
+         case STATE_ACCOUNT:
             account_prompt( dsock );
             break;
       }
@@ -967,7 +967,7 @@ void handle_new_connections(D_SOCKET *dsock, char *arg)
         log_string("New account: %s has entered the game.", dsock->account->name);
 
         /* and into the game */
-        dsock->state = STATE_ACCOUNT_MENU;
+        dsock->state = STATE_ACCOUNT;
         text_to_buffer(dsock, motd);
         fwrite_account( dsock->account ); /* write the new account */
 
@@ -1000,7 +1000,7 @@ void handle_new_connections(D_SOCKET *dsock, char *arg)
           log_string("%s has reconnected.", dsock->account->name);
 
           /* and let him enter the game */
-          dsock->state = STATE_ACCOUNT_MENU;
+          dsock->state = STATE_ACCOUNT;
           text_to_buffer(dsock, "You take over an account already in use.\n\r");
 
           /* strip the idle event from this socket */
@@ -1027,7 +1027,7 @@ void handle_new_connections(D_SOCKET *dsock, char *arg)
           log_string("%s has entered the game.", dsock->account->name);
 
           /* and let him enter the game */
-          dsock->state = STATE_ACCOUNT_MENU;
+          dsock->state = STATE_ACCOUNT;
           text_to_buffer(dsock, motd);
 
 	  /* initialize events on the player */

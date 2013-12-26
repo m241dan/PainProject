@@ -38,7 +38,7 @@
 
 /* Connection states */
 typedef enum {
-   STATE_NEW_NAME, STATE_NEW_PASSWORD, STATE_VERIFY_PASSWORD, STATE_ASK_PASSWORD, STATE_ACCOUNT_MENU, STATE_PLAYING, STATE_CLOSED, MAX_STATE
+   STATE_NEW_NAME, STATE_NEW_PASSWORD, STATE_VERIFY_PASSWORD, STATE_ASK_PASSWORD, STATE_ACCOUNT, STATE_PLAYING, STATE_CLOSED, MAX_STATE
 } socket_states;
 
 /* Thread states - please do not change the order of these states    */
@@ -121,6 +121,8 @@ typedef struct  help_data     HELP_DATA;
 typedef struct  lookup_data   LOOKUP_DATA;
 typedef struct  event_data    EVENT_DATA;
 typedef struct game_account ACCOUNT;
+typedef struct typCmd COMMAND;
+
 /* the actual structures */
 struct dSocket
 {
@@ -141,8 +143,6 @@ struct dSocket
 
   /* New Stuff */
   ACCOUNT       * account; /* sockets now hold accounts */
-  LIST          * available_commands; /* going to change how command interpretation functions */
-
 };
 
 struct dMobile
@@ -170,7 +170,7 @@ struct lookup_data
 struct typCmd
 {
   char      * cmd_name;
-  void     (* cmd_funct)(D_MOBILE *dMOb, char *arg);
+  void     (* cmd_funct)(void *passed, char *arg);
   sh_int    level;
   sh_int    state;
 };
@@ -316,7 +316,8 @@ D_M  *check_reconnect         ( char *player );
  * action_safe.c
  */
 void  cmd_say                 ( D_M *dMob, char *arg );
-void  cmd_quit                ( D_M *dMob, char *arg );
+void  cmd_quit                ( void *
+passed, char *arg );
 void  cmd_shutdown            ( D_M *dMob, char *arg );
 void  cmd_commands            ( D_M *dMob, char *arg );
 void  cmd_who                 ( D_M *dMob, char *arg );
