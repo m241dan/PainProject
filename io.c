@@ -47,6 +47,7 @@ void log_string(const char *txt, ...)
   fprintf(fp, "%s: %s\n", strtime, buf);
   fclose(fp);
 
+  puts( buf );
   communicate(NULL, buf, COMM_LOG);
 }
 
