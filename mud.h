@@ -186,6 +186,7 @@ typedef struct buffer_type
 /* here we include external structure headers */
 #include "event.h"
 #include "account.h"
+#include "nanny.h"
 
 /******************************
  * End of new structures      *
