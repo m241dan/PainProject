@@ -131,6 +131,7 @@ typedef struct  lookup_data   LOOKUP_DATA;
 typedef struct  event_data    EVENT_DATA;
 typedef struct game_account ACCOUNT;
 typedef struct typCmd COMMAND;
+typedef struct the_nanny NANNY;
 
 /* the actual structures */
 struct dSocket
@@ -152,6 +153,7 @@ struct dSocket
 
   /* New Stuff */
   ACCOUNT       * account; /* sockets now hold accounts */
+  NANNY         * nanny;
 };
 
 struct dMobile
