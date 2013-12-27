@@ -967,6 +967,7 @@ void handle_new_connections(D_SOCKET *dsock, char *arg)
         log_string("New account: %s has entered the game.", dsock->account->name);
 
         /* and into the game */
+        load_commands( dsock->account );
         dsock->state = STATE_ACCOUNT;
         text_to_buffer(dsock, motd);
         fwrite_account( dsock->account ); /* write the new account */
@@ -1000,6 +1001,7 @@ void handle_new_connections(D_SOCKET *dsock, char *arg)
           log_string("%s has reconnected.", dsock->account->name);
 
           /* and let him enter the game */
+          load_commands( dsock->account );
           dsock->state = STATE_ACCOUNT;
           text_to_buffer(dsock, "You take over an account already in use.\n\r");
 
@@ -1027,6 +1029,7 @@ void handle_new_connections(D_SOCKET *dsock, char *arg)
           log_string("%s has entered the game.", dsock->account->name);
 
           /* and let him enter the game */
+          load_commands( dsock->account );
           dsock->state = STATE_ACCOUNT;
           text_to_buffer(dsock, motd);
 

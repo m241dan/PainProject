@@ -311,7 +311,8 @@ void  load_muddata            ( bool fCopyOver );
 char *get_time                ( void );
 void  copyover_recover        ( void );
 D_M  *check_reconnect         ( char *player );
-
+COMMAND *copy_command( const struct typCmd to_copy );
+void free_command( COMMAND *command );
 /*
  * action_safe.c
  */
