@@ -38,7 +38,16 @@
 
 /* Connection states */
 typedef enum {
-   STATE_NEW_NAME, STATE_NEW_PASSWORD, STATE_VERIFY_PASSWORD, STATE_ASK_PASSWORD, STATE_ACCOUNT, STATE_PLAYING, STATE_CLOSED, MAX_STATE
+   /* Account Creation States */
+   STATE_NEW_NAME, STATE_NEW_PASSWORD, STATE_VERIFY_PASSWORD, STATE_ASK_PASSWORD, 
+   /* Account States */
+   STATE_ACCOUNT,
+   /* Character Creation States */
+
+   /* Playing States */
+   STATE_PLAYING,
+   /* Other */
+   STATE_CLOSED, MAX_STATE
 } socket_states;
 
 /* Thread states - please do not change the order of these states    */
@@ -317,17 +326,16 @@ void free_command( COMMAND *command );
 /*
  * action_safe.c
  */
-void  cmd_say                 ( D_M *dMob, char *arg );
-void  cmd_quit                ( void *
-passed, char *arg );
-void  cmd_shutdown            ( D_M *dMob, char *arg );
-void  cmd_commands            ( D_M *dMob, char *arg );
-void  cmd_who                 ( D_M *dMob, char *arg );
-void  cmd_help                ( D_M *dMob, char *arg );
-void  cmd_compress            ( D_M *dMob, char *arg );
-void  cmd_save                ( D_M *dMob, char *arg );
-void  cmd_copyover            ( D_M *dMob, char *arg );
-void  cmd_linkdead            ( D_M *dMob, char *arg );
+void  cmd_say                 ( void *passed, char *arg );
+void  cmd_quit                ( void *passed, char *arg );
+void  cmd_shutdown            ( void *passed, char *arg );
+void  cmd_commands            ( void *passed, char *arg );
+void  cmd_who                 ( void *passed, char *arg );
+void  cmd_help                ( void *passed, char *arg );
+void  cmd_compress            ( void *passed, char *arg );
+void  cmd_save                ( void *passed, char *arg );
+void  cmd_copyover            ( void *passed, char *arg );
+void  cmd_linkdead            ( void *passed, char *arg );
 
 /*
  * mccp.c

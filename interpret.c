@@ -90,6 +90,7 @@ void new_handle_cmd_input(D_SOCKET *dsock, char *arg)
       {
          (*com->cmd_funct)( entity, arg );
          found_cmd = TRUE;
+         break;
       }
    DetachIterator(&Iter);
 

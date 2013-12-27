@@ -9,6 +9,9 @@
 #include <sys/stat.h>
 #include "mud.h"
 
+/* Account Utilities -Davenge */
+/*----------------------------*/
+
 ACCOUNT *load_account( const char *act_name, bool partial )
 {
    FILE *fp;
@@ -181,21 +184,6 @@ void account_prompt( D_SOCKET *dsock )
    return;
 }
 
-void act_quit( void *passed, char *argument )
-{
-   ACCOUNT *account = (ACCOUNT *)passed;
-   char buf[MAX_BUFFER];
-
-   /* create a logout string */
-   snprintf( buf, MAX_BUFFER, "%s has left the game.", account->name );
-   log_string( buf );
-
-   account->socket->account = NULL;
-   free_account( account );
-   close_socket( account->socket, FALSE );
-   return;
-}
-
 void load_commands( ACCOUNT *account )
 {
    COMMAND *com;
@@ -227,4 +215,35 @@ void clear_command_list( ACCOUNT *account )
    DetachIterator(&Iter);
    FreeList( account->commands );
    return;
+}
+
+/* Account Commands - Davenge */
+/*----------------------------*/
+void act_quit( void *passed, char *argument )
+{
+   ACCOUNT *account = (ACCOUNT *)passed;
+   char buf[MAX_BUFFER];
+
+   /* create a logout string */
+   snprintf( buf, MAX_BUFFER, "%s has left the game.", account->name );
+   log_string( buf );
+
+   account->socket->account = NULL;
+   free_account( account );
+   close_socket( account->socket, FALSE );
+   return;
+}
+
+void act_create_char( void *passed, char *argument )
+{
+   ACCOUNT *account = (ACCOUNT *)passed;
+   bool free_slot = FALSE;
+   int x;
+
+   for( x = 0; x < MAX_CHARACTER; x++ )
+      if( account->char_list[x] == NULL )
+      {
+         free_slot = TRUE;
+         break;
+      }
 }

@@ -42,3 +42,4 @@ void load_commands( ACCOUNT *account );
 void clear_command_list( ACCOUNT *account );
 /* Account Commands */
 void act_quit( void *passed, char *argument );
+void act_create_char( void *passed, char *argument );
