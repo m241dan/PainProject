@@ -60,3 +60,41 @@ const struct typCmd tabCmd [] =
   { "", 0 }
 };
 
+void new_handle_cmd_input(D_SOCKET *dsock, char *arg)
+{
+   ITERATOR Iter;
+   LIST *cmd_table;
+   COMMAND *com;
+   void *entity;
+   char command[MAX_BUFFER];
+   bool found_cmd = FALSE;
+
+  arg = one_arg(arg, command);
+
+   switch( dsock->state )
+   {
+      case STATE_ACCOUNT:
+         if( ( entity = dsock->account ) == NULL )
+            return;
+         cmd_table = dsock->account->commands;
+         break;
+      case STATE_PLAYING:
+         if( ( entity = dsock->player ) == NULL )
+            return;
+         break;
+   }
+
+   AttachIterator( &Iter, cmd_table );
+   while( ( com = (COMMAND *)NextInList(&Iter) ) != NULL )
+      if( is_prefix( com->cmd_name, command ) )
+      {
+         (*com->cmd_funct)( entity, arg );
+         found_cmd = TRUE;
+      }
+   DetachIterator(&Iter);
+
+   if (!found_cmd)
+     text_to_buffer(dsock, "No such command.\n\r");
+   return;
+}
+

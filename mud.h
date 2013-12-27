@@ -262,7 +262,7 @@ void *lookup_address          ( void *arg );
  * interpret.c
  */
 void  handle_cmd_input        ( D_S *dsock, char *arg );
-
+void new_handle_cmd_input ( D_S *dsock, char *arg );
 /*
  * io.c
  */
