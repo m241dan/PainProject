@@ -4,6 +4,8 @@
    It's organized, but hardcoded and process potentially raw input.
    Written by Davenge */
 
+#define MAX_NANNY_STATES 10
+
 typedef enum {
    NANNY_CREATE_CHARACTER, MAX_NANNY_TYPE
 } nanny_types;

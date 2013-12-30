@@ -2,6 +2,8 @@
    All functions/methods corresponding with nannys
    Written by Davenge */
 
+#include <stdio.h>
+#include "mud.h"
 
 void nanny_handle_input( D_SOCKET *dsock, char *arg )
 {
@@ -47,5 +49,4 @@ void nanny_ask_character_name( D_SOCKET *dsock, char *arg )
 
    player->name = strdup( arg );
    text_to_buffer( dsock, "(Optional)Enter an Additional Password(blank for none): " );
-   dsock->nanny
 }
