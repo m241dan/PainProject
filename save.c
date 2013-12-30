@@ -66,7 +66,7 @@ D_MOBILE *load_player(char *player)
   pName[i] = '\0';
 
   /* open the pfile so we can write to it */
-  snprintf(pfile, MAX_BUFFER, "../players/%s.pfile", pName);     
+  snprintf(pfile, MAX_BUFFER, "../players/%s.pfile", pName);
   if ((fp = fopen(pfile, "r")) == NULL)
     return NULL;
 

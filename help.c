@@ -41,7 +41,7 @@ bool check_help(D_MOBILE *dMob, char *helpfile)
   char *entry, *hFile;
   bool found = FALSE;
 
-  hFile = capitalize(helpfile);
+  hFile = capitalize_word(helpfile);
 
   AttachIterator(&Iter, help_list);
   while ((pHelp = (HELP_DATA *) NextInList(&Iter)) != NULL)

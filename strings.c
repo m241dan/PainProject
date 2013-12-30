@@ -64,7 +64,7 @@ char *one_arg(char *fStr, char *bStr)
   return fStr;
 }
 
-char *capitalize(char *txt)
+char *capitalize_word(char *txt)
 {
   static char buf[MAX_BUFFER];
   int size, i;
@@ -211,4 +211,113 @@ int strcasecmp(const char *s1, const char *s2)
 
   /* s2 is less than s1 */
   return 1;
+}
+
+/*
+ * Downcase and Capitalize that return a pointer to a new string
+ * Written by Davenge
+ */
+
+char *downcase( const char *word )
+{
+   static char buf[MAX_BUFFER]; /* when returning a string like this, always use a static char or compiler will complain */
+   int length, x;
+
+   buf[0] = '\0'; /* initialize the buf */
+
+   if( !word || word[0] == '\0' ) /* make sure we are working with something that isn't null */
+      return buf;
+
+   length = strlen( word ); /* get the length of the word so we know how far to iterate */
+
+   for( x = 0; x < length; x++ )
+      buf[x] = tolower( word[x] ); /* iterate through the word and set the lowercase version of each letter into the buf */
+   buf[x] = '\0'; /* make sure to give our new string a null terminator */
+
+   return buf; /* return it */
+}
+
+
+/*
+ * Most of these operation are the same, except we capitalize the first letter
+ * -Davenge
+ */
+char *capitalize( const char *word )
+{
+   static char buf[MAX_BUFFER];
+   char *dWord;
+   int length, x;
+   buf[0] = '\0';
+
+   if( !word || word[0] == '\0')
+      return buf;
+
+   dWord = downcase( word );
+   length = strlen( dWord );
+
+   for( x = 0; x < length; x++ ) /* copy the downcased string into our buffer... there's gotta be a better way */
+      buf[x] = dWord[x];
+
+   buf[0] = toupper( buf[0] ); /* Capitalize the first letter */
+
+   buf[strlen(word)] = '\0';
+
+   return buf;
+}
+
+/* downcase_orig and capitalize_orig that modify the string passed
+ * Written by Davenge
+ */
+
+bool downcase_orig( char * word )
+{
+   int x, length = strlen( word );
+
+   if( !word || word[0] == '\0' )
+      return FALSE; /* return false because string passed as unmodifiable */
+
+   for( x = 0; x < length; x++ )
+      word[x] = tolower( word[x] );
+
+   return TRUE; /* successfully modified */
+
+}
+
+bool capitalize_orig( char * word )
+{
+   if( !word || word[0] == '\0' )
+      return FALSE;
+
+   downcase_orig( word ); /* make it all lowercase first */
+   word[0] = toupper( word[0] ); /* capitalize the first letter, like a proper noun */
+
+   return TRUE;
+}
+
+/* some output stuff for pretty formatting
+ * Written by Davenge
+ */
+
+void spit_equals( D_SOCKET *dsock, int amount )
+{
+   int x;
+
+   for( x = 0; x < amount; x++ )
+      text_to_buffer( dsock, "=" );
+
+   return;
+}
+
+char *produce_equals( int amount )
+{
+   static char equals[MAX_BUFFER];
+   char *ptr;
+   int x;
+   ptr = equals;
+   equals[amount] = '\0';
+
+   for( x = 0; x < amount; x++, ptr++ )
+      *ptr = '=';
+
+   return equals;
 }

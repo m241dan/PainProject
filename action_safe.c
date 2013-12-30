@@ -9,8 +9,9 @@
 /* include main header file */
 #include "mud.h"
 
-void cmd_say(D_MOBILE *dMob, char *arg)
+void cmd_say(void *passed, char *arg)
 {
+   D_MOBILE *dMob = (D_MOBILE *)passed;
   if (arg[0] == '\0')
   {
     text_to_mobile(dMob, "Say what?\n\r");
@@ -19,8 +20,9 @@ void cmd_say(D_MOBILE *dMob, char *arg)
   communicate(dMob, arg, COMM_LOCAL);
 }
 
-void cmd_quit(D_MOBILE *dMob, char *arg)
+void cmd_quit(void *passed, char *arg)
 {
+  D_MOBILE *dMob = (D_MOBILE *)passed;
   char buf[MAX_BUFFER];
 
   /* log the attempt */
@@ -34,13 +36,14 @@ void cmd_quit(D_MOBILE *dMob, char *arg)
   close_socket(dMob->socket, FALSE);
 }
 
-void cmd_shutdown(D_MOBILE *dMob, char *arg)
+void cmd_shutdown(void *passed, char *arg)
 {
   shut_down = TRUE;
 }
 
-void cmd_commands(D_MOBILE *dMob, char *arg)
+void cmd_commands(void *passed, char *arg)
 {
+   D_MOBILE *dMob = (D_MOBILE *)passed;
   BUFFER *buf = buffer_new(MAX_BUFFER);
   int i, col = 0;
 
@@ -57,8 +60,9 @@ void cmd_commands(D_MOBILE *dMob, char *arg)
   buffer_free(buf);
 }
 
-void cmd_who(D_MOBILE *dMob, char *arg)
+void cmd_who(void *passed, char *arg)
 {
+   D_MOBILE *dMob = (D_MOBILE *)passed;
   D_MOBILE *xMob;
   D_SOCKET *dsock;
   ITERATOR Iter;
@@ -82,8 +86,9 @@ void cmd_who(D_MOBILE *dMob, char *arg)
   buffer_free(buf);
 }
 
-void cmd_help(D_MOBILE *dMob, char *arg)
+void cmd_help(void *passed, char *arg)
 {
+   D_MOBILE *dMob = (D_MOBILE *)passed;
   if (arg[0] == '\0')
   {
     HELP_DATA *pHelp;
@@ -113,8 +118,9 @@ void cmd_help(D_MOBILE *dMob, char *arg)
     text_to_mobile(dMob, "Sorry, no such helpfile.\n\r");
 }
 
-void cmd_compress(D_MOBILE *dMob, char *arg)
+void cmd_compress( void *passed, char *arg)
 {
+   D_MOBILE *dMob = (D_MOBILE *)passed;
   /* no socket, no compression */
   if (!dMob->socket)
     return;
@@ -137,19 +143,21 @@ void cmd_compress(D_MOBILE *dMob, char *arg)
   }
 }
 
-void cmd_save(D_MOBILE *dMob, char *arg)
+void cmd_save( void *passed, char *arg)
 {
+   D_MOBILE *dMob = (D_MOBILE *)passed;
   save_player(dMob);
   text_to_mobile(dMob, "Saved.\n\r");
 }
 
-void cmd_copyover(D_MOBILE *dMob, char *arg)
-{ 
+void cmd_copyover(void *passed, char *arg)
+{
+   D_MOBILE *dMob = (D_MOBILE *)passed;
   FILE *fp;
   ITERATOR Iter;
   D_SOCKET *dsock;
   char buf[MAX_BUFFER];
-  
+
   if ((fp = fopen(COPYOVER_FILE, "w")) == NULL)
   {
     text_to_mobile(dMob, "Copyover file not writeable, aborted.\n\r");
@@ -200,8 +208,9 @@ void cmd_copyover(D_MOBILE *dMob, char *arg)
   text_to_mobile(dMob, "Copyover FAILED!\n\r");
 }
 
-void cmd_linkdead(D_MOBILE *dMob, char *arg)
+void cmd_linkdead(void *passed, char *arg)
 {
+  D_MOBILE *dMob = (D_MOBILE *)passed;
   D_MOBILE *xMob;
   ITERATOR Iter;
   char buf[MAX_BUFFER];

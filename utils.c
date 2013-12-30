@@ -216,3 +216,22 @@ D_MOBILE *check_reconnect(char *player)
 
   return dMob;
 }
+
+COMMAND *copy_command( const struct typCmd to_copy )
+{
+   COMMAND *copy;
+
+   CREATE( copy, COMMAND, 1 );
+   copy->cmd_name = strdup( to_copy.cmd_name );
+   copy->cmd_funct = to_copy.cmd_funct;
+   copy->level = to_copy.level;
+   copy->state = to_copy.state;
+   return copy;
+}
+
+void free_command( COMMAND *command )
+{
+   command->cmd_name = NULL;
+   command->cmd_funct = NULL;
+   free(command);
+}

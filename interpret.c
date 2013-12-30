@@ -40,20 +40,62 @@ void handle_cmd_input(D_SOCKET *dsock, char *arg)
 const struct typCmd tabCmd [] =
 {
 
- /* command          function        Req. Level   */
- /* --------------------------------------------- */
+ /* command          function        Req. Level   State               */
+ /* ----------------------------------------------------------------- */
 
-  { "commands",      cmd_commands,   LEVEL_GUEST  },
-  { "compress",      cmd_compress,   LEVEL_GUEST  },
-  { "copyover",      cmd_copyover,   LEVEL_GOD    },
-  { "help",          cmd_help,       LEVEL_GUEST  },
-  { "linkdead",      cmd_linkdead,   LEVEL_ADMIN  },
-  { "say",           cmd_say,        LEVEL_GUEST  },
-  { "save",          cmd_save,       LEVEL_GUEST  },
-  { "shutdown",      cmd_shutdown,   LEVEL_GOD    },
-  { "quit",          cmd_quit,       LEVEL_GUEST  },
-  { "who",           cmd_who,        LEVEL_GUEST  },
+  { "commands",      cmd_commands,   LEVEL_GUEST, STATE_PLAYING },
+  { "compress",      cmd_compress,   LEVEL_GUEST, STATE_PLAYING },
+  { "copyover",      cmd_copyover,   LEVEL_GOD,   STATE_PLAYING },
+  { "help",          cmd_help,       LEVEL_GUEST, STATE_PLAYING },
+  { "linkdead",      cmd_linkdead,   LEVEL_ADMIN, STATE_PLAYING },
+  { "say",           cmd_say,        LEVEL_GUEST, STATE_PLAYING },
+  { "save",          cmd_save,       LEVEL_GUEST, STATE_PLAYING },
+  { "shutdown",      cmd_shutdown,   LEVEL_GOD,   STATE_PLAYING },
+  { "quit",          cmd_quit,       LEVEL_GUEST, STATE_PLAYING },
+  { "who",           cmd_who,        LEVEL_GUEST, STATE_PLAYING },
+  /* account commands */
+  { "quit",          act_quit,       LEVEL_BASIC, STATE_ACCOUNT },
 
   /* end of table */
   { "", 0 }
 };
+
+void new_handle_cmd_input(D_SOCKET *dsock, char *arg)
+{
+   ITERATOR Iter;
+   LIST *cmd_table;
+   COMMAND *com;
+   void *entity;
+   char command[MAX_BUFFER];
+   bool found_cmd = FALSE;
+
+  arg = one_arg(arg, command);
+
+   switch( dsock->state )
+   {
+      case STATE_ACCOUNT:
+         if( ( entity = dsock->account ) == NULL )
+            return;
+         cmd_table = dsock->account->commands;
+         break;
+      case STATE_PLAYING:
+         if( ( entity = dsock->player ) == NULL )
+            return;
+         break;
+   }
+
+   AttachIterator( &Iter, cmd_table );
+   while( ( com = (COMMAND *)NextInList(&Iter) ) != NULL )
+      if( is_prefix( com->cmd_name, command ) )
+      {
+         (*com->cmd_funct)( entity, arg );
+         found_cmd = TRUE;
+         break;
+      }
+   DetachIterator(&Iter);
+
+   if (!found_cmd)
+     text_to_buffer(dsock, "No such command.\n\r");
+   return;
+}
+

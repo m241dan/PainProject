@@ -8,7 +8,6 @@
 #include <zlib.h>
 #include <pthread.h>
 #include <arpa/telnet.h>
-
 #include "list.h"
 #include "stack.h"
 
@@ -38,12 +37,18 @@
 #define EXE_FILE           "../src/SocketMud"     /* the name of the mud binary         */
 
 /* Connection states */
-#define STATE_NEW_NAME         0
-#define STATE_NEW_PASSWORD     1
-#define STATE_VERIFY_PASSWORD  2
-#define STATE_ASK_PASSWORD     3
-#define STATE_PLAYING          4
-#define STATE_CLOSED           5
+typedef enum {
+   /* Account Creation States */
+   STATE_NEW_NAME, STATE_NEW_PASSWORD, STATE_VERIFY_PASSWORD, STATE_ASK_PASSWORD, 
+   /* Account States */
+   STATE_ACCOUNT,
+   /* Character Creation States */
+
+   /* Playing States */
+   STATE_PLAYING,
+   /* Other */
+   STATE_CLOSED, MAX_STATE
+} socket_states;
 
 /* Thread states - please do not change the order of these states    */
 #define TSTATE_LOOKUP          0  /* Socket is in host_lookup        */
@@ -64,7 +69,6 @@
 /* define simple types */
 typedef  unsigned char     bool;
 typedef  short int         sh_int;
-
 
 /******************************
  * End of standard definitons *
@@ -95,6 +99,21 @@ typedef  short int         sh_int;
     break;                            \
   }                                   \
 }
+/*
+ * A memory allocation macro, because its what I'm used to using
+ * Written by Davenge
+ */
+#define CREATE(result, type, number)                                    \
+do                                                                      \
+{                                                                       \
+   if (!((result) = (type *) calloc ((number), sizeof(type))))          \
+   {                                                                    \
+      perror("malloc failure");                                         \
+      fprintf(stderr, "Malloc failure @ %s:%d\n", __FILE__, __LINE__ ); \
+      abort();                                                          \
+   }                                                                    \
+} while(0)
+
 
 /***********************
  * End of Macros       *
@@ -110,6 +129,9 @@ typedef struct  dMobile       D_MOBILE;
 typedef struct  help_data     HELP_DATA;
 typedef struct  lookup_data   LOOKUP_DATA;
 typedef struct  event_data    EVENT_DATA;
+typedef struct game_account ACCOUNT;
+typedef struct typCmd COMMAND;
+typedef struct the_nanny NANNY;
 
 /* the actual structures */
 struct dSocket
@@ -128,6 +150,10 @@ struct dSocket
   unsigned char   compressing;                 /* MCCP support */
   z_stream      * out_compress;                /* MCCP support */
   unsigned char * out_compress_buf;            /* MCCP support */
+
+  /* New Stuff */
+  ACCOUNT       * account; /* sockets now hold accounts */
+  NANNY         * nanny;
 };
 
 struct dMobile
@@ -155,8 +181,9 @@ struct lookup_data
 struct typCmd
 {
   char      * cmd_name;
-  void     (* cmd_funct)(D_MOBILE *dMOb, char *arg);
-  sh_int      level;
+  void     (* cmd_funct)(void *passed, char *arg);
+  sh_int    level;
+  sh_int    state;
 };
 
 typedef struct buffer_type
@@ -166,8 +193,11 @@ typedef struct buffer_type
   int      size;        /* The allocated size of data    */
 } BUFFER;
 
+
 /* here we include external structure headers */
 #include "event.h"
+#include "nanny.h"
+#include "account.h"
 
 /******************************
  * End of new structures      *
@@ -182,6 +212,8 @@ extern  LIST        *   dsock_list;       /* the linked list of active sockets  
 extern  STACK       *   dmobile_free;     /* the mobile free list               */
 extern  LIST        *   dmobile_list;     /* the mobile list of active mobiles  */
 extern  LIST        *   help_list;        /* the linked list of help files      */
+extern  STACK       *   account_free;     /* list of free accounts -Davenge     */
+extern  LIST        *   account_list;     /* list of active accounts -Davenge   */
 extern  const struct    typCmd tabCmd[];  /* the command table                  */
 extern  bool            shut_down;        /* used for shutdown                  */
 extern  char        *   greeting;         /* the welcome greeting               */
@@ -242,7 +274,7 @@ void *lookup_address          ( void *arg );
  * interpret.c
  */
 void  handle_cmd_input        ( D_S *dsock, char *arg );
-
+void new_handle_cmd_input ( D_S *dsock, char *arg );
 /*
  * io.c
  */
@@ -262,13 +294,18 @@ char   *one_arg               ( char *fStr, char *bStr );
 char   *strdup                ( const char *s );
 int     strcasecmp            ( const char *s1, const char *s2 );
 bool    is_prefix             ( const char *aStr, const char *bStr );
-char   *capitalize            ( char *txt );
+char   *capitalize_word       ( char *txt ); /* changed make my own styles of capitalize methods -Davenge */
 BUFFER *__buffer_new          ( int size );
 void    __buffer_strcat       ( BUFFER *buffer, const char *text );
 void    buffer_free           ( BUFFER *buffer );
 void    buffer_clear          ( BUFFER *buffer );
 int     bprintf               ( BUFFER *buffer, char *fmt, ... );
-
+char   *downcase	      ( const char *word );
+char   *capitalize            ( const char *word );
+bool   downcase_orig          ( char *word );
+bool   capitalize_orig        ( char *word );
+void   spit_equals            ( D_SOCKET *dsock, int amount );
+char   *produce_equals        ( int amount );
 /*
  * help.c
  */
@@ -286,20 +323,21 @@ void  load_muddata            ( bool fCopyOver );
 char *get_time                ( void );
 void  copyover_recover        ( void );
 D_M  *check_reconnect         ( char *player );
-
+COMMAND *copy_command( const struct typCmd to_copy );
+void free_command( COMMAND *command );
 /*
  * action_safe.c
  */
-void  cmd_say                 ( D_M *dMob, char *arg );
-void  cmd_quit                ( D_M *dMob, char *arg );
-void  cmd_shutdown            ( D_M *dMob, char *arg );
-void  cmd_commands            ( D_M *dMob, char *arg );
-void  cmd_who                 ( D_M *dMob, char *arg );
-void  cmd_help                ( D_M *dMob, char *arg );
-void  cmd_compress            ( D_M *dMob, char *arg );
-void  cmd_save                ( D_M *dMob, char *arg );
-void  cmd_copyover            ( D_M *dMob, char *arg );
-void  cmd_linkdead            ( D_M *dMob, char *arg );
+void  cmd_say                 ( void *passed, char *arg );
+void  cmd_quit                ( void *passed, char *arg );
+void  cmd_shutdown            ( void *passed, char *arg );
+void  cmd_commands            ( void *passed, char *arg );
+void  cmd_who                 ( void *passed, char *arg );
+void  cmd_help                ( void *passed, char *arg );
+void  cmd_compress            ( void *passed, char *arg );
+void  cmd_save                ( void *passed, char *arg );
+void  cmd_copyover            ( void *passed, char *arg );
+void  cmd_linkdead            ( void *passed, char *arg );
 
 /*
  * mccp.c
