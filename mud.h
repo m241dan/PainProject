@@ -165,6 +165,7 @@ struct dMobile
   char          * name;
   char          * password;
   sh_int          level;
+  sh_int        race;
 };
 
 struct help_data
@@ -224,7 +225,13 @@ extern  int             control;          /* boot control socket thingy         
 extern  time_t          current_time;     /* let's cut down on calls to time()  */
 
 /* Strings Table */
+typedef enum {
+   RACE_HUMAN, RACE_SAIYAN, RACE_HALFBREED, RACE_NAMEK, RACE_ICER, RACE_ANDROID, RACE_BIOANDROID, RACE_MAJIN, RACE_DEMON, RACE_KAIO, RACE_TUFFLE, RACE_DRAGON, MAX_RACE
+} race_names;
+
+
 extern const char *const nanny_strings[MAX_NANNY_TYPE][MAX_NANNY_STATES];
+extern const char *const race_table[MAX_RACE];
 
 extern const unsigned char do_echo       [];
 extern const unsigned char dont_echo       [];

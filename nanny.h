@@ -11,7 +11,7 @@ typedef enum {
 } nanny_types;
 
 typedef enum {
-   NANNY_ASK_CHARACTER_NAME, NANNY_ADDITIONAL_PASSWORD, NANNY_CONFIRM_ADDITIONAL_PASSWORD, MAX_CHARACTER_NANNY_STATE
+   NANNY_ASK_CHARACTER_NAME, NANNY_ADDITIONAL_PASSWORD, NANNY_CONFIRM_ADDITIONAL_PASSWORD, NANNY_PICK_RACE, MAX_CHARACTER_NANNY_STATE
 } character_nanny_states;
 
 struct the_nanny
@@ -32,4 +32,6 @@ void nanny_create_character( D_SOCKET *dsock, char *arg );
 void nanny_ask_character_name( D_SOCKET *dsock, char *arg );
 void nanny_additional_password( D_SOCKET *dsock, char *arg );
 void nanny_confirm_password( D_SOCKET *dsock, char *arg );
+void nanny_pick_race( D_SOCKET *dsock, char *arg );
 void nanny_complete_character( D_SOCKET *dsock );
+

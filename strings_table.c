@@ -6,5 +6,9 @@
 #include "mud.h"
 
 const char *const nanny_strings[MAX_NANNY_TYPE][MAX_NANNY_STATES] = {
-   { "What would you like to name this character?", "(Optional)Enter an Additional Password(blank space for none): ", "Retype Password to Confirm: " } /* type 1 Nanny */
+   { "What would you like to name this character?", "(Optional)Enter an Additional Password(blank space for none): ", "Retype Password to Confirm: ", "Please type in your race: " } /* type 1 Nanny */
+};
+
+const char *const race_table[MAX_RACE] = }
+   "human", "saiyan", "halfbreed", "namek", "icer", "android", "bioandroid", "majin", "demon", "kaio", "tuffle", "dragon"
 };

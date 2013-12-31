@@ -116,6 +116,9 @@ void nanny_create_character( D_SOCKET *dsock, char *arg )
       case NANNY_CONFIRM_ADDITIONAL_PASSWORD:
          nanny_confirm_password( dsock, arg );
          return;
+      case NANNY_PICK_RACE:
+	 nanny_pick_race( dsock, arg );
+	 return;
    }
 }
 
@@ -170,6 +173,21 @@ void nanny_confirm_password( D_SOCKET *dsock, char *arg )
    text_to_buffer( dsock, "Passwords don't match.\r\n" );
    free(player->password);
    change_nanny_state( dsock->nanny, NANNY_ADDITIONAL_PASSWORD, TRUE );
+   return;
+}
+
+/* Wasnt sure on how to make a new list, I forgotteded, so I just did it like names for practice, until I get back and can do it right. -Irish */
+void nanny_pick_race( D_SOCKET *dsock, char *arg )
+{
+   D_MOBILE *player = (D_MOBILE *)dsock->nanny->creation;
+   char race[MAX_BUFFER];
+
+   arg = one_arg( arg, race);
+   text_to_buffer(dsock, (char *) do_echo);
+   player->race = strdup( arg );
+
+   nanny_complete_character( dsock );
+   change_nanny_state( dsock->nanny, NANNY_PICK_RACE, TRUE);
    return;
 }
 

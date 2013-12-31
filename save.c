@@ -43,6 +43,7 @@ void save_pfile(D_MOBILE *dMob)
   fprintf(fp, "Name            %s~\n", dMob->name);
   fprintf(fp, "Level           %d\n",  dMob->level);
   fprintf(fp, "Password        %s~\n", dMob->password);
+  fprintf(fp, "Race            %s~\n",  dMob->race);
 
   /* terminate the file */
   fprintf(fp, "%s\n", FILE_TERMINATOR);
@@ -104,6 +105,9 @@ D_MOBILE *load_player(char *player)
       case 'P':
         SREAD( "Password",  dMob->password  );
         break;
+      case 'R':
+	SREAD( "Race",      dMob->race      );
+	break;
     }
     if (!found)
     {
