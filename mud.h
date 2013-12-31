@@ -229,9 +229,11 @@ typedef enum {
    RACE_HUMAN, RACE_SAIYAN, RACE_HALFBREED, RACE_NAMEK, RACE_ICER, RACE_ANDROID, RACE_BIOANDROID, RACE_MAJIN, RACE_DEMON, RACE_KAIO, RACE_TUFFLE, RACE_DRAGON, MAX_RACE
 } race_names;
 
+const char *get_table( const char *const string_table[], int size );
 
 extern const char *const nanny_strings[MAX_NANNY_TYPE][MAX_NANNY_STATES];
 extern const char *const race_table[MAX_RACE];
+extern const char *const race_desc_table[MAX_RACE];
 
 extern const unsigned char do_echo       [];
 extern const unsigned char dont_echo       [];

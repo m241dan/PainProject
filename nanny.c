@@ -148,8 +148,8 @@ void nanny_additional_password( D_SOCKET *dsock, char *arg )
 
    if( passwd[0] == '\0' ) /* no password? no problem, create player */
    {
-      text_to_buffer(dsock, (char *) do_echo);
-      nanny_complete_character( dsock );
+      show_race_table( dsock );
+      change_nanny_state( dsock->nanny, NANNY_PICK_RACE, TRUE );
       return;
    }
    player->password = strdup(crypt(passwd, dsock->account->name));
@@ -167,7 +167,8 @@ void nanny_confirm_password( D_SOCKET *dsock, char *arg )
    text_to_buffer(dsock, (char *) do_echo);
    if( !strcmp(crypt(passwd, dsock->account->name), player->password) )
    {
-      nanny_complete_character( dsock );
+      show_race_table( dsock );
+      change_nanny_state( dsock->nanny, NANNY_PICK_RACE, TRUE );
       return;
    }
    text_to_buffer( dsock, "Passwords don't match.\r\n" );
@@ -181,13 +182,37 @@ void nanny_pick_race( D_SOCKET *dsock, char *arg )
 {
    D_MOBILE *player = (D_MOBILE *)dsock->nanny->creation;
    char race[MAX_BUFFER];
+   int x;
 
-   arg = one_arg( arg, race);
-   text_to_buffer(dsock, (char *) do_echo);
-   player->race = strdup( arg );
+   arg = one_arg( arg, race );
+   for( x = 0; x < MAX_RACE; x++ )
+      if( !strcmp( downcase( race ), downcase( race_table[x] ) ) )
+      {
+         player->race = x;
+         break;
+      }
+
+   if( x >= MAX_RACE )
+   {
+      text_to_buffer( dsock, "No such race.\r\n" );
+      change_nanny_state( dsock->nanny, NANNY_PICK_RACE, TRUE );
+      return;
+   }
 
    nanny_complete_character( dsock );
-   change_nanny_state( dsock->nanny, NANNY_PICK_RACE, TRUE);
+   return;
+}
+
+void show_race_table( D_SOCKET *dsock )
+{
+   BUFFER *buf = buffer_new(MAX_BUFFER);
+   int x;
+
+   for( x = 0; x < MAX_RACE; x++ )
+      bprintf( buf, "|> [%-2d] %-10.10s - %-45.45s <|\r\n", (x+1), race_table[x], race_desc_table[x] );
+
+   text_to_buffer( dsock, buf->data );
+   buffer_free( buf );
    return;
 }
 
@@ -210,3 +235,4 @@ void nanny_complete_character( D_SOCKET *dsock )
 /********************************
  * END CHARACTER CREATION NANNY *
  ********************************/
+
