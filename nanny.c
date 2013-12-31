@@ -25,6 +25,8 @@ void change_nanny_state( NANNY *nanny, int state, bool message )
    char output[MAX_BUFFER];
 
    nanny->state = state;
+   if( ( nanny->state == NANNY_ADDITIONAL_PASSWORD || nanny->state == NANNY_CONFIRM_ADDITIONAL_PASSWORD ) && nanny->type == NANNY_CREATE_CHARACTER )
+      text_to_buffer( nanny->socket, (char *) dont_echo );
 
    if( !message )
       return;
@@ -132,7 +134,6 @@ void nanny_ask_character_name( D_SOCKET *dsock, char *arg )
 
    player->name = strdup( arg );
    change_nanny_state( dsock->nanny, NANNY_ADDITIONAL_PASSWORD, TRUE );
-   text_to_buffer(dsock, (char *) dont_echo); /* hardcoded laziness, last time, I swear (will figure out and fix later, promise) -Davenge */
    return;
 }
 
@@ -141,17 +142,15 @@ void nanny_additional_password( D_SOCKET *dsock, char *arg )
    D_MOBILE *player = (D_MOBILE *)dsock->nanny->creation;
    char passwd[MAX_BUFFER];
 
+   text_to_buffer(dsock, (char *) do_echo);
    arg = one_arg( arg, passwd );
-
    if( passwd[0] == '\0' ) /* no password? no problem, create player */
    {
-      text_to_buffer(dsock, (char *) do_echo);
       nanny_complete_character( dsock );
       return;
    }
    player->password = strdup(crypt(passwd, dsock->account->name));
    change_nanny_state( dsock->nanny, NANNY_CONFIRM_ADDITIONAL_PASSWORD, TRUE );
-   text_to_buffer(dsock, (char *) dont_echo);
    return;
 }
 
@@ -160,8 +159,8 @@ void nanny_confirm_password( D_SOCKET *dsock, char *arg )
    D_MOBILE *player = (D_MOBILE *)dsock->nanny->creation;
    char passwd[MAX_BUFFER];
 
-   arg = one_arg( arg, passwd );
    text_to_buffer(dsock, (char *) do_echo);
+   arg = one_arg( arg, passwd );
    if( !strcmp(crypt(passwd, dsock->account->name), player->password) )
    {
       nanny_complete_character( dsock );
