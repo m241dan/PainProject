@@ -55,6 +55,7 @@ const struct typCmd tabCmd [] =
   { "who",           cmd_who,        LEVEL_GUEST, STATE_PLAYING },
   /* account commands */
   { "quit",          act_quit,       LEVEL_BASIC, STATE_ACCOUNT },
+  { "create",        act_create_char,LEVEL_BASIC, STATE_ACCOUNT },
 
   /* end of table */
   { "", 0 }

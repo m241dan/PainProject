@@ -237,7 +237,6 @@ void act_quit( void *passed, char *argument )
 void act_create_char( void *passed, char *argument )
 {
    ACCOUNT *account = (ACCOUNT *)passed;
-   NANNY *char_nanny;
    bool free_slot = FALSE;
    int x;
 
@@ -258,11 +257,8 @@ void act_create_char( void *passed, char *argument )
       text_to_buffer( account->socket, "You cannot do that.\r\n" );
       return;
    }
-   CREATE( char_nanny, NANNY, 1 );
-   account->socket->nanny = char_nanny;
-   char_nanny->type = NANNY_CREATE_CHARACTER;
-   char_nanny->state = NANNY_ASK_CHARACTER_NAME;
-   CREATE( char_nanny->creation, D_MOBILE, 1 );
-   text_to_buffer( account->socket, "What would you like to name this character?\r\n" );
+   account->socket->state = STATE_NANNY;
+   account->socket->nanny = create_nanny( account->socket, NANNY_CREATE_CHARACTER );
+   change_nanny_state( account->socket->nanny, NANNY_ASK_CHARACTER_NAME, TRUE );
    return;
 }

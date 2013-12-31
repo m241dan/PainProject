@@ -184,6 +184,9 @@ void GameLoop(int control)
           case STATE_ACCOUNT:
             new_handle_cmd_input( dsock, dsock->next_command );
             break;
+          case STATE_NANNY:
+             nanny_handle_input( dsock, dsock->next_command );
+             break;
         }
 
         dsock->next_command[0] = '\0';

@@ -28,7 +28,6 @@ struct game_account
 
    /* account commands container */
    LIST *commands;
-
 };
 
 /* Account Utilities */

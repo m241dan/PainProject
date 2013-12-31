@@ -8,6 +8,8 @@
 #include <zlib.h>
 #include <pthread.h>
 #include <arpa/telnet.h>
+#include <stdlib.h>
+#include <string.h>
 #include "list.h"
 #include "stack.h"
 
@@ -42,8 +44,8 @@ typedef enum {
    STATE_NEW_NAME, STATE_NEW_PASSWORD, STATE_VERIFY_PASSWORD, STATE_ASK_PASSWORD, 
    /* Account States */
    STATE_ACCOUNT,
-   /* Character Creation States */
-
+   /* Nanny State */
+   STATE_NANNY,
    /* Playing States */
    STATE_PLAYING,
    /* Other */
@@ -221,6 +223,11 @@ extern  char        *   motd;             /* the MOTD help file                 
 extern  int             control;          /* boot control socket thingy         */
 extern  time_t          current_time;     /* let's cut down on calls to time()  */
 
+/* Strings Table */
+extern const char *const nanny_strings[MAX_NANNY_TYPE][MAX_NANNY_STATES];
+
+extern const unsigned char do_echo       [];
+extern const unsigned char dont_echo       [];
 /*************************** 
  * End of Global Variables *
  ***************************/
