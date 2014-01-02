@@ -209,7 +209,7 @@ void show_race_table( D_SOCKET *dsock )
    int x;
 
    for( x = 0; x < MAX_RACE; x++ )
-      bprintf( buf, "|> [%-2d] %-10.10s - %-45.45s <|\r\n", (x+1), race_table[x], race_desc_table[x] );
+      bprintf( buf, "|> [%-2d] %-10.10s - %-62.62s <|\r\n", (x+1), race_table[x], race_desc_table[x] );
 
    text_to_buffer( dsock, buf->data );
    buffer_free( buf );

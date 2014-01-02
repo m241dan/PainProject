@@ -31,16 +31,16 @@ const char *const race_table[MAX_RACE] = {
 };
 
 const char *const race_desc_table[MAX_RACE] = {
-   "All Around Balance",
-   "Melee+Ki Offense/Afflictions",
-   "Weaker All Around Balance/Gains",
-   "Ki Offense+Defense/Healing",
-   "All Power/High Mods",
-   "Tech shit?",
-   "Strong Ki/Poor Melee",
-   "Afflictions/Healing",
-   "Afflictions/Melee+Ki",
-   "Barrier/Healer",
-   "Tech Buffs/Debuffs",
-   "All Power/High Mods",
+   "#WWell Rounded#D/#WDecent Mods#D/#WGood Gains#D",
+   "#WOffensive Melee+Ki#D/#WGood Mods#D/#WGood Gains#D",
+   "#WLow Rounded#D/#WLow Mods#D/#WGreat Gains#D",
+   "#WOffensive Ki#D/Healing#W/#DAverage Mods#W/#DGood Gains",
+   "#WStrong Offensive Ki#D/#WGood Mods#D/#WLow Gains#D",
+   "#WStrong Offensive Melee+Ki#D/#WAverage Mods#D/#WLow Gains#D",
+   "#WStrong Rounded#D/#WGood Mods#D/#WLow Gains#D",
+   "#WStrong Ki#D/#WGood Mods#D/#WDecent Gains#D",
+   "#WStrong Rounded#D/#WGood Mods#D/#WLow Gains#D",
+   "#WRounded#D/#WStrong Healing#D/#WLow Mods#D/#WGood Gains",
+   "#WLow Rounded#D/#WBuffs+Debuffs#D/#WLow Mods#D/#WDecent Gains",
+   "#WStrong Rounded#D/#WBuffs#D/#WHigh Mods#D/#WVery Low Gains",
 };
