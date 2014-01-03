@@ -40,7 +40,7 @@ const char *const race_desc_table[MAX_RACE] = {
    "#WStrong Rounded#D/#WGood Mods#D/#WLow Gains#D",
    "#WStrong Ki#D/#WGood Mods#D/#WDecent Gains#D",
    "#WStrong Rounded#D/#WGood Mods#D/#WLow Gains#D",
-   "#WRounded#D/#WStrong Healing#D/#WLow Mods#D/#WGood Gains",
-   "#WLow Rounded#D/#WBuffs+Debuffs#D/#WLow Mods#D/#WDecent Gains",
-   "#WStrong Rounded#D/#WBuffs#D/#WHigh Mods#D/#WVery Low Gains",
+   "#WRounded#D/#WStrong Healing#D/#WLow Mods#D/#WGood Gains#D",
+   "#WLow Rounded#D/#WBuffs+Debuffs#D/#WLow Mods#D/#WDecent Gains#D",
+   "#WStrong Rounded#D/#WBuffs#D/#WHigh Mods#D/#WVery Low Gains#D",
 };

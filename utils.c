@@ -235,3 +235,19 @@ void free_command( COMMAND *command )
    command->cmd_funct = NULL;
    free(command);
 }
+
+/* Count Colorm, how many color tags are used in a string? */
+int count_color( const char *str )
+{
+   int x;
+   int count = 0;
+
+   if( !str || str[0] == '\0' )
+      return count;
+
+   for( x = 0; x < strlen( str ); x++ )
+      if( str[x] == '#' )
+         count++;
+
+   return count;
+}
