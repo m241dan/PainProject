@@ -7,7 +7,7 @@
 #define MAX_NANNY_STATES 10
 
 typedef enum {
-   NANNY_CREATE_CHARACTER, MAX_NANNY_TYPE
+   NANNY_CREATE_CHARACTER, NANNY_TERMINATOR, MAX_NANNY_TYPE
 } nanny_types;
 
 typedef enum {
@@ -34,4 +34,3 @@ void nanny_additional_password( D_SOCKET *dsock, char *arg );
 void nanny_confirm_password( D_SOCKET *dsock, char *arg );
 void nanny_pick_race( D_SOCKET *dsock, char *arg );
 void nanny_complete_character( D_SOCKET *dsock );
-void show_race_table( D_SOCKET *dsock );
