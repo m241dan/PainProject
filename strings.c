@@ -217,13 +217,12 @@ int strcasecmp(const char *s1, const char *s2)
  * Downcase and Capitalize that return a pointer to a new string
  * Written by Davenge
  */
-
+/* The problem with this function is you can't compare two downcased strings because its a static buf but otherwise you have to make new variables etc */
 char *downcase( const char *word )
 {
-   static char buf[MAX_BUFFER]; /* when returning a string like this, always use a static char or compiler will complain */
+   static char buf[MAX_BUFFER]; /* has to be buffer or compiler throws error, the it also has to be static so there are no memory leaks */
    int length, x;
 
-   buf[0] = '\0'; /* initialize the buf */
 
    if( !word || word[0] == '\0' ) /* make sure we are working with something that isn't null */
       return buf;
@@ -297,6 +296,30 @@ bool capitalize_orig( char * word )
 /* some output stuff for pretty formatting
  * Written by Davenge
  */
+char *smash_color( const char *str )
+{
+   static char ret[MAX_BUFFER];
+   char *retptr;
+
+   retptr = ret;
+
+   if(str == NULL)
+      return NULL;
+
+   for ( ; *str != '\0'; str++ )
+   {
+      if (*str == '#' && *(str + 1) != '\0' )
+         str++;
+      else
+      {
+         *retptr = *str;
+
+         retptr++;
+      }
+   }
+   *retptr = '\0';
+   return ret;
+}
 
 void spit_equals( D_SOCKET *dsock, int amount )
 {

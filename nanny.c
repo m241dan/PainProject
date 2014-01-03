@@ -185,19 +185,20 @@ void nanny_pick_race( D_SOCKET *dsock, char *arg )
    int x;
 
    arg = one_arg( arg, race );
+   downcase_orig( race ); /* we've got to make sure the input matches what we will compare it to */
    for( x = 0; x < MAX_RACE; x++ )
-      if( !strcmp( downcase( race ), downcase( race_table[x] ) ) )
+   {
+      if( !strcmp( race, downcase( smash_color( race_table[x] ) ) ) ) /* make sure the entry from the table is lowercased to match our string and color codes are removed */
       {
          player->race = x;
          break;
       }
+   }
 
-   log_string( "x is... %d", x );
-
-   if( x >= MAX_RACE )
+   if( x >= MAX_RACE ) /* X will be Max_race if it is not found */
    {
       text_to_buffer( dsock, "No such race.\r\n" );
-      change_nanny_state( dsock->nanny, NANNY_PICK_RACE, TRUE );
+      change_nanny_state( dsock->nanny, NANNY_PICK_RACE, TRUE ); /* basically just spit out the pick race mesage again */
       return;
    }
 
