@@ -192,6 +192,8 @@ void nanny_pick_race( D_SOCKET *dsock, char *arg )
          break;
       }
 
+   log_string( "x is... %d", x );
+
    if( x >= MAX_RACE )
    {
       text_to_buffer( dsock, "No such race.\r\n" );
