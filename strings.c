@@ -344,3 +344,27 @@ char *produce_equals( int amount )
 
    return equals;
 }
+
+/* Append spaces onto a string and return a new version */
+char *append_spaces( const char *str, int amount )
+{
+   static char buf[MAX_BUFFER];
+   int x;
+
+   buf[0] = '\0';
+   snprintf( buf, MAX_BUFFER, "%s", str );
+   for( x = 0; x < amount; x++ )
+      strcat( buf, " " );
+
+   return buf;
+}
+
+void add_spaces( char *str, int amount )
+{
+   int x;
+
+   for( x = 0; x < amount; x++ )
+      strcat( str, " " );
+
+   return;
+}

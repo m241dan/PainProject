@@ -11,6 +11,6 @@ extern const char *const race_desc_table[];
 /* General */
 const char *get_table( const char *const string_table[] );
 int str_table_max_strlen( const char *const table[] );
-
+void fit_space_with_color( char *dest, const char *orig, int space );
 /* Table Specific */
 void show_race_table( D_SOCKET *dsock );
