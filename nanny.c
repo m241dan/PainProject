@@ -219,7 +219,7 @@ void show_race_table( D_SOCKET *dsock )
       c_one = ( l_one + ( count_color( race_table[x] ) * 2 ) );
       c_two = ( l_two + ( count_color( race_desc_table[x] ) *2 ) );
       log_string( "length of desc %d\r\nc_one length: %d\r\nc_two length: %d", strlen( race_desc_table[x] ), c_one, c_two );
-      bprintf( buf, "|> [%-2d] %-*.*s - %*.*s <|\r\n", (x+1), l_one, c_one, race_table[x], l_two, c_two, race_desc_table[x] );
+      bprintf( buf, "|> [%-2d] %-10s - %65s <|\r\n", (x+1), race_table[x], race_desc_table[x] );
    }
    text_to_buffer( dsock, buf->data );
    buffer_free( buf );
