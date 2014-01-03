@@ -76,6 +76,8 @@ void nanny_handle_input( D_SOCKET *dsock, char *arg )
    if( !strcmp( arg, "/back" ) )
    {
       text_to_buffer(dsock, (char *) do_echo);
+      if( ( dsock->nanny->state - 1 ) == NANNY_CONFIRM_ADDITIONAL_PASSWORD )
+         change_nanny_state( dsock->nanny, ( dsock->nanny->state - 1), FALSE );
       change_nanny_state( dsock->nanny, ( dsock->nanny->state - 1 ), TRUE );
       return;
    }
@@ -212,7 +214,7 @@ void show_race_table( D_SOCKET *dsock )
    int x;
 
    for( x = 0; x < MAX_RACE; x++ )
-      bprintf( buf, "|> [%-2d] %-10s - %-62s <|\r\n", (x+1), race_table[x], race_desc_table[x] );
+      bprintf( buf, "|> [%-2.2d] %-10s - %-62s <|\r\n", (x+1), race_table[x], race_desc_table[x] );
 
    text_to_buffer( dsock, buf->data );
    buffer_free( buf );
