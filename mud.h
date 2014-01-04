@@ -164,8 +164,10 @@ struct dMobile
   LIST          * events;
   char          * name;
   char          * password;
-  sh_int          level;
-  sh_int        race;
+  sh_int        level;
+   /* New Content */
+   ACCOUNT *account;
+   sh_int  race;
 };
 
 struct help_data
@@ -202,6 +204,7 @@ typedef struct buffer_type
 #include "nanny.h"
 #include "account.h"
 #include "strings_table.h"
+#include "mobile.h"
 
 /******************************
  * End of new structures      *
