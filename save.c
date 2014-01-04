@@ -10,14 +10,6 @@
 void save_pfile           ( D_MOBILE *dMob );
 void save_profile         ( D_MOBILE *dMob );
 
-void save_player(D_MOBILE *dMob)
-{
-  if (!dMob) return;
-
-  save_pfile(dMob);      /* saves the actual player data */
-  save_profile(dMob);    /* saves the players profile    */
-}
-
 void save_pfile(D_MOBILE *dMob)
 {
   char pName[MAX_BUFFER];

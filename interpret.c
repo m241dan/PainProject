@@ -43,16 +43,16 @@ const struct typCmd tabCmd [] =
  /* command          function        Req. Level   State               */
  /* ----------------------------------------------------------------- */
 
-  { "commands",      cmd_commands,   LEVEL_GUEST, STATE_PLAYING },
-  { "compress",      cmd_compress,   LEVEL_GUEST, STATE_PLAYING },
+  { "commands",      cmd_commands,   LEVEL_PLAYER, STATE_PLAYING },
+  { "compress",      cmd_compress,   LEVEL_PLAYER, STATE_PLAYING },
   { "copyover",      cmd_copyover,   LEVEL_GOD,   STATE_PLAYING },
-  { "help",          cmd_help,       LEVEL_GUEST, STATE_PLAYING },
+  { "help",          cmd_help,       LEVEL_PLAYER, STATE_PLAYING },
   { "linkdead",      cmd_linkdead,   LEVEL_ADMIN, STATE_PLAYING },
-  { "say",           cmd_say,        LEVEL_GUEST, STATE_PLAYING },
-  { "save",          cmd_save,       LEVEL_GUEST, STATE_PLAYING },
+  { "say",           cmd_say,        LEVEL_NPC, STATE_PLAYING },
+  { "save",          cmd_save,       LEVEL_PLAYER, STATE_PLAYING },
   { "shutdown",      cmd_shutdown,   LEVEL_GOD,   STATE_PLAYING },
-  { "quit",          cmd_quit,       LEVEL_GUEST, STATE_PLAYING },
-  { "who",           cmd_who,        LEVEL_GUEST, STATE_PLAYING },
+  { "quit",          cmd_quit,       LEVEL_PLAYER, STATE_PLAYING },
+  { "who",           cmd_who,        LEVEL_PLAYER, STATE_PLAYING },
   /* account commands */
   { "quit",          act_quit,       LEVEL_BASIC, STATE_ACCOUNT },
   { "create",        act_create_char,LEVEL_BASIC, STATE_ACCOUNT },

@@ -10,6 +10,7 @@
 #include <arpa/telnet.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdio.h>
 #include "list.h"
 #include "stack.h"
 
@@ -59,7 +60,7 @@ typedef enum {
 #define TSTATE_CLOSED          3  /* Closed, ready to be recycled.   */
 
 /* player levels */
-#define LEVEL_GUEST            1  /* Dead players and actual guests  */
+#define LEVEL_NPC              1  /* Dead players and actual guests  */
 #define LEVEL_PLAYER           2  /* Almost everyone is this level   */
 #define LEVEL_ADMIN            3  /* Any admin without shell access  */
 #define LEVEL_GOD              4  /* Any admin with shell access     */
@@ -156,18 +157,6 @@ struct dSocket
   /* New Stuff */
   ACCOUNT       * account; /* sockets now hold accounts */
   NANNY         * nanny;
-};
-
-struct dMobile
-{
-  D_SOCKET      * socket;
-  LIST          * events;
-  char          * name;
-  char          * password;
-  sh_int        level;
-   /* New Content */
-   ACCOUNT *account;
-   sh_int  race;
 };
 
 struct help_data
