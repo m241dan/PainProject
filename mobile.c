@@ -123,7 +123,7 @@ D_MOBILE *load_player( ACCOUNT *account, char *player, bool partial )
   pName[i] = '\0';
 
   /* open the pfile so we can write to it */
-  snprintf(pfile, MAX_BUFFER, "../players/%s", pName);
+  snprintf(pfile, MAX_BUFFER, "../accounts/%s/%s", account->name, pName);
   if ((fp = fopen(pfile, "r")) == NULL)
     return NULL;
 

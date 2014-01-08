@@ -18,6 +18,7 @@ ACCOUNT *load_account( const char *act_name, bool partial )
 {
    FILE *fp;
    ACCOUNT *account = NULL;
+   D_MOBILE *dMob;
    char *word;
    char aFolder[MAX_BUFFER];
    char aFile[MAX_BUFFER];
@@ -93,7 +94,7 @@ ACCOUNT *load_account( const char *act_name, bool partial )
       regex_t regex;
       int reti;
 
-      reti = regcomp(&regex, "/..pfile/", 0 );
+      reti = regcomp(&regex, ".pfile", 0 );
       if( reti )
       {
          bug( "regex in account.c doesn't compile" );
@@ -103,14 +104,12 @@ ACCOUNT *load_account( const char *act_name, bool partial )
       directory = opendir( aFolder );
       for( entry = readdir( directory ); entry; entry = readdir( directory ) )
       {
-         puts( entry->d_name );
          if( !strcmp( entry->d_name, "."  ) || !strcmp(entry->d_name, ".." ) )
             continue;
          reti = regexec( &regex, entry->d_name, 0, NULL, 0 );
          if( !reti )
          {
-            puts( "doing this" );
-            D_MOBILE *dMob = load_player( account, entry->d_name, TRUE );
+            dMob = load_player( account, entry->d_name, TRUE );
             char_list_add( account, dMob );
          }
          else if( reti == REG_NOMATCH )
@@ -280,6 +279,26 @@ void clear_command_list( ACCOUNT *account )
    return;
 }
 
+void char_list_add( ACCOUNT *account, D_MOBILE *player )
+{
+   int x;
+
+   for( x = 0; x < MAX_CHARACTER; x++ )
+   {
+      if( account->char_list[x] == NULL )
+      {
+         account->char_list[x] = player;
+         break;
+      }
+   }
+
+   if( x >= MAX_CHARACTER )
+   {
+      bug( "%s: trying to add a char to a full char_list on account: %s", __FUNCTION__, account->name );
+      return;
+   }
+}
+
 /* Account Commands - Davenge */
 /*----------------------------*/
 void act_quit( void *passed, char *argument )
@@ -326,22 +345,3 @@ void act_create_char( void *passed, char *argument )
    return;
 }
 
-void char_list_add( ACCOUNT *account, D_MOBILE *player )
-{
-   int x;
-
-   for( x = 0; x < MAX_CHARACTER; x++ )
-   {
-      if( account->char_list[x] == NULL )
-      {
-         account->char_list[x] = player;
-         break;
-      }
-   }
-
-   if( x >= MAX_CHARACTER )
-   {
-      bug( "%s: trying to add a char to a full char_list on account: %s", __FUNCTION__, account->name );
-      return;
-   }
-}
