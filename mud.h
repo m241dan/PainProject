@@ -322,8 +322,6 @@ void  load_helps              ( void );
  * utils.c
  */
 bool  check_name              ( const char *name );
-void  clear_mobile            ( D_M *dMob );
-void  free_mobile             ( D_M *dMob );
 void  communicate             ( D_M *dMob, char *txt, int range );
 void  load_muddata            ( bool fCopyOver );
 char *get_time                ( void );
@@ -356,7 +354,6 @@ bool  compressEnd             ( D_S *dsock, unsigned char teleopt, bool forced )
  * save.c
  */
 void  save_player             ( D_M *dMob );
-D_M  *load_player             ( char *player );
 D_M  *load_profile            ( char *player );
 
 /*******************************

@@ -30,38 +30,6 @@ bool check_name(const char *name)
   return TRUE;
 }
 
-void clear_mobile(D_MOBILE *dMob)
-{
-  memset(dMob, 0, sizeof(*dMob));
-
-  dMob->name         =  NULL;
-  dMob->password     =  NULL;
-  dMob->level        =  LEVEL_PLAYER;
-  dMob->events       =  AllocList();
-}
-
-void free_mobile(D_MOBILE *dMob)
-{
-  EVENT_DATA *pEvent;
-  ITERATOR Iter;
-
-  DetachFromList(dMob, dmobile_list);
-
-  if (dMob->socket) dMob->socket->player = NULL;
-
-  AttachIterator(&Iter, dMob->events);
-  while ((pEvent = (EVENT_DATA *) NextInList(&Iter)) != NULL)
-    dequeue_event(pEvent);
-  DetachIterator(&Iter);
-  FreeList(dMob->events);
-
-  /* free allocated memory */
-  free(dMob->name);
-  free(dMob->password);
-
-  PushStack(dMob, dmobile_free);
-}
-
 void communicate(D_MOBILE *dMob, char *txt, int range)
 {
   D_MOBILE *xMob;
@@ -106,9 +74,9 @@ void load_muddata(bool fCopyOver)
 {
   load_helps();
 
-  /* copyover */
+  /* copyover *
   if (fCopyOver)
-    copyover_recover();
+    copyover_recover(); */
 }
 
 char *get_time()
@@ -126,6 +94,7 @@ char *get_time()
 }
 
 /* Recover from a copyover - load players */
+/*
 void copyover_recover()
 {     
   D_MOBILE *dMob;
@@ -143,7 +112,7 @@ void copyover_recover()
     exit (1);
   }
       
-  /* In case something crashes - doesn't prevent reading */
+  * In case something crashes - doesn't prevent reading *
   unlink(COPYOVER_FILE);
     
   for (;;)
@@ -158,44 +127,44 @@ void copyover_recover()
     dsock->hostname     =  strdup(host);
     AttachToList(dsock, dsock_list);
  
-    /* load player data */
+    * load player data *
     if ((dMob = load_player(name)) != NULL)
     {
-      /* attach to socket */
+      * attach to socket *
       dMob->socket     =  dsock;
       dsock->player    =  dMob;
   
-      /* attach to mobile list */
+      * attach to mobile list *
       AttachToList(dMob, dmobile_list);
 
-      /* initialize events on the player */
+      * initialize events on the player *
       init_events_player(dMob);
     }
-    else /* ah bugger */
+    else * ah bugger *
     {
       close_socket(dsock, FALSE);
       continue;
     }
    
-    /* Write something, and check if it goes error-free */
+    * Write something, and check if it goes error-free *
     if (!text_to_socket(dsock, "\n\r <*>  And before you know it, everything has changed  <*>\n\r"))
     { 
       close_socket(dsock, FALSE);
       continue;
     }
   
-    /* make sure the socket can be used */
+    * make sure the socket can be used *
     dsock->bust_prompt    =  TRUE;
     dsock->lookup_status  =  TSTATE_DONE;
     dsock->state          =  STATE_PLAYING;
 
-    /* negotiate compression */
+    * negotiate compression *
     text_to_buffer(dsock, (char *) compress_will2);
     text_to_buffer(dsock, (char *) compress_will);
   }
   fclose(fp);
 }     
-
+*/
 D_MOBILE *check_reconnect(char *player)
 {
   D_MOBILE *dMob;

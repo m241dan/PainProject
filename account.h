@@ -4,6 +4,8 @@
 
 #define MAX_CHARACTER 3
 
+#define save_account(account) fwrite_account( account )
+
 /* The levels an account can be */
 typedef enum {
    LEVEL_BASIC, LEVEL_ENFORCER, LEVEL_DEVELOPER, LEVEL_OWNER, MAX_ACCOUNT_LEVEL
@@ -39,6 +41,8 @@ ACCOUNT *check_account_reconnect( const char *act_name );
 void account_prompt( D_SOCKET *dsock );
 void load_commands( ACCOUNT *account );
 void clear_command_list( ACCOUNT *account );
+void char_list_add( ACCOUNT *account, D_MOBILE *player );
 /* Account Commands */
 void act_quit( void *passed, char *argument );
 void act_create_char( void *passed, char *argument );
+

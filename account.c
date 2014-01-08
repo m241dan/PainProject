@@ -7,7 +7,9 @@
 #include <string.h>
 #include <dirent.h>
 #include <sys/stat.h>
+#include <regex.h>
 #include "mud.h"
+
 
 /* Account Utilities -Davenge */
 /*----------------------------*/
@@ -17,10 +19,15 @@ ACCOUNT *load_account( const char *act_name, bool partial )
    FILE *fp;
    ACCOUNT *account = NULL;
    char *word;
+   char aFolder[MAX_BUFFER];
    char aFile[MAX_BUFFER];
    bool done = FALSE, found;
+   DIR *directory;
+   struct dirent *entry;
 
-   snprintf( aFile, MAX_BUFFER, "../accounts/%s/account.afile", capitalize( act_name ) );
+   snprintf( aFolder, MAX_BUFFER, "../accounts/%s/", capitalize( act_name ) );
+   snprintf( aFile, MAX_BUFFER, "%saccount.afile", aFolder );
+
    if( ( fp = fopen( aFile, "r" ) ) == NULL )
       return NULL;
 
@@ -78,6 +85,43 @@ ACCOUNT *load_account( const char *act_name, bool partial )
          word = fread_word( fp );
    }
    fclose( fp );
+
+   /* account data is loaded, now load the char_list */
+   if( !partial )
+   {
+      /* Using Regular Expression */
+      regex_t regex;
+      int reti;
+
+      reti = regcomp(&regex, "/..pfile/", 0 );
+      if( reti )
+      {
+         bug( "regex in account.c doesn't compile" );
+         return NULL;
+      }
+
+      directory = opendir( aFolder );
+      for( entry = readdir( directory ); entry; entry = readdir( directory ) )
+      {
+         puts( entry->d_name );
+         if( !strcmp( entry->d_name, "."  ) || !strcmp(entry->d_name, ".." ) )
+            continue;
+         reti = regexec( &regex, entry->d_name, 0, NULL, 0 );
+         if( !reti )
+         {
+            puts( "doing this" );
+            D_MOBILE *dMob = load_player( account, entry->d_name, TRUE );
+            char_list_add( account, dMob );
+         }
+         else if( reti == REG_NOMATCH )
+            continue;
+         else
+         {
+            log_string( "didn't know what to do with: %s", entry->d_name );
+            continue;
+         }
+      }
+   }
    return account;
 }
 
@@ -108,6 +152,7 @@ void fwrite_account( ACCOUNT *account )
       return;
    }
 
+
    /* dump the data */
    fprintf( fp, "Name              %s~\n", account->name );
    fprintf( fp, "Password          %s~\n", account->password );
@@ -118,6 +163,13 @@ void fwrite_account( ACCOUNT *account )
    /* make sure file has a terminator on it */
    fprintf( fp, "%s\n", FILE_TERMINATOR );
    fclose( fp );
+
+   /* save the characters */
+   {
+      int x;
+      for( x = 0; x < MAX_CHARACTER && account->char_list[x] != NULL; x++ )
+         save_mobile( account->char_list[x] );
+   }
 
 }
 
@@ -172,13 +224,24 @@ void account_prompt( D_SOCKET *dsock )
    COMMAND *command;
    BUFFER *buf = buffer_new(MAX_BUFFER);
    ITERATOR Iter;
-   int count = 0;
+   int x, count = 0;
 
    bprintf( buf, "%s Account Menu %s\r\n", produce_equals(30), produce_equals(30) );
    AttachIterator(&Iter, dsock->account->commands );
    while( ( command = (COMMAND *)NextInList(&Iter) ) != NULL )
       bprintf( buf, "%d : %s\r\n", ++count, command->cmd_name );
    DetachIterator(&Iter);
+
+   if( dsock->account->char_list[0] != NULL )
+   {
+      bprintf( buf, "\r\nCharacters:\r\n" );
+
+      for( x = 0; x < MAX_CHARACTER && dsock->account->char_list[x] != NULL; x++ )
+         bprintf( buf, "%s the %s\r\n", dsock->account->char_list[x]->name, race_table[dsock->account->char_list[x]->race] );
+   }
+
+   bprintf( buf, "\r\nWhat is your choice?: " );
+
    text_to_buffer( dsock, buf->data );
    buffer_free( buf );
    return;
@@ -261,4 +324,24 @@ void act_create_char( void *passed, char *argument )
    account->socket->nanny = create_nanny( account->socket, NANNY_CREATE_CHARACTER );
    change_nanny_state( account->socket->nanny, NANNY_ASK_CHARACTER_NAME, TRUE );
    return;
+}
+
+void char_list_add( ACCOUNT *account, D_MOBILE *player )
+{
+   int x;
+
+   for( x = 0; x < MAX_CHARACTER; x++ )
+   {
+      if( account->char_list[x] == NULL )
+      {
+         account->char_list[x] = player;
+         break;
+      }
+   }
+
+   if( x >= MAX_CHARACTER )
+   {
+      bug( "%s: trying to add a char to a full char_list on account: %s", __FUNCTION__, account->name );
+      return;
+   }
 }
