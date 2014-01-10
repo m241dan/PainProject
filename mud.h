@@ -11,6 +11,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
+#include <regex.h>
 #include "list.h"
 #include "stack.h"
 
@@ -312,6 +313,7 @@ char   *produce_equals        ( int amount );
 char   *smash_color( const char *str );
 char   *append_spaces( const char *str, int amount );
 void add_spaces( char *str, int amount );
+bool string_contains( char *string, const char *regex_string );
 /*
  * help.c
  */

@@ -7,7 +7,6 @@
 #include <string.h>
 #include <dirent.h>
 #include <sys/stat.h>
-#include <regex.h>
 #include "mud.h"
 
 
@@ -90,36 +89,13 @@ ACCOUNT *load_account( const char *act_name, bool partial )
    /* account data is loaded, now load the char_list */
    if( !partial )
    {
-      /* Using Regular Expression */
-      regex_t regex;
-      int reti;
-
-      reti = regcomp(&regex, ".pfile", 0 );
-      if( reti )
-      {
-         bug( "regex in account.c doesn't compile" );
-         return NULL;
-      }
-
       directory = opendir( aFolder );
       for( entry = readdir( directory ); entry; entry = readdir( directory ) )
-      {
-         if( !strcmp( entry->d_name, "."  ) || !strcmp(entry->d_name, ".." ) )
-            continue;
-         reti = regexec( &regex, entry->d_name, 0, NULL, 0 );
-         if( !reti )
+         if( string_contains( entry->d_name, ".pfile" ) )
          {
             dMob = load_player( account, entry->d_name, TRUE );
             char_list_add( account, dMob );
          }
-         else if( reti == REG_NOMATCH )
-            continue;
-         else
-         {
-            log_string( "didn't know what to do with: %s", entry->d_name );
-            continue;
-         }
-      }
    }
    return account;
 }
@@ -282,6 +258,12 @@ void clear_command_list( ACCOUNT *account )
 void char_list_add( ACCOUNT *account, D_MOBILE *player )
 {
    int x;
+
+   if( !player )
+   {
+      bug( "%s: trying to add a NULL player to %s's account.", __FUNCTION__, account->name );
+      return;
+   }
 
    for( x = 0; x < MAX_CHARACTER; x++ )
    {
