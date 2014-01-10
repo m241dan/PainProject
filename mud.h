@@ -19,6 +19,8 @@
  * Standard definitions *
  ************************/
 
+#define args( list )                    list
+
 /* define TRUE and FALSE */
 #ifndef FALSE
 #define FALSE   0
@@ -273,7 +275,7 @@ void  handle_new_connections  ( D_S *dsock, char *arg );
 void  clear_socket            ( D_S *sock_new, int sock );
 void  recycle_sockets         ( void );
 void *lookup_address          ( void *arg );
-
+void change_socket_state( D_S *dsock, int state );
 /*
  * interpret.c
  */

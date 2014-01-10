@@ -183,3 +183,36 @@ D_MOBILE *load_player( ACCOUNT *account, char *player, bool partial )
   return dMob;
 }
 
+void load_mobile_commands( D_MOBILE *dMob )
+{
+   COMMAND *com;
+   int x;
+
+   if( dMob->commands )
+   {
+      clear_mobile_command_list( dMob ); /* clear it out before we lost new commands */
+      dMob->commands = AllocList();
+   }
+
+   for( x = 0; tabCmd[x].cmd_name[0] != '\0'; x++ ) /* load the new commands that fit our criteria */
+      if( tabCmd[x].state == STATE_PLAYING && tabCmd[x].level <= 2 )
+      {
+         com = copy_command( tabCmd[x] );
+         AttachToList( com, dMob->commands );
+      }
+   return;
+}
+
+void clear_mobile_command_list( D_MOBILE *dMob )
+{
+   COMMAND *com;
+   ITERATOR Iter;
+
+   AttachIterator(&Iter, dMob->commands );
+   while( ( com = (COMMAND *)NextInList(&Iter) ) != NULL )
+      free_command( com );
+   DetachIterator(&Iter);
+   FreeList( dMob->commands );
+   return;
+}
+

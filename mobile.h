@@ -22,6 +22,7 @@ struct dMobile
    bool loaded;
    ACCOUNT *account;
    sh_int  race;
+   LIST *commands;
 };
 
 
@@ -33,3 +34,5 @@ void save_player( D_MOBILE *mobile );
 void free_mobile(D_MOBILE *dMob);
 void clear_mobile(D_MOBILE *dMob);
 D_MOBILE *load_player( ACCOUNT *account, char *player, bool partial );
+void load_mobile_commands args( ( D_MOBILE *dMob ) );
+void clear_mobile_command_list args( ( D_MOBILE *dMob ) );

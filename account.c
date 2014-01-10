@@ -170,7 +170,7 @@ void free_account( ACCOUNT *account )
       account->socket->player = NULL;
 
    clear_character_list( account );
-   clear_command_list( account );
+   clear_account_command_list( account );
    account->socket = NULL;
    free( account->name );
    free( account->password );
@@ -232,14 +232,14 @@ void account_prompt( D_SOCKET *dsock )
    return;
 }
 
-void load_commands( ACCOUNT *account )
+void load_account_commands( ACCOUNT *account )
 {
    COMMAND *com;
    int x;
 
    if( account->commands )
    {
-      clear_command_list( account ); /* clear it out before we lost new commands */
+      clear_account_command_list( account ); /* clear it out before we lost new commands */
       account->commands = AllocList();
    }
 
@@ -252,7 +252,7 @@ void load_commands( ACCOUNT *account )
    return;
 }
 
-void clear_command_list( ACCOUNT *account )
+void clear_account_command_list( ACCOUNT *account )
 {
    COMMAND *com;
    ITERATOR Iter;

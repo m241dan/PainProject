@@ -39,8 +39,8 @@ void clear_account( ACCOUNT *account );
 void free_account( ACCOUNT *account );
 ACCOUNT *check_account_reconnect( const char *act_name );
 void account_prompt( D_SOCKET *dsock );
-void load_commands( ACCOUNT *account );
-void clear_command_list( ACCOUNT *account );
+void load_account_commands args( ( ACCOUNT *account ) );
+void clear_account_command_list args( ( ACCOUNT *account ) );
 void clear_character_list( ACCOUNT *account );
 void char_list_add( ACCOUNT *account, D_MOBILE *player );
 /* Account Commands */

@@ -179,8 +179,6 @@ void GameLoop(int control)
             handle_new_connections(dsock, dsock->next_command);
             break;
           case STATE_PLAYING:
-            handle_cmd_input(dsock, dsock->next_command);
-            break;
           case STATE_ACCOUNT:
             new_handle_cmd_input( dsock, dsock->next_command );
             break;
@@ -973,8 +971,8 @@ void handle_new_connections(D_SOCKET *dsock, char *arg)
         log_string("New account: %s has entered the game.", dsock->account->name);
 
         /* and into the game */
-        load_commands( dsock->account );
-        dsock->state = STATE_ACCOUNT;
+        change_socket_state( dsock, STATE_ACCOUNT );
+
         text_to_buffer(dsock, motd);
         fwrite_account( dsock->account ); /* write the new account */
 
@@ -1007,8 +1005,7 @@ void handle_new_connections(D_SOCKET *dsock, char *arg)
           log_string("%s has reconnected.", dsock->account->name);
 
           /* and let him enter the game */
-          load_commands( dsock->account );
-          dsock->state = STATE_ACCOUNT;
+          change_socket_state( dsock, STATE_ACCOUNT );
           text_to_buffer(dsock, "You take over an account already in use.\n\r");
 
           /* strip the idle event from this socket */
@@ -1035,8 +1032,7 @@ void handle_new_connections(D_SOCKET *dsock, char *arg)
           log_string("%s has entered the game.", dsock->account->name);
 
           /* and let him enter the game */
-          load_commands( dsock->account );
-          dsock->state = STATE_ACCOUNT;
+          change_socket_state( dsock, STATE_ACCOUNT );
           text_to_buffer(dsock, motd);
 
 	  /* initialize events on the player */
@@ -1129,4 +1125,24 @@ void recycle_sockets()
     PushStack(dsock, dsock_free);
   }
   DetachIterator(&Iter);
+}
+
+/* Use this method to change a sockets state -Davenge
+ * -Quick note, before changing states,
+ *  make sure the proper player/account
+ *  is pointed to
+ */
+void change_socket_state( D_SOCKET *dsock, int state )
+{
+   dsock->state = state;
+   switch( state )
+   {
+      case STATE_PLAYING:
+         load_mobile_commands( dsock->player );
+         break;
+      case STATE_ACCOUNT:
+         load_account_commands( dsock->account );
+         break;
+   }
+   return;
 }

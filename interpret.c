@@ -82,17 +82,20 @@ void new_handle_cmd_input(D_SOCKET *dsock, char *arg)
       case STATE_PLAYING:
          if( ( entity = dsock->player ) == NULL )
             return;
+         cmd_table = dsock->player->commands;
          break;
    }
 
    AttachIterator( &Iter, cmd_table );
    while( ( com = (COMMAND *)NextInList(&Iter) ) != NULL )
+   {
       if( is_prefix( com->cmd_name, command ) )
       {
          (*com->cmd_funct)( entity, arg );
          found_cmd = TRUE;
          break;
       }
+   }
    DetachIterator(&Iter);
 
    if( !found_cmd && dsock->state == STATE_ACCOUNT && SizeOfList( dsock->account->characters ) >= 1 )
@@ -103,10 +106,15 @@ void new_handle_cmd_input(D_SOCKET *dsock, char *arg)
          if( !strcasecmp( command, character->name ) )
          {
             dsock->player = character;
+            dsock->player->socket = dsock;
+            dsock->player->commands = AllocList();
             character->loaded = TRUE;
-            dsock->state = STATE_PLAYING;
+            change_socket_state( dsock, STATE_PLAYING );
             dsock->bust_prompt = TRUE;
+            found_cmd = TRUE;
+            text_to_buffer( dsock, "You enter the Mud.\r\n" );
          }
+      DetachIterator( &Iter );
    }
 
 
