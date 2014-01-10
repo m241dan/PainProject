@@ -141,9 +141,13 @@ void fwrite_account( ACCOUNT *account )
 
    /* save the characters */
    {
-      int x;
-      for( x = 0; x < MAX_CHARACTER && account->char_list[x] != NULL; x++ )
-         save_mobile( account->char_list[x] );
+      D_MOBILE *character;
+      ITERATOR Iter;
+
+      AttachIterator( &Iter, account->characters );
+      while( ( character = (D_MOBILE *)NextInList( &Iter ) ) != NULL )
+         save_mobile( character );
+      DetachIterator( &Iter );
    }
 
 }
@@ -154,6 +158,7 @@ void clear_account( ACCOUNT *account )
    account->password = NULL;
    account->level = LEVEL_BASIC;
    account->commands = AllocList();
+   account->characters = AllocList();
    return;
 }
 
@@ -164,7 +169,9 @@ void free_account( ACCOUNT *account )
    if( account->socket )
       account->socket->player = NULL;
 
+   clear_character_list( account );
    clear_command_list( account );
+   account->socket = NULL;
    free( account->name );
    free( account->password );
 
@@ -197,9 +204,10 @@ void account_prompt( D_SOCKET *dsock )
 {
    /* should convert to lua later */
    COMMAND *command;
+   D_MOBILE *character;
    BUFFER *buf = buffer_new(MAX_BUFFER);
    ITERATOR Iter;
-   int x, count = 0;
+   int count = 0;
 
    bprintf( buf, "%s Account Menu %s\r\n", produce_equals(30), produce_equals(30) );
    AttachIterator(&Iter, dsock->account->commands );
@@ -207,12 +215,14 @@ void account_prompt( D_SOCKET *dsock )
       bprintf( buf, "%d : %s\r\n", ++count, command->cmd_name );
    DetachIterator(&Iter);
 
-   if( dsock->account->char_list[0] != NULL )
+   if( SizeOfList( dsock->account->characters ) > 0 )
    {
       bprintf( buf, "\r\nCharacters:\r\n" );
 
-      for( x = 0; x < MAX_CHARACTER && dsock->account->char_list[x] != NULL; x++ )
-         bprintf( buf, "%s the %s\r\n", dsock->account->char_list[x]->name, race_table[dsock->account->char_list[x]->race] );
+      AttachIterator( &Iter, dsock->account->characters );
+      while( ( character = (D_MOBILE *)NextInList( &Iter ) ) != NULL )
+         bprintf( buf, "%s the %s\r\n", character->name, race_table[character->race] );
+      DetachIterator( &Iter );
    }
 
    bprintf( buf, "\r\nWhat is your choice?: " );
@@ -255,30 +265,34 @@ void clear_command_list( ACCOUNT *account )
    return;
 }
 
+void clear_character_list( ACCOUNT *account )
+{
+   D_MOBILE *character;
+   ITERATOR Iter;
+
+   AttachIterator( &Iter, account->characters );
+   while( ( character = ( D_MOBILE *)NextInList( &Iter ) ) != NULL )
+      free_mobile( character );
+   DetachIterator( &Iter );
+   FreeList( account->characters );
+}
+
 void char_list_add( ACCOUNT *account, D_MOBILE *player )
 {
-   int x;
-
    if( !player )
    {
       bug( "%s: trying to add a NULL player to %s's account.", __FUNCTION__, account->name );
       return;
    }
-
-   for( x = 0; x < MAX_CHARACTER; x++ )
-   {
-      if( account->char_list[x] == NULL )
-      {
-         account->char_list[x] = player;
-         break;
-      }
-   }
-
-   if( x >= MAX_CHARACTER )
+   if( SizeOfList( account->characters ) >= MAX_CHARACTER )
    {
       bug( "%s: trying to add a char to a full char_list on account: %s", __FUNCTION__, account->name );
+      free_mobile( player );
       return;
    }
+   player->account = account;
+   AttachToList( player, account->characters );
+   return;
 }
 
 /* Account Commands - Davenge */
@@ -301,16 +315,8 @@ void act_quit( void *passed, char *argument )
 void act_create_char( void *passed, char *argument )
 {
    ACCOUNT *account = (ACCOUNT *)passed;
-   bool free_slot = FALSE;
-   int x;
 
-   for( x = 0; x < MAX_CHARACTER; x++ )
-      if( account->char_list[x] == NULL )
-      {
-         free_slot = TRUE;
-         break;
-      }
-   if( !free_slot )
+   if( SizeOfList( account->characters ) >= 3 )
    {
       text_to_buffer( account->socket, "You don't have any free character slots.\r\n" );
       return;

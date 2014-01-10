@@ -95,6 +95,21 @@ void new_handle_cmd_input(D_SOCKET *dsock, char *arg)
       }
    DetachIterator(&Iter);
 
+   if( !found_cmd && dsock->state == STATE_ACCOUNT && SizeOfList( dsock->account->characters ) >= 1 )
+   {
+      D_MOBILE *character;
+      AttachIterator( &Iter, dsock->account->characters );
+      while( ( character = (D_MOBILE *)NextInList( &Iter ) ) != NULL )
+         if( !strcasecmp( command, character->name ) )
+         {
+            dsock->player = character;
+            character->loaded = TRUE;
+            dsock->state = STATE_PLAYING;
+            dsock->bust_prompt = TRUE;
+         }
+   }
+
+
    if (!found_cmd)
      text_to_buffer(dsock, "No such command.\n\r");
    return;

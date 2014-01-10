@@ -23,7 +23,7 @@ struct game_account
    int level;
 
    /* the list of characters in an array, max size of MAX_CHARACTER */
-   D_MOBILE *char_list[MAX_CHARACTER];
+   LIST *characters;
 
    char *name;
    char *password;
@@ -41,6 +41,7 @@ ACCOUNT *check_account_reconnect( const char *act_name );
 void account_prompt( D_SOCKET *dsock );
 void load_commands( ACCOUNT *account );
 void clear_command_list( ACCOUNT *account );
+void clear_character_list( ACCOUNT *account );
 void char_list_add( ACCOUNT *account, D_MOBILE *player );
 /* Account Commands */
 void act_quit( void *passed, char *argument );

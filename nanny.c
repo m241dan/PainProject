@@ -216,24 +216,10 @@ void nanny_pick_race( D_SOCKET *dsock, char *arg )
 void nanny_complete_character( D_SOCKET *dsock )
 {
    D_MOBILE *new_char = (D_MOBILE *)dsock->nanny->creation;
-   int x;
 
    text_to_buffer( dsock, "New Character Successfully Created\r\n\r\n" );
+   char_list_add( dsock->account, new_char );
 
-   for( x = 0; x < MAX_CHARACTER; x++ )
-   {
-      if( dsock->account->char_list[x] == NULL )
-      {
-         new_char->account = dsock->account;
-         dsock->account->char_list[x] = new_char;
-         break;
-      }
-   }
-   if( x >= MAX_CHARACTER )
-   {
-      free_mobile( new_char );
-      bug( "%s: cannot create character for account %s. No empty slot in char_list", __FUNCTION__, dsock->account->name );
-   }
    free_nanny( dsock->nanny );
    dsock->state = STATE_ACCOUNT;
    save_account( dsock->account );
