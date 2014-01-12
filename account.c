@@ -17,7 +17,7 @@ ACCOUNT *load_account( const char *act_name, bool partial )
 {
    FILE *fp;
    ACCOUNT *account = NULL;
-   D_MOBILE *dMob;
+   D_MOBILE *dMob = NULL;
    char *word;
    char aFolder[MAX_BUFFER];
    char aFile[MAX_BUFFER];
@@ -93,7 +93,12 @@ ACCOUNT *load_account( const char *act_name, bool partial )
       for( entry = readdir( directory ); entry; entry = readdir( directory ) )
          if( string_contains( entry->d_name, ".pfile" ) )
          {
-            dMob = load_player( account, entry->d_name, TRUE );
+            load_player( account, entry->d_name, TRUE, dMob );
+            if( !dMob )
+            {
+               bug( "%s: can't load %s.", __FUNCTION__, entry->d_name );
+               continue;
+            }
             char_list_add( account, dMob );
          }
    }
@@ -155,7 +160,9 @@ void unload_account( ACCOUNT *account )
    DetachFromList( account, account_list );
 
    clear_character_list( account );
+   FreeList( account->characters );
    clear_account_command_list( account );
+   FreeList( account->commands );
    account->socket = NULL;
    free( account->name );
    free( account->password );
@@ -222,11 +229,8 @@ void load_account_commands( ACCOUNT *account )
    COMMAND *com;
    int x;
 
-   if( account->commands )
-   {
-      clear_account_command_list( account ); /* clear it out before we lost new commands */
-      account->commands = AllocList();
-   }
+   clear_account_command_list( account ); /* clear it out before we lost new commands */
+   account->commands = AllocList();
 
    for( x = 0; tabCmd[x].cmd_name[0] != '\0'; x++ ) /* load the new commands that fit our criteria */
       if( tabCmd[x].state == STATE_ACCOUNT && tabCmd[x].level <= account->level )
@@ -249,7 +253,6 @@ void clear_account_command_list( ACCOUNT *account )
    while( ( com = (COMMAND *)NextInList(&Iter) ) != NULL )
       free_command( com );
    DetachIterator(&Iter);
-   FreeList( account->commands );
    return;
 }
 
@@ -265,7 +268,7 @@ void clear_character_list( ACCOUNT *account )
    while( ( character = ( D_MOBILE *)NextInList( &Iter ) ) != NULL )
       unload_mobile( character, FALSE );
    DetachIterator( &Iter );
-   FreeList( account->characters );
+   return;
 }
 
 void char_list_add( ACCOUNT *account, D_MOBILE *player )

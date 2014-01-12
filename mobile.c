@@ -127,15 +127,14 @@ void free_mobile_account_data( D_MOBILE *dMob )
 
 void clear_mobile(D_MOBILE *dMob)
 {
-  dMob->name         =  NULL;
-  dMob->password     =  NULL;
-  dMob->level        =  LEVEL_PLAYER;
+   dMob->name         =  NULL;
+   dMob->password     =  NULL;
+   dMob->level        =  LEVEL_PLAYER;
 }
 
-D_MOBILE *load_player( ACCOUNT *account, char *player, bool partial )
+void load_player( ACCOUNT *account, char *player, bool partial, D_MOBILE *dMob )
 {
   FILE *fp;
-  D_MOBILE *dMob = NULL;
   char pfile[MAX_BUFFER];
   char pName[MAX_BUFFER];
   char *word;
@@ -151,13 +150,16 @@ D_MOBILE *load_player( ACCOUNT *account, char *player, bool partial )
   /* open the pfile so we can write to it */
   snprintf(pfile, MAX_BUFFER, "../accounts/%s/%s", account->name, pName);
   if ((fp = fopen(pfile, "r")) == NULL)
-    return NULL;
+    return;
 
   /* create new mobile data */
-  if (StackSize(dmobile_free) <= 0)
-     CREATE( dMob, D_MOBILE, 1 );
-  else
-    dMob = (D_MOBILE *) PopStack(dmobile_free);
+  if( !dMob )
+  {
+     if( StackSize( dmobile_free ) <= 0 )
+        CREATE( dMob, D_MOBILE, 1 );
+     else
+       dMob = (D_MOBILE *)PopStack( dmobile_free );
+  }
 
   clear_mobile(dMob);
 
@@ -198,7 +200,8 @@ D_MOBILE *load_player( ACCOUNT *account, char *player, bool partial )
     {
       bug("Load_player: unexpected '%s' in %s's pfile.", word, player);
       unload_mobile( dMob, FALSE );
-      return NULL;
+      dMob = NULL;
+      return;
     }
 
     /* read one more */
@@ -206,7 +209,7 @@ D_MOBILE *load_player( ACCOUNT *account, char *player, bool partial )
   }
 
   fclose(fp);
-  return dMob;
+  return;
 }
 
 void load_mobile_commands( D_MOBILE *dMob )
@@ -214,11 +217,8 @@ void load_mobile_commands( D_MOBILE *dMob )
    COMMAND *com;
    int x;
 
-   if( dMob->commands )
-   {
-      clear_mobile_command_list( dMob ); /* clear it out before we lost new commands */
-      dMob->commands = AllocList();
-   }
+   clear_mobile_command_list( dMob ); /* clear it out before we lost new commands */
+   dMob->commands = AllocList();
 
    for( x = 0; tabCmd[x].cmd_name[0] != '\0'; x++ ) /* load the new commands that fit our criteria */
       if( tabCmd[x].state == STATE_PLAYING && tabCmd[x].level <= 2 )
@@ -241,7 +241,6 @@ void clear_mobile_command_list( D_MOBILE *dMob )
    while( ( com = (COMMAND *)NextInList(&Iter) ) != NULL )
       free_command( com );
    DetachIterator(&Iter);
-   FreeList( dMob->commands );
    return;
 }
 
@@ -257,6 +256,5 @@ void clear_mobile_event_list( D_MOBILE *dMob )
    while ((pEvent = (EVENT_DATA *) NextInList(&Iter)) != NULL)
      dequeue_event(pEvent);
    DetachIterator(&Iter);
-   FreeList(dMob->events);
    return;
 }

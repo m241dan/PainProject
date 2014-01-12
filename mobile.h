@@ -40,7 +40,7 @@ void unload_mobile( D_MOBILE *dMob, bool partial );
 void free_mobile_game_data(D_MOBILE *dMob );
 void free_mobile_account_data( D_MOBILE *dMob );
 void clear_mobile(D_MOBILE *dMob);
-D_MOBILE *load_player( ACCOUNT *account, char *player, bool partial );
+void load_player( ACCOUNT *account, char *player, bool partial, D_MOBILE *dMob );
 void load_mobile_commands args( ( D_MOBILE *dMob ) );
 void clear_mobile_command_list args( ( D_MOBILE *dMob ) );
 void clear_mobile_event_list( D_MOBILE *dMob );
