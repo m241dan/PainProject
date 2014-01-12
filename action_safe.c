@@ -32,7 +32,7 @@ void cmd_quit(void *passed, char *arg)
   save_player(dMob);
 
   dMob->socket->player = NULL;
-  free_mobile(dMob);
+  unload_mobile( dMob, FALSE );
   close_socket(dMob->socket, FALSE);
 }
 

@@ -69,34 +69,53 @@ void save_player( D_MOBILE *dMob )
    fclose(fp);
 }
 
+/* unload a mobile, with options */
+
 void unload_mobile( D_MOBILE *dMob, bool partial )
 {
+   if( !dMob->loaded && partial ) /* a character already logged out and want a partial unload, do nothing */
+      return;
+   else if( dMob->loaded && partial ) /* logging out of a character to an account */
+      free_mobile_game_data( dMob );
+   else if( dMob->loaded && !partial ) /* character logged in and we want to completely quit the game */
+   {
+      free_mobile_game_data( dMob );
+      free_mobile_account_data( dMob );
+      PushStack( dMob, dmobile_free );
+      return;
+   }
+   else if( !dMob->loaded && !partial ) /* this would be quitting the game from an account and freeing up the LIST *character in account structure */
+   {
+      free_mobile_account_data( dMob );
+      PushStack( dMob, dmobile_free );
+      return;
+   }
    return;
 }
 
-void free_mobile(D_MOBILE *dMob)
+/* Free all the data related to playing the game only */
+void free_mobile_game_data(D_MOBILE *dMob)
 {
-   EVENT_DATA *pEvent;
-   ITERATOR Iter;
-
    if( dMob->loaded )
    {
       DetachFromList(dMob, dmobile_list);
 
       if (dMob->socket) dMob->socket->player = NULL;
 
-      AttachIterator(&Iter, dMob->events);
-      while ((pEvent = (EVENT_DATA *) NextInList(&Iter)) != NULL)
-        dequeue_event(pEvent);
-      DetachIterator(&Iter);
-      FreeList(dMob->events);
+      /* Free Up Event List */
+      clear_mobile_event_list( dMob );
+      /* Free up Comand List */
+      clear_mobile_command_list( dMob );
    }
+   return;
+}
 
-   /* free allocated memory */
-   free(dMob->name);
-   free(dMob->password);
-
-   PushStack(dMob, dmobile_free);
+/* Free all dMob account data */
+void free_mobile_account_data( D_MOBILE *dMob )
+{
+   free( dMob->name );
+   free( dMob->password );
+   return;
 }
 
 void clear_mobile(D_MOBILE *dMob)
@@ -171,7 +190,7 @@ D_MOBILE *load_player( ACCOUNT *account, char *player, bool partial )
     if (!found)
     {
       bug("Load_player: unexpected '%s' in %s's pfile.", word, player);
-      free_mobile(dMob);
+      unload_mobile( dMob, FALSE );
       return NULL;
     }
 
@@ -216,3 +235,15 @@ void clear_mobile_command_list( D_MOBILE *dMob )
    return;
 }
 
+void clear_mobile_event_list( D_MOBILE *dMob )
+{
+   EVENT_DATA *pEvent;
+   ITERATOR Iter;
+
+   AttachIterator(&Iter, dMob->events);
+   while ((pEvent = (EVENT_DATA *) NextInList(&Iter)) != NULL)
+     dequeue_event(pEvent);
+   DetachIterator(&Iter);
+   FreeList(dMob->events);
+   return;
+}

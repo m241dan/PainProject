@@ -272,7 +272,7 @@ void clear_character_list( ACCOUNT *account )
 
    AttachIterator( &Iter, account->characters );
    while( ( character = ( D_MOBILE *)NextInList( &Iter ) ) != NULL )
-      free_mobile( character );
+      unload_mobile( character, FALSE );
    DetachIterator( &Iter );
    FreeList( account->characters );
 }
@@ -287,7 +287,7 @@ void char_list_add( ACCOUNT *account, D_MOBILE *player )
    if( SizeOfList( account->characters ) >= MAX_CHARACTER )
    {
       bug( "%s: trying to add a char to a full char_list on account: %s", __FUNCTION__, account->name );
-      free_mobile( player );
+      unload_mobile( player, FALSE );
       return;
    }
    player->account = account;

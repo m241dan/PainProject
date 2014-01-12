@@ -406,7 +406,7 @@ void close_socket(D_SOCKET *dsock, bool reconnect)
     }
   }
   else if (dsock->player)
-    free_mobile(dsock->player);
+    unload_mobile( dsock->player, FALSE );
 
   /* dequeue all events for this socket */
   AttachIterator(&Iter, dsock->events);
