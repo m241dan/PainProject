@@ -125,11 +125,18 @@ void free_mobile_account_data( D_MOBILE *dMob )
    return;
 }
 
-void clear_mobile(D_MOBILE *dMob)
+void clear_mobile(D_MOBILE *dMob, bool partial )
 {
    dMob->name         =  NULL;
    dMob->password     =  NULL;
    dMob->level        =  LEVEL_PLAYER;
+   dMob->race         =  RACE_HUMAN;
+
+   if( !partial )
+   {
+      dMob->commands = AllocList();
+      dMob->events = AllocList();
+   }
 }
 
 void load_player( ACCOUNT *account, char *player, bool partial, D_MOBILE *dMob )
@@ -161,7 +168,7 @@ void load_player( ACCOUNT *account, char *player, bool partial, D_MOBILE *dMob )
        dMob = (D_MOBILE *)PopStack( dmobile_free );
   }
 
-  clear_mobile(dMob);
+  clear_mobile(dMob, partial);
 
   /* load data */
   word = fread_word(fp);
