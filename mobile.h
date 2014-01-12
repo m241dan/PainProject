@@ -35,8 +35,10 @@ struct dMobile
  * Utility Methods *
  *******************/
 void save_mobile( D_MOBILE *mobile );
-void save_player( D_MOBILE *mobile );
+void save_player( D_MOBILE *mobile, bool New );
 void unload_mobile( D_MOBILE *dMob, bool partial );
+void alloc_mobile_lists( D_MOBILE *dMob );
+void free_mobile_lists( D_MOBILE *dMob );
 void free_mobile_game_data(D_MOBILE *dMob );
 void free_mobile_account_data( D_MOBILE *dMob );
 void clear_mobile(D_MOBILE *dMob, bool partial );

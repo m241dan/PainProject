@@ -357,7 +357,6 @@ bool  compressEnd             ( D_S *dsock, unsigned char teleopt, bool forced )
 /*
  * save.c
  */
-void  save_player             ( D_M *dMob );
 D_M  *load_profile            ( char *player );
 
 /*******************************

@@ -16,13 +16,13 @@ void save_mobile( D_MOBILE *dMob)
          bug( "%s: %s attempting to save with %d level.", __FUNCTION__, dMob->name, dMob->level );
          return;
       case LEVEL_PLAYER:
-         save_player( dMob );
+         save_player( dMob, FALSE );
          break;
    }
    return;
 }
 
-void save_player( D_MOBILE *dMob )
+void save_player( D_MOBILE *dMob, bool New )
 {
    char pName[MAX_BUFFER];
    char aName[MAX_BUFFER];
@@ -41,7 +41,7 @@ void save_player( D_MOBILE *dMob )
       return;
    }
 
-   if( !dMob->loaded )
+   if( !New && !dMob->loaded )
    {
       bug( "%s: trying to save an unfully loaded mobile named %s.", __FUNCTION__, dMob->name );
       return;
@@ -100,6 +100,20 @@ void unload_mobile( D_MOBILE *dMob, bool partial )
    return;
 }
 
+void alloc_mobile_lists( D_MOBILE *dMob ) /* alloc the dMobiles lists */
+{
+   dMob->commands = AllocList();
+   dMob->events = AllocList();
+   return;
+}
+
+void free_mobile_lists( D_MOBILE *dMob ) /* deallocate the dMobiles list memory */
+{
+   FreeList( dMob->commands );
+   FreeList( dMob->events );
+   return;
+}
+
 /* Free all the data related to playing the game only */
 void free_mobile_game_data(D_MOBILE *dMob)
 {
@@ -113,6 +127,8 @@ void free_mobile_game_data(D_MOBILE *dMob)
       clear_mobile_event_list( dMob );
       /* Free up Comand List */
       clear_mobile_command_list( dMob );
+      /* Now for the List's Memory */
+      free_mobile_lists( dMob );
    }
    return;
 }
@@ -133,10 +149,7 @@ void clear_mobile(D_MOBILE *dMob, bool partial )
    dMob->race         =  RACE_HUMAN;
 
    if( !partial )
-   {
-      dMob->commands = AllocList();
-      dMob->events = AllocList();
-   }
+      alloc_mobile_lists( dMob );
 }
 
 void load_player( ACCOUNT *account, char *player, bool partial, D_MOBILE *dMob )
@@ -225,7 +238,6 @@ void load_mobile_commands( D_MOBILE *dMob )
    int x;
 
    clear_mobile_command_list( dMob ); /* clear it out before we lost new commands */
-   dMob->commands = AllocList();
 
    for( x = 0; tabCmd[x].cmd_name[0] != '\0'; x++ ) /* load the new commands that fit our criteria */
       if( tabCmd[x].state == STATE_PLAYING && tabCmd[x].level <= 2 )
