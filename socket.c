@@ -408,6 +408,12 @@ void close_socket(D_SOCKET *dsock, bool reconnect)
   else if (dsock->player)
     unload_mobile( dsock->player, FALSE );
 
+   if( dsock->account )
+   {
+      unload_account( dsock->account );
+      dsock->account = NULL;
+   }
+
   /* dequeue all events for this socket */
   AttachIterator(&Iter, dsock->events);
   while ((pEvent = (EVENT_DATA *) NextInList(&Iter)) != NULL)
@@ -415,7 +421,7 @@ void close_socket(D_SOCKET *dsock, bool reconnect)
   DetachIterator(&Iter);
 
   /* set the closed state */
-  dsock->state = STATE_CLOSED;
+  change_socket_state( dsock, STATE_CLOSED );
 }
 
 /* 
@@ -998,7 +1004,7 @@ void handle_new_connections(D_SOCKET *dsock, char *arg)
         if ((a_new = check_account_reconnect(dsock->account->name)) != NULL)
         {
           /* attach the new player */
-          free_account(dsock->account);
+          unload_account(dsock->account);
           dsock->account = a_new;
           a_new->socket = dsock;
 
@@ -1014,7 +1020,7 @@ void handle_new_connections(D_SOCKET *dsock, char *arg)
         else if ((a_new = load_account( dsock->account->name, FALSE ) ) == NULL) /* false because I want a full load of the account */
         {
           text_to_socket(dsock, "ERROR: Your afile is missing!\n\r");
-          free_account(dsock->account);
+          unload_account(dsock->account);
           dsock->account = NULL;
           close_socket(dsock, FALSE);
           return;
@@ -1022,7 +1028,7 @@ void handle_new_connections(D_SOCKET *dsock, char *arg)
         else
         {
           /* attach the new player */
-          free_account(dsock->account);
+          unload_account(dsock->account);
           dsock->account = a_new;
           a_new->socket = dsock;
 
@@ -1046,7 +1052,7 @@ void handle_new_connections(D_SOCKET *dsock, char *arg)
       else
       {
         text_to_socket(dsock, "Bad password!\n\r");
-        free_account(dsock->account);
+        unload_account(dsock->account);
         dsock->account = NULL;
         close_socket(dsock, FALSE);
       }

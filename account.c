@@ -77,7 +77,7 @@ ACCOUNT *load_account( const char *act_name, bool partial )
       if( !found )
       {
          bug( "Load_account: unexpected '%s' in %s's aFile.", word, act_name );
-         free_account(account);
+         unload_account(account);
          return NULL;
       }
 
@@ -150,12 +150,9 @@ void clear_account( ACCOUNT *account )
    return;
 }
 
-void free_account( ACCOUNT *account )
+void unload_account( ACCOUNT *account )
 {
    DetachFromList( account, account_list );
-
-   if( account->socket )
-      account->socket->player = NULL;
 
    clear_character_list( account );
    clear_account_command_list( account );
@@ -245,6 +242,9 @@ void clear_account_command_list( ACCOUNT *account )
    COMMAND *com;
    ITERATOR Iter;
 
+   if( !account->commands )
+      return;
+
    AttachIterator(&Iter, account->commands );
    while( ( com = (COMMAND *)NextInList(&Iter) ) != NULL )
       free_command( com );
@@ -257,6 +257,9 @@ void clear_character_list( ACCOUNT *account )
 {
    D_MOBILE *character;
    ITERATOR Iter;
+
+   if( !account->characters )
+      return;
 
    AttachIterator( &Iter, account->characters );
    while( ( character = ( D_MOBILE *)NextInList( &Iter ) ) != NULL )
@@ -312,8 +315,6 @@ void act_quit( void *passed, char *argument )
    snprintf( buf, MAX_BUFFER, "%s has left the game.", account->name );
    log_string( buf );
 
-   account->socket->account = NULL;
-   free_account( account );
    close_socket( account->socket, FALSE );
    return;
 }

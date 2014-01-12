@@ -36,7 +36,7 @@ struct game_account
 void fwrite_account( ACCOUNT *account );
 ACCOUNT *load_account( const char *act_name, bool partial );
 void clear_account( ACCOUNT *account );
-void free_account( ACCOUNT *account );
+void unload_account( ACCOUNT *account );
 ACCOUNT *check_account_reconnect( const char *act_name );
 void account_prompt( D_SOCKET *dsock );
 void load_account_commands args( ( ACCOUNT *account ) );

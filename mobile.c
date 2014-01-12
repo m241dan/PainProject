@@ -234,6 +234,9 @@ void clear_mobile_command_list( D_MOBILE *dMob )
    COMMAND *com;
    ITERATOR Iter;
 
+   if( !dMob->commands )
+      return;
+
    AttachIterator(&Iter, dMob->commands );
    while( ( com = (COMMAND *)NextInList(&Iter) ) != NULL )
       free_command( com );
@@ -246,6 +249,9 @@ void clear_mobile_event_list( D_MOBILE *dMob )
 {
    EVENT_DATA *pEvent;
    ITERATOR Iter;
+
+   if( !dMob->events )
+      return;
 
    AttachIterator(&Iter, dMob->events);
    while ((pEvent = (EVENT_DATA *) NextInList(&Iter)) != NULL)
