@@ -229,8 +229,8 @@ void load_account_commands( ACCOUNT *account )
    COMMAND *com;
    int x;
 
-   clear_account_command_list( account ); /* clear it out before we lost new commands */
-   account->commands = AllocList();
+   if( SizeOfList( account->commands ) <= 0 )
+      clear_account_command_list( account );
 
    for( x = 0; tabCmd[x].cmd_name[0] != '\0'; x++ ) /* load the new commands that fit our criteria */
       if( tabCmd[x].state == STATE_ACCOUNT && tabCmd[x].level <= account->level )
