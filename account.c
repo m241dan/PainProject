@@ -138,18 +138,6 @@ void fwrite_account( ACCOUNT *account )
    /* make sure file has a terminator on it */
    fprintf( fp, "%s\n", FILE_TERMINATOR );
    fclose( fp );
-
-   /* save the characters */
-   {
-      D_MOBILE *character;
-      ITERATOR Iter;
-
-      AttachIterator( &Iter, account->characters );
-      while( ( character = (D_MOBILE *)NextInList( &Iter ) ) != NULL )
-         save_mobile( character );
-      DetachIterator( &Iter );
-   }
-
 }
 
 void clear_account( ACCOUNT *account )
@@ -292,6 +280,24 @@ void char_list_add( ACCOUNT *account, D_MOBILE *player )
    }
    player->account = account;
    AttachToList( player, account->characters );
+   return;
+}
+
+void char_list_remove( ACCOUNT *account, D_MOBILE *player )
+{
+   if( !player )
+   {
+      bug( "%s: trying to remove a NULL player from %s's char list.", __FUNCTION__, account->name );
+      return;
+   }
+
+   if( SizeOfList( account->characters ) <= 0 )
+   {
+      bug( "%s: trying to remove a player from a list that is empty on %s's account.", __FUNCTION__, account->name );
+      return;
+   }
+   player->account = NULL;
+   DetachFromList( player, account->characters );
    return;
 }
 

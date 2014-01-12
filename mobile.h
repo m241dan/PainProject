@@ -28,8 +28,6 @@ struct dMobile
    /* game data */
    LIST *commands;
 
-   D_MOBILE *target;
-
 };
 
 

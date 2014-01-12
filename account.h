@@ -43,6 +43,7 @@ void load_account_commands args( ( ACCOUNT *account ) );
 void clear_account_command_list args( ( ACCOUNT *account ) );
 void clear_character_list( ACCOUNT *account );
 void char_list_add( ACCOUNT *account, D_MOBILE *player );
+void char_list_remove( ACCOUNT *account, D_MOBILE *player );
 /* Account Commands */
 void act_quit( void *passed, char *argument );
 void act_create_char( void *passed, char *argument );

@@ -40,6 +40,13 @@ void save_player( D_MOBILE *dMob )
       bug( "%s: %s attempting to save with no account.", __FUNCTION__, dMob->name );
       return;
    }
+
+   if( !dMob->loaded )
+   {
+      bug( "%s: trying to save an unfully loaded mobile named %s.", __FUNCTION__, dMob->name );
+      return;
+   }
+
    strcpy( pName, dMob->name );
    strcpy( aName, dMob->account->name );
    capitalize_orig( pName );

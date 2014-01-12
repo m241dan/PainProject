@@ -218,11 +218,12 @@ void nanny_complete_character( D_SOCKET *dsock )
    D_MOBILE *new_char = (D_MOBILE *)dsock->nanny->creation;
 
    text_to_buffer( dsock, "New Character Successfully Created\r\n\r\n" );
+   save_player( new_char );
+   unload_mobile( new_char, TRUE );
    char_list_add( dsock->account, new_char );
 
    free_nanny( dsock->nanny );
-   dsock->state = STATE_ACCOUNT;
-   save_account( dsock->account );
+   change_socket_state( dsock,  STATE_ACCOUNT );
    return;
 }
 
