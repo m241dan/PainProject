@@ -166,9 +166,9 @@ void load_player( ACCOUNT *account, char *player, bool partial, D_MOBILE *dMob )
         CREATE( dMob, D_MOBILE, 1 );
      else
        dMob = (D_MOBILE *)PopStack( dmobile_free );
-  }
 
-  clear_mobile(dMob, partial);
+     clear_mobile(dMob, partial);
+  }
 
   /* load data */
   word = fread_word(fp);

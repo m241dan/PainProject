@@ -217,6 +217,12 @@ void nanny_complete_character( D_SOCKET *dsock )
 {
    D_MOBILE *new_char = (D_MOBILE *)dsock->nanny->creation;
 
+   if( !new_char )
+   {
+      bug( "%s: being called but the creation is NULL... wtf: account %s", __FUNCTION__, dsock->account->name );
+      return;
+   }
+
    text_to_buffer( dsock, "New Character Successfully Created\r\n\r\n" );
    save_player( new_char );
    unload_mobile( new_char, TRUE );
