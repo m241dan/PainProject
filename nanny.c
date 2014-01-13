@@ -224,6 +224,7 @@ void nanny_complete_character( D_SOCKET *dsock )
    }
 
    text_to_buffer( dsock, "New Character Successfully Created\r\n\r\n" );
+   load_player( 
    save_player( new_char, TRUE );
    unload_mobile( new_char, TRUE );
    char_list_add( dsock->account, new_char );

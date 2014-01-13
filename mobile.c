@@ -22,7 +22,7 @@ void save_mobile( D_MOBILE *dMob)
    return;
 }
 
-void save_player( D_MOBILE *dMob, bool New )
+void save_player( D_MOBILE *dMob )
 {
    char pName[MAX_BUFFER];
    char aName[MAX_BUFFER];
@@ -41,7 +41,7 @@ void save_player( D_MOBILE *dMob, bool New )
       return;
    }
 
-   if( !New && !dMob->loaded )
+   if( !dMob->loaded )
    {
       bug( "%s: trying to save an unfully loaded mobile named %s.", __FUNCTION__, dMob->name );
       return;
@@ -141,14 +141,14 @@ void free_mobile_account_data( D_MOBILE *dMob )
    return;
 }
 
-void clear_mobile(D_MOBILE *dMob, bool partial )
+void clear_mobile( D_MOBILE *dMob )
 {
    dMob->name         =  NULL;
    dMob->password     =  NULL;
    dMob->level        =  LEVEL_PLAYER;
    dMob->race         =  RACE_HUMAN;
 
-   if( !partial )
+   if( dMob->loaded )
       alloc_mobile_lists( dMob );
 }
 
@@ -180,7 +180,10 @@ void load_player( ACCOUNT *account, char *player, bool partial, D_MOBILE *dMob )
      else
        dMob = (D_MOBILE *)PopStack( dmobile_free );
 
-     clear_mobile(dMob, partial);
+     if( partial )
+        dMob->loaded = FALSE;
+
+     clear_mobile(dMob);
   }
 
   /* load data */
