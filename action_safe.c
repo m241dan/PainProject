@@ -30,9 +30,6 @@ void cmd_quit(void *passed, char *arg)
   log_string(buf);
 
   save_mobile(dMob);
-
-  dMob->socket->player = NULL;
-  unload_mobile( dMob, FALSE );
   close_socket(dMob->socket, FALSE);
 }
 

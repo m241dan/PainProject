@@ -159,7 +159,7 @@ void load_mobile( ACCOUNT *account, char *player, bool partial, D_MOBILE *dMob )
 
    if( account ) /* if its a player */
    {
-      mud_printf( pFile, "../accounts/%s/%s", capitalize( account->name ), capitalize( player ) );
+      mud_printf( pFile, "../accounts/%s/%s.pfile", capitalize( account->name ), capitalize( player ) );
       fread_mobile_account_data( pFile, dMob );
       if( !partial )
       {
@@ -297,4 +297,15 @@ void clear_mobile_event_list( D_MOBILE *dMob )
      dequeue_event(pEvent);
    DetachIterator(&Iter);
    return;
+}
+
+void char_to_game( D_SOCKET *dsock, D_MOBILE *dMob )
+{
+   dsock->player = dMob;
+   dMob->socket = dsock;
+   dMob->loaded = TRUE;
+   load_mobile( dMob->account, dMob->name, FALSE, dMob );
+   change_socket_state( dsock, STATE_PLAYING );
+   dsock->bust_prompt = TRUE;
+   text_to_buffer( dsock, "You enter the Mud.\r\n" );
 }

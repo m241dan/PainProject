@@ -55,3 +55,4 @@ void load_player( ACCOUNT *account, char *player, bool partial, D_MOBILE *dMob )
 void load_mobile_commands args( ( D_MOBILE *dMob ) );
 void clear_mobile_command_list args( ( D_MOBILE *dMob ) );
 void clear_mobile_event_list( D_MOBILE *dMob );
+void char_to_game( D_SOCKET *dsock, D_MOBILE *dMob );

@@ -19,6 +19,7 @@ ACCOUNT *load_account( const char *act_name, bool partial )
    ACCOUNT *account = NULL;
    D_MOBILE *dMob;
    char *word;
+   char *pFile;
    char aFile[MAX_BUFFER];
    char aFolder[MAX_BUFFER];
    bool done = FALSE, found;
@@ -93,12 +94,14 @@ ACCOUNT *load_account( const char *act_name, bool partial )
       for( entry = readdir( directory ); entry; entry = readdir( directory ) )
          if( string_contains( entry->d_name, ".pfile" ) )
          {
+            pFile = strdup( entry->d_name ); /* hack wizardry to make this work */
+            pFile[ strlen( entry->d_name ) - 6 ] = '\0';
             if( StackSize( dmobile_free ) <= 0 )
                CREATE( dMob, D_MOBILE, 1 );
             else
                dMob = (D_MOBILE *)PopStack( dmobile_free );
 
-            load_mobile( account, entry->d_name, TRUE, dMob );
+            load_mobile( account, pFile, TRUE, dMob );
             if( !dMob )
             {
                bug( "%s: can't load %s.", __FUNCTION__, entry->d_name );

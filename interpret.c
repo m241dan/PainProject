@@ -105,14 +105,8 @@ void new_handle_cmd_input(D_SOCKET *dsock, char *arg)
       while( ( character = (D_MOBILE *)NextInList( &Iter ) ) != NULL )
          if( !strcasecmp( command, character->name ) )
          {
-            dsock->player = character;
-            dsock->player->socket = dsock;
-            dsock->player->commands = AllocList();
-            character->loaded = TRUE;
-            change_socket_state( dsock, STATE_PLAYING );
-            dsock->bust_prompt = TRUE;
+            char_to_game( dsock, character );
             found_cmd = TRUE;
-            text_to_buffer( dsock, "You enter the Mud.\r\n" );
          }
       DetachIterator( &Iter );
    }
