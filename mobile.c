@@ -22,6 +22,29 @@ void save_mobile( D_MOBILE *dMob)
    return;
 }
 
+void fwrite_account_data( D_MOBILE *dMob )
+{
+   FILE *fp;
+
+   if( !dMob || !dMob->name || dMob->name[0] == '\0' )
+   {
+      bug( "%s: attempting to save a mobile with no name.", __FUNCTION__ );
+      return;
+   }
+
+   if( !dMob->account || !dMob->account->name || dMob->account->name[0] == '\0' )
+   {
+      bug( "%s: %s attempting to save with no account.", __FUNCTION__, dMob->name );
+      return;
+   }
+
+}
+
+void fwrite_game_data( D_MOBILE *dMob )
+{
+
+}
+
 void save_player( D_MOBILE *dMob )
 {
    char pName[MAX_BUFFER];

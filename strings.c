@@ -170,7 +170,7 @@ int bprintf(BUFFER *buffer, char *fmt, ...)
   }
   else
     buffer_strcat(buffer, buf);
-   
+  
   return res;
 }
 
@@ -184,6 +184,25 @@ char *strdup(const char *s)
   strcpy(pstr, s);
 
   return pstr;
+}
+
+int mud_printf( char *dest, const char *format, ... )
+{
+   va_list va;
+   int res;
+
+   va_start( va, format );
+   res = vsnprintf( dest, MAX_BUFFER, format, va );
+   va_end( va );
+
+   if( res >= MAX_BUFFER -1 )
+   {
+      dest[0] = '\0';
+      bug( "Overflow when printing string %s", format );
+   }
+
+   clear_strings();
+   return res;
 }
 
 int strcasecmp(const char *s1, const char *s2)
@@ -220,20 +239,19 @@ int strcasecmp(const char *s1, const char *s2)
 /* The problem with this function is you can't compare two downcased strings because its a static buf but otherwise you have to make new variables etc */
 char *downcase( const char *word )
 {
-   static char buf[MAX_BUFFER]; /* has to be buffer or compiler throws error, the it also has to be static so there are no memory leaks */
+   char *new_word; /* create a new word */
    int length, x;
 
-
    if( !word || word[0] == '\0' ) /* make sure we are working with something that isn't null */
-      return buf;
+      return NULL;
 
    length = strlen( word ); /* get the length of the word so we know how far to iterate */
-
+   CREATE( new_word, char, MAX_BUFFER );
    for( x = 0; x < length; x++ )
-      buf[x] = tolower( word[x] ); /* iterate through the word and set the lowercase version of each letter into the buf */
-   buf[x] = '\0'; /* make sure to give our new string a null terminator */
-
-   return buf; /* return it */
+      new_word[x] = tolower( word[x] ); /* iterate through the word and set the lowercase version of each letter into the buf */
+   new_word[x] = '\0'; /* make sure to give our new string a null terminator */
+   AttachToList( new_word, string_free );
+   return new_word; /* return it */
 }
 
 
@@ -243,25 +261,16 @@ char *downcase( const char *word )
  */
 char *capitalize( const char *word )
 {
-   static char buf[MAX_BUFFER];
    char *dWord;
-   int length, x;
-   buf[0] = '\0';
 
    if( !word || word[0] == '\0')
-      return buf;
+      return NULL;
 
    dWord = downcase( word );
-   length = strlen( dWord );
+   dWord[0] = toupper( dWord[0] ); /* Capitalize the first letter */
+   /* no need to terminate, string is already terminated from downcase */
 
-   for( x = 0; x < length; x++ ) /* copy the downcased string into our buffer... there's gotta be a better way */
-      buf[x] = dWord[x];
-
-   buf[0] = toupper( buf[0] ); /* Capitalize the first letter */
-
-   buf[strlen(word)] = '\0';
-
-   return buf;
+   return dWord;
 }
 
 /* downcase_orig and capitalize_orig that modify the string passed
@@ -393,4 +402,16 @@ bool string_contains( char *string, const char *regex_string )
       return FALSE;
    }
    return FALSE;
+}
+
+void clear_strings( void )
+{
+   char *to_clear;
+   ITERATOR Iter;
+
+   AttachIterator( &Iter, string_free );
+   while( ( to_clear = (char *)NextInList( &Iter ) ) != NULL )
+      free(to_clear);
+   DetachIterator(&Iter);
+   return;
 }

@@ -25,6 +25,7 @@ ACCOUNT *load_account( const char *act_name, bool partial )
    DIR *directory;
    struct dirent *entry;
 
+
    snprintf( aFolder, MAX_BUFFER, "../accounts/%s/", capitalize( act_name ) );
    snprintf( aFile, MAX_BUFFER, "%saccount.afile", aFolder );
 

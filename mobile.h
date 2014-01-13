@@ -13,13 +13,18 @@
 
 struct dMobile
 {
-  D_SOCKET      * socket;
-  LIST          * events; /*game data */
-  char          * name; /* account data */
-  char          * password; /* account data */
-  sh_int        level; /* account data */
-   /* New Content */
-   bool loaded; /* utility variable */
+   D_SOCKET      * socket;
+   LIST          * events; /*game data */
+   char          * name; /* account data */
+   char          * password; /* account data */
+   sh_int        level; /* account data */
+
+   /***************
+    * New Content *
+    ***************/
+
+   /* Utility Variables */
+   bool loaded;
    ACCOUNT *account;
 
    /* account data */
@@ -27,7 +32,6 @@ struct dMobile
 
    /* game data */
    LIST *commands;
-
 };
 
 
@@ -35,6 +39,8 @@ struct dMobile
  * Utility Methods *
  *******************/
 void save_mobile( D_MOBILE *mobile );
+void fwrite_account_data( D_MOBILE *dMob);
+void fwrite_game_data( D_MOBILE *dMob );
 void save_player( D_MOBILE *mobile );
 void unload_mobile( D_MOBILE *dMob, bool partial );
 void alloc_mobile_lists( D_MOBILE *dMob );

@@ -213,6 +213,7 @@ extern  LIST        *   dmobile_list;     /* the mobile list of active mobiles  
 extern  LIST        *   help_list;        /* the linked list of help files      */
 extern  STACK       *   account_free;     /* list of free accounts -Davenge     */
 extern  LIST        *   account_list;     /* list of active accounts -Davenge   */
+extern  LIST        *   string_free;      /* the string clear collection -Davenge*/
 extern  const struct    typCmd tabCmd[];  /* the command table                  */
 extern  bool            shut_down;        /* used for shutdown                  */
 extern  char        *   greeting;         /* the welcome greeting               */
@@ -316,6 +317,8 @@ char   *smash_color( const char *str );
 char   *append_spaces( const char *str, int amount );
 void add_spaces( char *str, int amount );
 bool string_contains( char *string, const char *regex_string );
+int mud_printf( char *dest, const char *format, ... );
+void clear_strings( void );
 /*
  * help.c
  */
