@@ -49,7 +49,7 @@ NANNY *create_nanny( D_SOCKET *dsock, int type )
    {
       case NANNY_CREATE_CHARACTER:
          CREATE( nanny->creation, D_MOBILE, 1 );
-         ((D_MOBILE *)nanny->creation)->loaded = FALSE;
+         ((D_MOBILE *)nanny->creation)->loaded = TRUE;
          ((D_MOBILE *)nanny->creation)->level = LEVEL_PLAYER;
          break;
    }
@@ -224,8 +224,7 @@ void nanny_complete_character( D_SOCKET *dsock )
    }
 
    text_to_buffer( dsock, "New Character Successfully Created\r\n\r\n" );
-   load_player( 
-   save_player( new_char, TRUE );
+   save_mobile( new_char );
    unload_mobile( new_char, TRUE );
    char_list_add( dsock->account, new_char );
 

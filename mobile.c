@@ -16,7 +16,9 @@ void save_mobile( D_MOBILE *dMob)
          bug( "%s: %s attempting to save with %d level.", __FUNCTION__, dMob->name, dMob->level );
          return;
       case LEVEL_PLAYER:
-         save_player( dMob, FALSE );
+         fwrite_account_data( dMob );
+         if( dMob->loaded )
+            fwrite_game_data( dMob );
          break;
    }
    return;
@@ -25,78 +27,51 @@ void save_mobile( D_MOBILE *dMob)
 void fwrite_account_data( D_MOBILE *dMob )
 {
    FILE *fp;
+   char pFile[MAX_BUFFER];
 
-   if( !dMob || !dMob->name || dMob->name[0] == '\0' )
-   {
-      bug( "%s: attempting to save a mobile with no name.", __FUNCTION__ );
+   if( !valid_mobile( dMob ) )
       return;
-   }
 
-   if( !dMob->account || !dMob->account->name || dMob->account->name[0] == '\0' )
-   {
-      bug( "%s: %s attempting to save with no account.", __FUNCTION__, dMob->name );
-      return;
-   }
+   mud_printf( pFile, "../accounts/%s/%s.pfile", capitalize( dMob->account->name ), capitalize( dMob->name ) );
 
-}
-
-void fwrite_game_data( D_MOBILE *dMob )
-{
-
-}
-
-void save_player( D_MOBILE *dMob )
-{
-   char pName[MAX_BUFFER];
-   char aName[MAX_BUFFER];
-   char pfile[MAX_BUFFER];
-   FILE *fp;
-
-   if( !dMob|| !dMob->name || dMob->name[0] == '\0' )
-   {
-      bug( "%s: attempting to save a mobile with no name.", __FUNCTION__ );
-      return;
-   }
-
-   if( !dMob->account || !dMob->account->name || dMob->account->name[0] == '\0' )
-   {
-      bug( "%s: %s attempting to save with no account.", __FUNCTION__, dMob->name );
-      return;
-   }
-
-   if( !dMob->loaded )
-   {
-      bug( "%s: trying to save an unfully loaded mobile named %s.", __FUNCTION__, dMob->name );
-      return;
-   }
-
-   strcpy( pName, dMob->name );
-   strcpy( aName, dMob->account->name );
-   capitalize_orig( pName );
-   capitalize_orig( aName );
-
-   snprintf( pfile, MAX_BUFFER, "../accounts/%s/%s.pfile", aName, pName );
    /* open the pfile so we can write to it */
-   if ((fp = fopen(pfile, "w")) == NULL)
+   if ((fp = fopen(pFile, "w")) == NULL)
    {
-      puts( pfile );
       bug( "%s: Unable to write to %s's pfile", __FUNCTION__, dMob->name);
       return;
    }
 
-   /* dump the players data into the file */
-
-   /* this is the data saved for a partial load */
    fprintf(fp, "Name            %s~\n", dMob->name);
    fprintf(fp, "Level           %d\n",  dMob->level);
    fprintf(fp, "Password        %s~\n", dMob->password);
    fprintf(fp, "Race            %d\n",  dMob->race);
 
-   /* this is the data for a full load */
-
    /* terminate the file */
    fprintf(fp, "%s\n", FILE_TERMINATOR);
    fclose(fp);
+   return;
+}
+
+void fwrite_game_data( D_MOBILE *dMob )
+{
+   FILE *fp;
+   char gFile[MAX_BUFFER];
+
+   if( !valid_mobile( dMob ) )
+      return;
+
+   mud_printf( gFile, "../accounts/%s/%s.gfile", capitalize( dMob->account->name ), capitalize( dMob->name ) );
+
+   if( ( fp = fopen( gFile, "w" ) ) == NULL )
+   {
+      bug( "%s: unable to write to %s's gfile", __FUNCTION__, dMob->name );
+      return;
+   }
+
+   fprintf( fp, "Nothing to Write at the Moment... just a test\n" );
+   fprintf( fp, "%s\n", FILE_TERMINATOR );
+   fclose( fp );
+   return;
 }
 
 /* unload a mobile, with options */
@@ -175,40 +150,65 @@ void clear_mobile( D_MOBILE *dMob )
       alloc_mobile_lists( dMob );
 }
 
-void load_player( ACCOUNT *account, char *player, bool partial, D_MOBILE *dMob )
+void load_mobile( ACCOUNT *account, char *player, bool partial, D_MOBILE *dMob )
 {
-  FILE *fp;
-  char pfile[MAX_BUFFER];
-  char pName[MAX_BUFFER];
-  char *word;
-  bool done = FALSE, found;
-  int i, size;
+   char pFile[MAX_BUFFER];
+   char gFile[MAX_BUFFER];
 
-  pName[0] = toupper(player[0]);
-  size = strlen(player);
-  for (i = 1; i < size && i < MAX_BUFFER - 1; i++)
-    pName[i] = tolower(player[i]);
-  pName[i] = '\0';
+   if( account ) /* if its a player */
+   {
+      mud_printf( pFile, "../accounts/%s/%s.pfile", capitalize( account->name ), capitalize( player ) );
+      fread_mobile_account_data( pFile, dMob );
+      if( !partial )
+      {
+         mud_printf( gFile, "../accounts/%s/%s.gfile", capitalize( account->name), capitalize( player ) );
+         fread_mobile_game_data( gFile, dMob );
+      }
+   }
+   else /* if its an npc */
+   {
+      return; /* nothing yet */
+   }
+   return;
+}
 
-  /* open the pfile so we can write to it */
-  snprintf(pfile, MAX_BUFFER, "../accounts/%s/%s", account->name, pName);
-  if ((fp = fopen(pfile, "r")) == NULL)
-    return;
+void fread_mobile_game_data( const char *gFile, D_MOBILE *dMob )
+{
+   FILE *fp;
 
-  /* create new mobile data */
-  if( !dMob )
-  {
+   if( ( fp = fopen( gFile, "r" ) ) == NULL )
+      return;
+
+   if( !dMob )
+   {
+      if( StackSize( dmobile_free ) <= 0 )
+         CREATE( dMob, D_MOBILE, 1 );
+      else
+         dMob = (D_MOBILE *)PopStack( dmobile_free );
+   }
+   alloc_mobile_lists( dMob );
+
+   /* no game data to load yet :( */
+
+   return;
+}
+
+void fread_mobile_account_data( const char *pFile, D_MOBILE *dMob )
+{
+   FILE *fp;
+   char *word;
+   bool found, done = FALSE;
+
+   if( ( fp = fopen( pFile, "r" ) ) == NULL )
+      return;
+
+   if( !dMob )
+   {
      if( StackSize( dmobile_free ) <= 0 )
         CREATE( dMob, D_MOBILE, 1 );
      else
        dMob = (D_MOBILE *)PopStack( dmobile_free );
-
-     if( partial )
-        dMob->loaded = FALSE;
-
-     clear_mobile(dMob);
-  }
-
+   }
   /* load data */
   word = fread_word(fp);
   while (!done)
@@ -229,22 +229,12 @@ void load_player( ACCOUNT *account, char *player, bool partial, D_MOBILE *dMob )
         SREAD( "Password",  dMob->password  );
         break;
       case 'R':
-        if( !strcmp( word, "Race" ) )
-        {
-           found = TRUE;
-           dMob->race = fread_number( fp );
-           if( partial )
-           {
-              done = TRUE;
-              dMob->loaded = FALSE;
-           }
-           break;
-        }
+        IREAD( "Race", dMob->race );
         break;
     }
     if (!found)
     {
-      bug("Load_player: unexpected '%s' in %s's pfile.", word, player);
+      bug("Load_player: unexpected '%s' in %s.", word, pFile);
       unload_mobile( dMob, FALSE );
       dMob = NULL;
       return;

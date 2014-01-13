@@ -46,7 +46,7 @@ bool event_mobile_save(EVENT_DATA *event)
   }
 
   /* save the actual player file */
-  save_player(dMob);
+  save_mobile(dMob);
 
   /* enqueue a new event to save the pfile in 2 minutes */
   event = alloc_event();

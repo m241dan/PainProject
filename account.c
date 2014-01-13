@@ -19,15 +19,14 @@ ACCOUNT *load_account( const char *act_name, bool partial )
    ACCOUNT *account = NULL;
    D_MOBILE *dMob = NULL;
    char *word;
-   char aFolder[MAX_BUFFER];
    char aFile[MAX_BUFFER];
+   char aFolder[MAX_BUFFER];
    bool done = FALSE, found;
    DIR *directory;
    struct dirent *entry;
 
-
-   snprintf( aFolder, MAX_BUFFER, "../accounts/%s/", capitalize( act_name ) );
-   snprintf( aFile, MAX_BUFFER, "%saccount.afile", aFolder );
+   mud_printf( aFolder, "../accounts/%s/", capitalize( act_name ) );
+   mud_printf( aFile, "%saccount.afile", aFolder, capitalize( act_name ) );
 
    if( ( fp = fopen( aFile, "r" ) ) == NULL )
       return NULL;
@@ -94,7 +93,7 @@ ACCOUNT *load_account( const char *act_name, bool partial )
       for( entry = readdir( directory ); entry; entry = readdir( directory ) )
          if( string_contains( entry->d_name, ".pfile" ) )
          {
-            load_player( account, entry->d_name, TRUE, dMob );
+            load_mobile( account, entry->d_name, TRUE, dMob );
             if( !dMob )
             {
                bug( "%s: can't load %s.", __FUNCTION__, entry->d_name );
@@ -112,7 +111,7 @@ void fwrite_account( ACCOUNT *account )
    char aDir[MAX_BUFFER], aFile[MAX_BUFFER];
 
    /* create the "file directory" for the account, so we can check if it exists */
-   snprintf( aDir, MAX_BUFFER, "../accounts/%s", capitalize( account->name ) );
+   mud_printf( aDir, "../accounts/%s", capitalize( account->name ) );
 
    if( opendir( aDir ) == NULL )
    {
@@ -124,7 +123,7 @@ void fwrite_account( ACCOUNT *account )
    }
 
    /* create the "file name" for the account */
-   snprintf( aFile, MAX_BUFFER, "%s/account.afile", aDir );
+   mud_printf( aFile, "%s/account.afile", aDir );
 
    /* open the pointer to the file, if we can't, spit out a bug msg and return */
    if( ( fp = fopen( aFile, "w" ) ) == NULL )

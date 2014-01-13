@@ -29,7 +29,7 @@ void cmd_quit(void *passed, char *arg)
   snprintf(buf, MAX_BUFFER, "%s has left the game.", dMob->name);
   log_string(buf);
 
-  save_player(dMob);
+  save_mobile(dMob);
 
   dMob->socket->player = NULL;
   unload_mobile( dMob, FALSE );
@@ -146,7 +146,7 @@ void cmd_compress( void *passed, char *arg)
 void cmd_save( void *passed, char *arg)
 {
    D_MOBILE *dMob = (D_MOBILE *)passed;
-  save_player(dMob);
+  save_mobile(dMob);
   text_to_mobile(dMob, "Saved.\n\r");
 }
 
@@ -183,7 +183,7 @@ void cmd_copyover(void *passed, char *arg)
         dsock->control, dsock->player->name, dsock->hostname);
 
       /* save the player */
-      save_player(dsock->player);
+      save_mobile(dsock->player);
 
       text_to_socket(dsock, buf);
     }

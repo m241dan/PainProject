@@ -337,6 +337,8 @@ D_M  *check_reconnect         ( char *player );
 COMMAND *copy_command( const struct typCmd to_copy );
 void free_command( COMMAND *command );
 int count_color( const char * str );
+bool valid_mobile( D_MOBILE *dMob );
+
 /*
  * action_safe.c
  */
