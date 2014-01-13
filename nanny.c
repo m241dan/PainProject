@@ -224,9 +224,9 @@ void nanny_complete_character( D_SOCKET *dsock )
    }
 
    text_to_buffer( dsock, "New Character Successfully Created\r\n\r\n" );
+   char_list_add( dsock->account, new_char );
    save_mobile( new_char );
    unload_mobile( new_char, TRUE );
-   char_list_add( dsock->account, new_char );
 
    free_nanny( dsock->nanny );
    change_socket_state( dsock,  STATE_ACCOUNT );

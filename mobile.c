@@ -107,8 +107,10 @@ void alloc_mobile_lists( D_MOBILE *dMob ) /* alloc the dMobiles lists */
 
 void free_mobile_lists( D_MOBILE *dMob ) /* deallocate the dMobiles list memory */
 {
-   FreeList( dMob->commands );
-   FreeList( dMob->events );
+   if( dMob->commands )
+      FreeList( dMob->commands );
+   if( dMob->events )
+      FreeList( dMob->events );
    return;
 }
 
@@ -157,7 +159,7 @@ void load_mobile( ACCOUNT *account, char *player, bool partial, D_MOBILE *dMob )
 
    if( account ) /* if its a player */
    {
-      mud_printf( pFile, "../accounts/%s/%s.pfile", capitalize( account->name ), capitalize( player ) );
+      mud_printf( pFile, "../accounts/%s/%s", capitalize( account->name ), capitalize( player ) );
       fread_mobile_account_data( pFile, dMob );
       if( !partial )
       {
@@ -274,7 +276,10 @@ void clear_mobile_command_list( D_MOBILE *dMob )
 
    AttachIterator(&Iter, dMob->commands );
    while( ( com = (COMMAND *)NextInList(&Iter) ) != NULL )
+   {
+      DetachFromList( com, dMob->commands );
       free_command( com );
+   }
    DetachIterator(&Iter);
    return;
 }

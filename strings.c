@@ -246,9 +246,9 @@ char *downcase( const char *word )
       return NULL;
 
    length = strlen( word ); /* get the length of the word so we know how far to iterate */
-   CREATE( new_word, char, MAX_BUFFER );
+   new_word = strdup( word );
    for( x = 0; x < length; x++ )
-      new_word[x] = tolower( word[x] ); /* iterate through the word and set the lowercase version of each letter into the buf */
+      new_word[x] = tolower( new_word[x] ); /* iterate through the word and set the lowercase version of each letter into the buf */
    new_word[x] = '\0'; /* make sure to give our new string a null terminator */
    AttachToList( new_word, string_free );
    return new_word; /* return it */
@@ -409,9 +409,15 @@ void clear_strings( void )
    char *to_clear;
    ITERATOR Iter;
 
+   if( SizeOfList( string_free ) <= 0 )
+      return;
+
    AttachIterator( &Iter, string_free );
    while( ( to_clear = (char *)NextInList( &Iter ) ) != NULL )
+   {
+      DetachFromList( to_clear, string_free );
       free(to_clear);
+   }
    DetachIterator(&Iter);
    return;
 }

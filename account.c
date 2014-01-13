@@ -17,7 +17,7 @@ ACCOUNT *load_account( const char *act_name, bool partial )
 {
    FILE *fp;
    ACCOUNT *account = NULL;
-   D_MOBILE *dMob = NULL;
+   D_MOBILE *dMob;
    char *word;
    char aFile[MAX_BUFFER];
    char aFolder[MAX_BUFFER];
@@ -26,7 +26,7 @@ ACCOUNT *load_account( const char *act_name, bool partial )
    struct dirent *entry;
 
    mud_printf( aFolder, "../accounts/%s/", capitalize( act_name ) );
-   mud_printf( aFile, "%saccount.afile", aFolder, capitalize( act_name ) );
+   mud_printf( aFile, "%saccount.afile", aFolder );
 
    if( ( fp = fopen( aFile, "r" ) ) == NULL )
       return NULL;
@@ -93,6 +93,11 @@ ACCOUNT *load_account( const char *act_name, bool partial )
       for( entry = readdir( directory ); entry; entry = readdir( directory ) )
          if( string_contains( entry->d_name, ".pfile" ) )
          {
+            if( StackSize( dmobile_free ) <= 0 )
+               CREATE( dMob, D_MOBILE, 1 );
+            else
+               dMob = (D_MOBILE *)PopStack( dmobile_free );
+
             load_mobile( account, entry->d_name, TRUE, dMob );
             if( !dMob )
             {
@@ -229,8 +234,7 @@ void load_account_commands( ACCOUNT *account )
    COMMAND *com;
    int x;
 
-   if( SizeOfList( account->commands ) <= 0 )
-      clear_account_command_list( account );
+   clear_account_command_list( account );
 
    for( x = 0; tabCmd[x].cmd_name[0] != '\0'; x++ ) /* load the new commands that fit our criteria */
       if( tabCmd[x].state == STATE_ACCOUNT && tabCmd[x].level <= account->level )
@@ -251,7 +255,10 @@ void clear_account_command_list( ACCOUNT *account )
 
    AttachIterator(&Iter, account->commands );
    while( ( com = (COMMAND *)NextInList(&Iter) ) != NULL )
+   {
+      DetachFromList( com, account->commands );
       free_command( com );
+   }
    DetachIterator(&Iter);
    return;
 }
@@ -266,7 +273,10 @@ void clear_character_list( ACCOUNT *account )
 
    AttachIterator( &Iter, account->characters );
    while( ( character = ( D_MOBILE *)NextInList( &Iter ) ) != NULL )
+   {
+      char_list_remove( account, character );
       unload_mobile( character, FALSE );
+   }
    DetachIterator( &Iter );
    return;
 }
