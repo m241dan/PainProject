@@ -144,6 +144,8 @@ typedef struct coordinate COORD;
 typedef struct framework FRAME;
 typedef struct room_framework ROOM_FRAME;
 typedef struct entity ENTITY;
+typedef struct frame_id FRAME_ID;
+typedef struct frame_id_handler ID_HANDLER;
 
 /* the actual structures */
 struct dSocket
