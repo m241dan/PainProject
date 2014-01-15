@@ -34,6 +34,10 @@ struct dMobile
    ENTITY *ent_wrapper;
    LIST *commands;
    COORD *at_coord;
+
+   /* olc stuff */
+   LIST *workspace;
+
 };
 
 

@@ -12,6 +12,7 @@ const char *const exit_directions[MAX_DIRECTION+1];
 
 /* Methods */
 /* General */
+int match_string_table( const char *string, const char *const string_table[] );
 const char *get_table( const char *const string_table[] );
 int str_table_max_strlen( const char *const table[] );
 void fit_space_with_color( char *dest, const char *orig, int space );

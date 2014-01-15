@@ -16,6 +16,7 @@ struct framework
 
 struct room_framework
 {
+   int frame_id;
    char *title;
    char *description;
 };

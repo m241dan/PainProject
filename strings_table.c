@@ -17,7 +17,7 @@
  **********/
 
 const char *const entity_types[MAX_ENTITY+1] = {
-   "mobile_entity", "room_entity", ""
+   "mob", "room", ""
 };
 
 const char *const framework_types[MAX_FRAME+1] = {
@@ -59,6 +59,16 @@ const char *const exit_directions[MAX_DIRECTION+1] = {
 /*******************
  * General Methods *
  *******************/
+
+int match_string_table( const char *string, const char *const string_table[] )
+{
+   int x;
+   for( x = 0; string_table[x] != '\0'; x++ )
+      if( !strcmp( string, string_table[x] ) )
+         return x;
+
+   return -1;
+}
 
 const char *get_table( const char *const string_table[] )
 {

@@ -493,5 +493,29 @@ void cmd_down( void *passed, char *arg )
 
 void cmd_create_framework( void *passed, char *arg )
 {
+   D_MOBILE *dMob = (D_MOBILE *)passed;
+   FRAME *framework;
+   char arg2[MAX_BUFFER];
+   int type;
 
+   arg = one_arg( arg, arg2 );
+
+   if( check_work( dMob ) )
+      return;
+
+   if( ( type = match_string_table( arg2, entity_types ) ) == -1 )
+   {
+      text_to_mobile( dMob, "Invalid framework type.\r\n" );
+      return;
+   }
+
+   if( ( framework = create_framework( type ) ) == NULL )
+   {
+      bug( "%s: something has really fucked up here.", __FUNCTION__ );
+      return;
+   }
+
+   AttachToList( framework, dMob->workspace );
+   text_to_mobile( "A new room framework has been added to your workspace.\r\n" );
+   return;
 }

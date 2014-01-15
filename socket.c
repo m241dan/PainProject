@@ -66,6 +66,7 @@ int main(int argc, char **argv)
    account_free = AllocStack();
    account_list = AllocList();
    string_free = AllocList();
+   world_entities = AllocList();
 
    for( x = 0; x < MAX_COORD_HASH; x++ )
       coord_map[x] = AllocList();

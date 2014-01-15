@@ -21,5 +21,6 @@ void wrap_entity( void *passed, int type )
          ((D_MOBILE *)passed)->ent_wrapper = ent;
          break;
    }
+   AttachToList( ent, world_entities );
    return;
 }
