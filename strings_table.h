@@ -6,6 +6,7 @@
 extern const char *const nanny_strings[MAX_NANNY_TYPE][MAX_NANNY_STATES];
 extern const char *const race_table[];
 extern const char *const race_desc_table[];
+const char *const exit_directions[MAX_DIRECTION+1];
 
 /* Methods */
 /* General */

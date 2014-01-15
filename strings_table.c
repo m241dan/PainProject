@@ -42,6 +42,12 @@ const char *const race_desc_table[] = {
    "",
 };
 
+/* Directions */
+
+const char *const exit_directions[MAX_DIRECTION+1] = {
+   "North", "East", "South", "West", "Up", "Down", "" /* ALWAYS TERMINATE */
+};
+
 /*******************
  * General Methods *
  *******************/

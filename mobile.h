@@ -57,3 +57,6 @@ void load_mobile_commands args( ( D_MOBILE *dMob ) );
 void clear_mobile_command_list args( ( D_MOBILE *dMob ) );
 void clear_mobile_event_list( D_MOBILE *dMob );
 void char_to_game( D_SOCKET *dsock, D_MOBILE *dMob );
+void mob_from_coord( D_MOBILE *dMob );
+void mob_to_coord( D_MOBILE *dMob, COORD *coordinate );
+void move_char( D_MOBILE *dMob, int dir );

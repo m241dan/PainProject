@@ -195,12 +195,12 @@ typedef struct buffer_type
 
 
 /* here we include external structure headers */
+#include "coord.h"
 #include "event.h"
 #include "nanny.h"
 #include "account.h"
 #include "strings_table.h"
 #include "mobile.h"
-#include "coord.h"
 
 /******************************
  * End of new structures      *

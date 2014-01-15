@@ -309,3 +309,25 @@ void char_to_game( D_SOCKET *dsock, D_MOBILE *dMob )
    dsock->bust_prompt = TRUE;
    text_to_buffer( dsock, "You enter the Mud.\r\n" );
 }
+
+void mob_from_coord( D_MOBILE *dMob )
+{
+   DetachFromList( dMob, dMob->at_coord->entities );
+   return;
+}
+void mob_to_coord( D_MOBILE *dMob, COORD *coordinate)
+{
+   if( !coordinate )
+   {
+      bug( "%s: attempting to move %s to a NULL coordinate", __FUNCTION__, dMob->name );
+      return;
+   }
+   dMob->at_coord = coordinate;
+   AttachToList( dMob, coordinate->entities );
+   return;
+}
+
+void move_char( D_MOBILE *dMob, int dir )
+{
+   
+}
