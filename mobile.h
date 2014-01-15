@@ -31,6 +31,7 @@ struct dMobile
    sh_int  race;
 
    /* game data */
+   ENTITY *ent_wrapper;
    LIST *commands;
    COORD *at_coord;
 };

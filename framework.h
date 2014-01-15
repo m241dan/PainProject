@@ -10,7 +10,7 @@ typedef enum {
 
 struct framework
 {
-   void *frame;
+   void *content;
    int type;
 };
 

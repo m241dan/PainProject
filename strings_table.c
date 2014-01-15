@@ -16,6 +16,10 @@
  * TABLES *
  **********/
 
+const char *const entity_types[MAX_ENTITY+1] = {
+   "mobile_entity", "room_entity", ""
+};
+
 const char *const framework_types[MAX_FRAME+1] = {
    "room_framework", ""
 };

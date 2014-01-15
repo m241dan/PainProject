@@ -313,6 +313,7 @@ void char_to_game( D_SOCKET *dsock, D_MOBILE *dMob )
    dMob->socket = dsock;
    dMob->loaded = TRUE;
    load_mobile( dMob->account, dMob->name, FALSE, dMob );
+   wrap_entity( dMob, MOBILE_ENTITY );
    change_socket_state( dsock, STATE_PLAYING );
    dsock->bust_prompt = TRUE;
    text_to_buffer( dsock, "You enter the Mud.\r\n" );
@@ -327,7 +328,7 @@ void char_to_game( D_SOCKET *dsock, D_MOBILE *dMob )
 
 void mob_from_coord( D_MOBILE *dMob )
 {
-   DetachFromList( dMob, dMob->at_coord->entities );
+   DetachFromList( dMob->ent_wrapper, dMob->at_coord->entities );
    return;
 }
 
@@ -339,7 +340,7 @@ void mob_to_coord( D_MOBILE *dMob, COORD *coordinate)
       return;
    }
    dMob->at_coord = coordinate;
-   AttachToList( dMob, coordinate->entities );
+   AttachToList( dMob->ent_wrapper, coordinate->entities );
    return;
 }
 
@@ -425,6 +426,7 @@ void cmd_look( void *passed, char *arg )
 {
    BUFFER *buf = buffer_new( MAX_BUFFER );
    D_MOBILE *dMob = (D_MOBILE *)passed;
+   ENTITY *ent;
    D_MOBILE *r_dMob;
    ITERATOR Iter;
    int x;
@@ -437,11 +439,17 @@ void cmd_look( void *passed, char *arg )
       if( dMob->at_coord->exits[x] )
          bprintf( buf, "%-10.10s-\r\n", exit_directions[x] );
    AttachIterator( &Iter, dMob->at_coord->entities );
-   while( ( r_dMob = (D_MOBILE *)NextInList( &Iter ) ) != NULL )
+   while( ( ent = (ENTITY *)NextInList( &Iter ) ) != NULL )
    {
-      if( r_dMob == dMob )
-         continue;
-      bprintf( buf, "%s the playah.\r\n", r_dMob->name );
+      switch( ent->type )
+      {
+         case MOBILE_ENTITY:
+            r_dMob = (D_MOBILE *)ent->content;
+            if( r_dMob == dMob )
+               continue;
+            bprintf( buf, "%s the playah.\r\n", r_dMob->name );
+            break;
+      }
    }
    DetachIterator( &Iter );
    text_to_mobile( dMob, buf->data );

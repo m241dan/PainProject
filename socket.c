@@ -31,6 +31,7 @@ STACK    * account_free = NULL;   /* the account free list -Davenge    */
 LIST     * account_list = NULL;   /* the account list of active accounts -Davenge */
 LIST     * string_free = NULL;    /* so I can use downcase the way I want -Davenge */
 LIST     * coord_map[MAX_COORD_HASH]; /* hash of the coord maps based on the absolute value of X -Davenge */
+LIST     * world_entities = NULL; /* a massive list of all entities in the world */
 
 
 /* mccp support */

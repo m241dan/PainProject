@@ -143,6 +143,7 @@ typedef struct the_nanny NANNY;
 typedef struct coordinate COORD;
 typedef struct framework FRAME;
 typedef struct room_framework ROOM_FRAME;
+typedef struct entity ENTITY;
 
 /* the actual structures */
 struct dSocket
@@ -203,6 +204,7 @@ typedef struct buffer_type
 #include "event.h"
 #include "nanny.h"
 #include "account.h"
+#include "entities.h"
 #include "strings_table.h"
 #include "mobile.h"
 
