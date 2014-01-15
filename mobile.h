@@ -32,6 +32,7 @@ struct dMobile
 
    /* game data */
    LIST *commands;
+   COORD *at_coord;
 };
 
 

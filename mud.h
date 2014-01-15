@@ -42,6 +42,8 @@
 #define COPYOVER_FILE      "../txt/copyover.dat"  /* tempfile to store copyover data    */
 #define EXE_FILE           "../src/SocketMud"     /* the name of the mud binary         */
 
+#define MAX_COORD_HASH     1000
+
 /* Connection states */
 typedef enum {
    /* Account Creation States */
@@ -138,6 +140,7 @@ typedef struct  event_data    EVENT_DATA;
 typedef struct game_account ACCOUNT;
 typedef struct typCmd COMMAND;
 typedef struct the_nanny NANNY;
+typedef struct coordinate COORD;
 
 /* the actual structures */
 struct dSocket
@@ -197,6 +200,7 @@ typedef struct buffer_type
 #include "account.h"
 #include "strings_table.h"
 #include "mobile.h"
+#include "coord.h"
 
 /******************************
  * End of new structures      *

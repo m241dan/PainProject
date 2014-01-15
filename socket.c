@@ -30,6 +30,8 @@ LIST     * dmobile_list = NULL;   /* the mobile list of active mobiles */
 STACK    * account_free = NULL;   /* the account free list -Davenge    */
 LIST     * account_list = NULL;   /* the account list of active accounts -Davenge */
 LIST     * string_free = NULL;    /* so I can use downcase the way I want -Davenge */
+LIST     * coord_map[MAX_COORD_HASH]; /* hash of the coord maps based on the absolute value of X -Davenge */
+
 
 /* mccp support */
 const unsigned char compress_will   [] = { IAC, WILL, TELOPT_COMPRESS,  '\0' };
@@ -49,6 +51,7 @@ int  control;
  */
 int main(int argc, char **argv)
 {
+   int x;
   bool fCopyOver;
 
   /* get the current time */
@@ -61,7 +64,10 @@ int main(int argc, char **argv)
    dmobile_list = AllocList();
    account_free = AllocStack();
    account_list = AllocList();
-   string_free = AllocList(); 
+   string_free = AllocList();
+
+   for( x = 0; x < MAX_COORD_HASH; x++ )
+      coord_map[x] = AllocList();
 
   /* note that we are booting up */
   log_string("Program starting.");
