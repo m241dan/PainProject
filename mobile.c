@@ -486,3 +486,12 @@ void cmd_down( void *passed, char *arg )
    move_char( (D_MOBILE *)passed, DIR_DOWN );
 }
 
+
+/****************
+ * OLC Commands *
+ ****************/
+
+void cmd_create_framework( void *passed, char *arg )
+{
+
+}
