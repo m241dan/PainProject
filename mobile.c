@@ -185,6 +185,8 @@ void fread_mobile_game_data( const char *gFile, D_MOBILE *dMob )
 {
    FILE *fp;
 
+   alloc_mobile_lists( dMob );
+
    if( ( fp = fopen( gFile, "r" ) ) == NULL )
       return;
 
@@ -195,7 +197,6 @@ void fread_mobile_game_data( const char *gFile, D_MOBILE *dMob )
       else
          dMob = (D_MOBILE *)PopStack( dmobile_free );
    }
-   alloc_mobile_lists( dMob );
 
    /* no game data to load yet :( */
 
