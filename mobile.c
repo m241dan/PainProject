@@ -20,6 +20,8 @@ void save_mobile( D_MOBILE *dMob)
          text_to_mobile( dMob, "Unknown mobile level, cannot save." );
          bug( "%s: %s attempting to save with %d level.", __FUNCTION__, dMob->name, dMob->level );
          return;
+      case LEVEL_GOD:
+      case LEVEL_ADMIN:
       case LEVEL_PLAYER:
          fwrite_account_data( dMob );
          if( dMob->loaded )
