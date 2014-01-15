@@ -200,6 +200,7 @@ typedef struct buffer_type
 /* here we include external structure headers */
 #include "coord.h"
 #include "framework.h"
+#include "olc.h"
 #include "room.h"
 #include "event.h"
 #include "nanny.h"
