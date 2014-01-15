@@ -3,6 +3,7 @@
  * Written by Davenge */
 
 /* Definitions */
+extern const char *const framework_types[MAX_FRAME+1];
 extern const char *const nanny_strings[MAX_NANNY_TYPE][MAX_NANNY_STATES];
 extern const char *const race_table[];
 extern const char *const race_desc_table[];

@@ -3,3 +3,19 @@
    Written by Davenge */
 
 
+typedef enum {
+   FRAME_ROOM, MAX_FRAME
+} framework_type_enum;
+
+
+struct framework
+{
+   void *frame;
+   int type;
+};
+
+struct room_framework
+{
+   char *title;
+   char *description;
+};

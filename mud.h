@@ -141,6 +141,8 @@ typedef struct game_account ACCOUNT;
 typedef struct typCmd COMMAND;
 typedef struct the_nanny NANNY;
 typedef struct coordinate COORD;
+typedef struct framework FRAME;
+typedef struct room_framework ROOM_FRAME;
 
 /* the actual structures */
 struct dSocket
@@ -196,6 +198,8 @@ typedef struct buffer_type
 
 /* here we include external structure headers */
 #include "coord.h"
+#include "framework.h"
+#include "room.h"
 #include "event.h"
 #include "nanny.h"
 #include "account.h"
