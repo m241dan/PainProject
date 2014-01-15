@@ -60,3 +60,15 @@ void char_to_game( D_SOCKET *dsock, D_MOBILE *dMob );
 void mob_from_coord( D_MOBILE *dMob );
 void mob_to_coord( D_MOBILE *dMob, COORD *coordinate );
 void move_char( D_MOBILE *dMob, int dir );
+
+/**************************
+ * Mobile Command Methods *
+ **************************/
+
+void cmd_look( void *passed, char *arg );
+void cmd_north( void *passed, char *arg );
+void cmd_east( void *passed, char *arg );
+void cmd_south( void *passed, char *arg );
+void cmd_west( void *passed, char *arg );
+void cmd_up( void *passed, char *arg );
+void cmd_down( void *passed, char *arg );

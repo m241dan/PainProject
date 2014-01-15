@@ -1,9 +1,14 @@
+
 /* File mobile.c
    All methods pertaining to the mobile go here
    Written by Davenge */
 
 #include <ctype.h>
 #include "mud.h"
+
+/*******************
+ * Utility Methods *
+ *******************/
 
 /* Method to save any mobile to its proper place */
 
@@ -308,6 +313,13 @@ void char_to_game( D_SOCKET *dsock, D_MOBILE *dMob )
    change_socket_state( dsock, STATE_PLAYING );
    dsock->bust_prompt = TRUE;
    text_to_buffer( dsock, "You enter the Mud.\r\n" );
+
+   /* a temporary hack */
+   if( !check_coord( 0, 0, 0 ) )
+      create_coord( 0, 0, 0 );
+
+   mob_to_coord( dMob, get_coord( 0, 0, 0 ) );
+   return;
 }
 
 void mob_from_coord( D_MOBILE *dMob )
@@ -315,6 +327,7 @@ void mob_from_coord( D_MOBILE *dMob )
    DetachFromList( dMob, dMob->at_coord->entities );
    return;
 }
+
 void mob_to_coord( D_MOBILE *dMob, COORD *coordinate)
 {
    if( !coordinate )
@@ -329,5 +342,136 @@ void mob_to_coord( D_MOBILE *dMob, COORD *coordinate)
 
 void move_char( D_MOBILE *dMob, int dir )
 {
-   
+   BUFFER *buf = buffer_new( MAX_BUFFER );
+   COORD *prev_coord = dMob->at_coord;
+   ITERATOR Iter;
+   D_MOBILE *r_dMob;
+   int x = prev_coord->pos_x, y = prev_coord->pos_y, z = prev_coord->pos_z;
+
+   /* Set X, Y, Z to the destinations variables */
+
+   switch( dir )
+   {
+      case DIR_NORTH:
+         y++;
+         break;
+      case DIR_EAST:
+         x++;
+         break;
+      case DIR_SOUTH:
+         y--;
+         break;
+      case DIR_WEST:
+         x--;
+         break;
+      case DIR_UP:
+         z++;
+         break;
+      case DIR_DOWN:
+         z--;
+         break;
+   }
+
+
+   if( !dMob->at_coord->exits[dir] )
+   {
+      if( !IS_ADMIN( dMob ) )
+      {
+         text_to_mobile( dMob, "You cannot move that way.\r\n" );
+         return;
+      }
+      bprintf( buf, "You wave your hand and create a new coordinate to the %s.\r\n", exit_directions[dir] );
+      text_to_mobile( dMob, buf->data );
+      buffer_clear( buf );
+      bprintf( buf, "%s waves their hand and create a coordinate to the %s.\r\n", dMob->name, exit_directions[dir] );
+      AttachIterator( &Iter, prev_coord->entities );
+      while( ( r_dMob = (D_MOBILE *)NextInList( &Iter ) ) != NULL )
+      {
+         if( r_dMob == dMob )
+            continue;
+         text_to_mobile( r_dMob, buf->data );
+      }
+      DetachIterator( &Iter );
+      buffer_clear( buf );
+      create_coord( x, y, z );
+   }
+   mob_from_coord( dMob );
+   mob_to_coord( dMob, dMob->at_coord->exits[dir] );
+   bprintf( buf, "You move %s.\r\n", exit_directions[dir] );
+   text_to_mobile( dMob, buf->data );
+   buffer_clear( buf );
+   bprintf( buf, "%s moves %s.\r\n", dMob->name, exit_directions[dir] );
+   cmd_look( dMob, "" );
+   AttachIterator( &Iter, prev_coord->entities );
+   while( ( r_dMob = (D_MOBILE *)NextInList( &Iter ) ) != NULL )
+   {
+      if( r_dMob == dMob )
+         continue;
+      text_to_mobile( r_dMob, buf->data );
+   }
+   DetachIterator( &Iter );
+   buffer_free( buf );
+   return;
 }
+
+/**************************
+ * Mobile Command Methods *
+ **************************/
+
+void cmd_look( void *passed, char *arg )
+{
+   BUFFER *buf = buffer_new( MAX_BUFFER );
+   D_MOBILE *dMob = (D_MOBILE *)passed;
+   D_MOBILE *r_dMob;
+   ITERATOR Iter;
+   int x;
+
+   bprintf( buf, "You are at coordinate (X): %d (Y): %d (Z): %d\r\n", dMob->at_coord->pos_x, dMob->at_coord->pos_y, dMob->at_coord->pos_z );
+
+   bprintf( buf, "----------\r\nExits    |\r\n----------\r\n" );
+
+   for( x = 0; x < MAX_DIRECTION; x++ )
+      if( dMob->at_coord->exits[x] )
+         bprintf( buf, "%-10.10s-\r\n", exit_directions[x] );
+   AttachIterator( &Iter, dMob->at_coord->entities );
+   while( ( r_dMob = (D_MOBILE *)NextInList( &Iter ) ) != NULL )
+   {
+      if( r_dMob == dMob )
+         continue;
+      bprintf( buf, "%s the playah.\r\n", r_dMob->name );
+   }
+   DetachIterator( &Iter );
+   text_to_mobile( dMob, buf->data );
+   buffer_free( buf );
+}
+
+void cmd_north( void *passed, char *arg )
+{
+   move_char( (D_MOBILE *)passed, DIR_NORTH );
+}
+
+void cmd_east( void *passed, char *arg )
+{
+   move_char( (D_MOBILE *)passed, DIR_EAST );
+}
+
+void cmd_south( void *passed, char *arg )
+{
+   move_char( (D_MOBILE *)passed, DIR_SOUTH );
+}
+
+void cmd_west( void *passed, char *arg )
+{
+   move_char( (D_MOBILE *)passed, DIR_WEST );
+}
+
+void cmd_up( void *passed, char *arg )
+{
+   move_char( (D_MOBILE *)passed, DIR_UP );
+}
+
+void cmd_down( void *passed, char *arg )
+{
+   move_char( (D_MOBILE *)passed, DIR_DOWN );
+}
+

@@ -15,7 +15,7 @@ COORD *create_coord( int x, int y, int z )
 
    if( check_coord( x, y, z ) )
    {
-      bug( "%s: attempting to create a coord that already exists, x: %d y: %d z: %d", x, y, z );
+      bug( "%s: attempting to create a coord that already exists, x: %d y: %d z: %d", __FUNCTION__, x, y, z );
       return NULL;
    }
 
@@ -65,9 +65,7 @@ bool check_coord( int x, int y, int z )
 {
    COORD *coordinate;
    ITERATOR Iter;
-   int hash;
-
-   hash = get_coord_hash( x );
+   int hash = get_coord_hash( x );
 
    AttachIterator( &Iter, coord_map[hash] );
    while( ( coordinate = (COORD *)NextInList( &Iter ) ) != NULL )

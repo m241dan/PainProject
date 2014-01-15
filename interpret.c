@@ -53,6 +53,13 @@ const struct typCmd tabCmd [] =
   { "shutdown",      cmd_shutdown,   LEVEL_GOD,   STATE_PLAYING },
   { "quit",          cmd_quit,       LEVEL_PLAYER, STATE_PLAYING },
   { "who",           cmd_who,        LEVEL_PLAYER, STATE_PLAYING },
+  { "look",          cmd_look,       LEVEL_PLAYER, STATE_PLAYING },
+  { "north",         cmd_north,      LEVEL_NPC, STATE_PLAYING },
+  { "east",          cmd_east,       LEVEL_NPC, STATE_PLAYING },
+  { "south",         cmd_south,      LEVEL_NPC, STATE_PLAYING },
+  { "west",          cmd_west,       LEVEL_NPC, STATE_PLAYING },
+  { "up",            cmd_up,         LEVEL_NPC, STATE_PLAYING },
+  { "down",          cmd_down,       LEVEL_NPC, STATE_PLAYING },
   /* account commands */
   { "quit",          act_quit,       LEVEL_BASIC, STATE_ACCOUNT },
   { "create",        act_create_char,LEVEL_BASIC, STATE_ACCOUNT },
@@ -89,7 +96,7 @@ void new_handle_cmd_input(D_SOCKET *dsock, char *arg)
    AttachIterator( &Iter, cmd_table );
    while( ( com = (COMMAND *)NextInList(&Iter) ) != NULL )
    {
-      if( is_prefix( com->cmd_name, command ) )
+      if( is_prefix( command, com->cmd_name ) )
       {
          (*com->cmd_funct)( entity, arg );
          found_cmd = TRUE;
