@@ -86,7 +86,7 @@ int get_coord_hash( int x )
 
 bool same_coord( COORD *coordinate, int x, int y, int z )
 {
-   return ( coordinate->pos_x == x && coordinate->pos_y == x && coordinate->pos_z == z );
+   return ( coordinate->pos_x == x && coordinate->pos_y == y && coordinate->pos_z == z );
 }
 
 int get_directional_opposite( int dir )
