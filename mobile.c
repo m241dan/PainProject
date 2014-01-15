@@ -1,4 +1,3 @@
-
 /* File mobile.c
    All methods pertaining to the mobile go here
    Written by Davenge */
@@ -197,6 +196,7 @@ void fread_mobile_game_data( const char *gFile, D_MOBILE *dMob )
       else
          dMob = (D_MOBILE *)PopStack( dmobile_free );
    }
+
 
    /* no game data to load yet :( */
 
