@@ -32,7 +32,7 @@ LIST     * account_list = NULL;   /* the account list of active accounts -Daveng
 LIST     * string_free = NULL;    /* so I can use downcase the way I want -Davenge */
 LIST     * coord_map[MAX_COORD_HASH]; /* hash of the coord maps based on the absolute value of X -Davenge */
 LIST     * world_entities = NULL; /* a massive list of all entities in the world */
-ID_HANDLER *global_id = NULL;
+ID_HANDLER *rid_handler = NULL;
 
 /* mccp support */
 const unsigned char compress_will   [] = { IAC, WILL, TELOPT_COMPRESS,  '\0' };
@@ -74,8 +74,9 @@ int main(int argc, char **argv)
   /* note that we are booting up */
   log_string("Program starting.");
 
-   log_string( "Loading ID Handler" );
-   fread_id_handler();
+   log_string( "Loading Room ID Handler" );
+   rid_handler = init_id_handler();
+   fread_id_handler( rid_handler, "../system/rid_handler.dat" );
 
   /* initialize the event queue - part 1 */
   init_event_queue(1);

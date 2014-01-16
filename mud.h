@@ -144,8 +144,20 @@ typedef struct coordinate COORD;
 typedef struct framework FRAME;
 typedef struct room_framework ROOM_FRAME;
 typedef struct entity ENTITY;
-typedef struct frame_id FRAME_ID;
-typedef struct frame_id_handler ID_HANDLER;
+typedef struct id_handler ID_HANDLER;
+typedef struct instance_id I_ID;
+
+#include "coord.h"
+#include "framework.h"
+#include "olc.h"
+#include "room.h"
+#include "event.h"
+#include "nanny.h"
+#include "account.h"
+#include "entities.h"
+#include "strings_table.h"
+#include "mobile.h"
+#include "id.h"
 
 /* the actual structures */
 struct dSocket
@@ -198,18 +210,6 @@ typedef struct buffer_type
   int      size;        /* The allocated size of data    */
 } BUFFER;
 
-
-/* here we include external structure headers */
-#include "coord.h"
-#include "framework.h"
-#include "olc.h"
-#include "room.h"
-#include "event.h"
-#include "nanny.h"
-#include "account.h"
-#include "entities.h"
-#include "strings_table.h"
-#include "mobile.h"
 
 /******************************
  * End of new structures      *
