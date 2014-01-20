@@ -340,6 +340,7 @@ char   *append_spaces( const char *str, int amount );
 void add_spaces( char *str, int amount );
 bool string_contains( char *string, const char *regex_string );
 int mud_printf( char *dest, const char *format, ... );
+int mud_cat( char *dest, const char *format );
 void clear_strings( void );
 /*
  * help.c
