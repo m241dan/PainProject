@@ -75,10 +75,10 @@ void new_handle_cmd_input(D_SOCKET *dsock, char *arg)
    COMMAND *com;
    void *entity;
    char command[MAX_BUFFER];
-   LIST *flags;
+   LIST *flags = pull_flags( arg );
    bool found_cmd = FALSE;
 
-  arg = one_arg(arg, command);
+   arg = one_arg(arg, command);
 
    switch( dsock->state )
    {
@@ -153,4 +153,6 @@ LIST *pull_flags( char *arg )
          mud_cat( no_flags_arg, anaylzed );
    }
 
+   arg = strdup( no_flags_arg );
+   return flags;
 };
