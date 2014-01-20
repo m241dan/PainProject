@@ -12,6 +12,10 @@ struct framework
 {
    void *content;
    int type;
+   time_t created_on;
+   time_t last_modified;
+   char *created_by;
+   char *modified_by;
 };
 
 struct room_framework
@@ -25,3 +29,5 @@ struct room_framework
  * Utility Methods *
  *******************/
 
+/* creation */
+FRAME_WORK *create_framework( D_MOBILE *dMob, int type );

@@ -509,7 +509,7 @@ void cmd_create_framework( void *passed, char *arg )
       return;
    }
 
-   if( ( framework = create_framework( type ) ) == NULL )
+   if( ( framework = create_framework( dMob, type ) ) == NULL )
    {
       bug( "%s: something has really fucked up here.", __FUNCTION__ );
       return;
