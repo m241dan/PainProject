@@ -146,6 +146,7 @@ typedef struct room_framework ROOM_FRAME;
 typedef struct entity ENTITY;
 typedef struct id_handler ID_HANDLER;
 typedef struct instance_id I_ID;
+typedef struct cmdFlag CMD_FLAG;
 
 #include "coord.h"
 #include "framework.h"
@@ -201,6 +202,11 @@ struct typCmd
   void     (* cmd_funct)(void *passed, char *arg);
   sh_int    level;
   sh_int    state;
+};
+
+struct cmdFlag
+{
+   char *flag;
 };
 
 typedef struct buffer_type
@@ -295,6 +301,9 @@ void change_socket_state( D_S *dsock, int state );
  */
 void  handle_cmd_input        ( D_S *dsock, char *arg );
 void new_handle_cmd_input ( D_S *dsock, char *arg );
+CMD_FLAG *create_flag( char *flag );
+LIST *pull_flags( char *arg );
+
 /*
  * io.c
  */

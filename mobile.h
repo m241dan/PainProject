@@ -44,6 +44,8 @@ struct dMobile
 /*******************
  * Utility Methods *
  *******************/
+
+/* I/O */
 void save_mobile( D_MOBILE *mobile );
 void fwrite_account_data( D_MOBILE *dMob);
 void fwrite_game_data( D_MOBILE *dMob );
@@ -61,6 +63,8 @@ void load_player( ACCOUNT *account, char *player, bool partial, D_MOBILE *dMob )
 void load_mobile_commands args( ( D_MOBILE *dMob ) );
 void clear_mobile_command_list args( ( D_MOBILE *dMob ) );
 void clear_mobile_event_list( D_MOBILE *dMob );
+
+/* Movement */
 void char_to_game( D_SOCKET *dsock, D_MOBILE *dMob );
 void mob_from_coord( D_MOBILE *dMob );
 void mob_to_coord( D_MOBILE *dMob, COORD *coordinate );
@@ -70,10 +74,16 @@ void move_char( D_MOBILE *dMob, int dir );
  * Mobile Command Methods *
  **************************/
 
+/* Utility */
 void cmd_look( void *passed, char *arg );
+
+/* Movement */
 void cmd_north( void *passed, char *arg );
 void cmd_east( void *passed, char *arg );
 void cmd_south( void *passed, char *arg );
 void cmd_west( void *passed, char *arg );
 void cmd_up( void *passed, char *arg );
 void cmd_down( void *passed, char *arg );
+
+/* Building */
+void cmd_load( void *passed, char *arg );

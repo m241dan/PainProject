@@ -75,6 +75,7 @@ void new_handle_cmd_input(D_SOCKET *dsock, char *arg)
    COMMAND *com;
    void *entity;
    char command[MAX_BUFFER];
+   LIST *flags;
    bool found_cmd = FALSE;
 
   arg = one_arg(arg, command);
@@ -124,3 +125,32 @@ void new_handle_cmd_input(D_SOCKET *dsock, char *arg)
    return;
 }
 
+CMD_FLAG *create_flag( char *flag )
+{
+   CMD_FLAG *cFlag;
+   CREATE( cFlag, CMD_FLAG, 1 );
+   cFlag = strdup( flag );
+   return cFlag;
+}
+
+LIST *pull_flags( char *arg )
+{
+   LIST *flags = AllocList();
+   CMD_FLAG *cFlag;
+   char no_flags_arg[MAX_BUFFER];
+   char analyzed[MAX_BUFFER];
+
+   while( arg && arg[0] != '\0' )
+   {
+      arg = one_arg( arg, analyzed );
+
+      if( analyzed[0] == '-' )
+      {
+         cFlag = create_flag( analyzed );
+         AttachToList( cFlag, flags );
+      }
+      else
+         mud_cat( no_flags_arg, anaylzed );
+   }
+
+};

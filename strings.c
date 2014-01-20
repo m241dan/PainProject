@@ -33,17 +33,21 @@ bool is_prefix(const char *aStr, const char *bStr)
   return TRUE;
 }
 
-char *one_arg(char *fStr, char *bStr)
+char *one_arg(char *fStr, char *bStr) /* upgraded to take "" -Davenge */
 {
+   char cEnd = ' ';
+
   /* skip leading spaces */
   while (isspace(*fStr))
-    fStr++; 
+    fStr++;
 
+   if( *fStr == '"' )
+      cEnd = *fStr++;
   /* copy the beginning of the string */
   while (*fStr != '\0')
   {
     /* have we reached the end of the first word ? */
-    if (*fStr == ' ')
+    if (*fStr == cEnd)
     {
       fStr++;
       break;
@@ -203,6 +207,17 @@ int mud_printf( char *dest, const char *format, ... )
 
    clear_strings();
    return res;
+}
+
+int mud_cat( char *dest, const char *format )
+{
+   if( ( strlen( dest ) + strlen( format ) ) > MAX_BUFFER )
+   {
+      bug( "%s: cannot concatenate strings, buffer overflow.", __FUNCTION__ );
+      return 0;
+   }
+   strcat( dest, format );
+   return 1;
 }
 
 int strcasecmp(const char *s1, const char *s2)
