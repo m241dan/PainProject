@@ -33,7 +33,7 @@ LIST     * string_free = NULL;    /* so I can use downcase the way I want -Daven
 LIST     * coord_map[MAX_COORD_HASH]; /* hash of the coord maps based on the absolute value of X -Davenge */
 LIST     * world_entities = NULL; /* a massive list of all entities in the world */
 ID_HANDLER *rid_handler = NULL;
-
+LIST     * workspaces = NULL;
 /* mccp support */
 const unsigned char compress_will   [] = { IAC, WILL, TELOPT_COMPRESS,  '\0' };
 const unsigned char compress_will2  [] = { IAC, WILL, TELOPT_COMPRESS2, '\0' };
@@ -77,6 +77,9 @@ int main(int argc, char **argv)
    log_string( "Loading Room ID Handler" );
    rid_handler = init_id_handler();
    fread_id_handler( rid_handler, "../system/rid_handler.dat" );
+
+   log_string( "Loading Workspaces" );
+   load_workspaces();
 
   /* initialize the event queue - part 1 */
   init_event_queue(1);

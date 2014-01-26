@@ -18,14 +18,14 @@ ID_HANDLER *init_id_handler( void )
    return handler;
 }
 
-I_ID *create_raw_id( int id, int create, int modify )
+I_ID *create_raw_id( int id, const char *create, const char *modify )
 {
    I_ID *i_id;
 
    CREATE( i_id, I_ID, 1 );
    i_id->id = id;
-   i_id->created_on = create;
-   i_id->last_modified = modify;
+   i_id->created_on = strdup( create );
+   i_id->last_modified = strdup( modify );
    return i_id;
 }
 
@@ -37,14 +37,14 @@ void fwrite_id_handler( ID_HANDLER *handler, const char *location )
 
    if( ( fp = fopen( location, "w" ) ) == NULL )
    {
-      bug( %s: can't open file to write handler at: %s", __FUNCTION__. location );
+      bug( "%s: can't open file to write handler at: %s", __FUNCTION__, location );
       return;
    }
 
-   fprintf( fp, "TopID             %d\n", handler->top_id )
+   fprintf( fp, "TopID             %d\n", handler->top_id );
    AttachIterator( &Iter, handler->free_ids );
-   while( ( fid = (FRAME_ID *)NextInList( &Iter ) ) != NULL )
-      fprintf( fp, "FreeID      %d %d %d\n", fid->id, fid->created_on, fid->last_modified );
+   while( ( id = (I_ID *)NextInList( &Iter ) ) != NULL )
+      fprintf( fp, "FreeID      %d %s~ %s~\n", id->id, id->created_on, id->last_modified );
    fprintf( fp, "%s\n", FILE_TERMINATOR );
    fclose( fp );
    return;
@@ -81,7 +81,7 @@ void fread_id_handler( ID_HANDLER *handler, const char *location )
             if( !strcmp( word, "FreeID" ) )
             {
                found = TRUE;
-               id = create_raw_id( fread_number( fp ), fread_number( fp ), fread_number( fp ) );
+               id = create_raw_id( fread_number( fp ), fread_string( fp ), fread_string( fp ) );
                AttachToList( id,  handler->free_ids );
                break;
             }
@@ -92,7 +92,7 @@ void fread_id_handler( ID_HANDLER *handler, const char *location )
       }
       if( !found )
       {
-         bug( "%s: unexpected '%s" in %s.", __FUNCTION__, word, location );
+         bug( "%s: unexpected '%s' in %s.", __FUNCTION__, word, location );
          return;
       }
       if( !done )
@@ -110,7 +110,7 @@ I_ID *create_new_id( int type )
    {
       case ROOM_ENTITY:
          if( ( id = check_free( rid_handler ) ) == NULL )
-            id = create_raw_id( get_top_id( rid_handler ), current_time, current_time );
+            id = create_raw_id( get_top_id( rid_handler ), ctime( &current_time ), ctime( &current_time ) );
          break;
    }
    return id;
@@ -128,8 +128,8 @@ I_ID *check_free( ID_HANDLER *handler )
    id = NextInList( &Iter );
    DetachFromList( id, handler->free_ids );
    DetachIterator( &Iter );
-   id->created_on = current_time;
-   id->last_modified = current_time;
+   id->created_on = ctime( &current_time );
+   id->last_modified = ctime( &current_time );
    return id;
 }
 

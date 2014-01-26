@@ -127,6 +127,14 @@ do                                                                      \
  * End of Macros       *
  ***********************/
 
+/*********************
+ * Structure ID Enum *
+ *********************/
+typedef enum {
+   MOBILE_ENTITY, ROOM_ENTITY, ROOM_FRAMEWORK, MAX_STRUCT
+} structure_ids;
+
+
 /******************************
  * New structures             *
  ******************************/
@@ -141,24 +149,13 @@ typedef struct game_account ACCOUNT;
 typedef struct typCmd COMMAND;
 typedef struct the_nanny NANNY;
 typedef struct coordinate COORD;
-typedef struct framework FRAME;
-typedef struct room_framework ROOM_FRAME;
 typedef struct entity ENTITY;
 typedef struct id_handler ID_HANDLER;
 typedef struct instance_id I_ID;
 typedef struct cmdFlag CMD_FLAG;
-
-#include "coord.h"
-#include "framework.h"
-#include "olc.h"
-#include "room.h"
-#include "event.h"
-#include "nanny.h"
-#include "account.h"
-#include "entities.h"
-#include "strings_table.h"
-#include "mobile.h"
-#include "id.h"
+typedef struct workspace WORKSPACE;
+typedef struct framework FRAMEWORK;
+typedef struct room_framework R_FRAMEWORK;
 
 /* the actual structures */
 struct dSocket
@@ -220,6 +217,18 @@ typedef struct buffer_type
 /******************************
  * End of new structures      *
  ******************************/
+#include "coord.h"
+#include "framework.h"
+#include "olc.h"
+#include "room.h"
+#include "event.h"
+#include "nanny.h"
+#include "account.h"
+#include "entities.h"
+#include "strings_table.h"
+#include "mobile.h"
+#include "id.h"
+
 
 /***************************
  * Global Variables        *
@@ -316,7 +325,7 @@ char   *fread_string          ( FILE *fp );                 /* allocated data  *
 char   *fread_word            ( FILE *fp );                 /* pointer         */
 int     fread_number          ( FILE *fp );                 /* just an integer */
 
-/* 
+/*
  * strings.c
  */
 char   *one_arg               ( char *fStr, char *bStr );

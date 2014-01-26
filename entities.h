@@ -4,10 +4,6 @@
 
 extern LIST * world_entities;
 
-typedef enum {
-   MOBILE_ENTITY, ROOM_ENTITIY, MAX_ENTITY
-} entity_types_enum;
-
 struct entity
 {
    void *content;

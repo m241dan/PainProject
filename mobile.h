@@ -36,7 +36,7 @@ struct dMobile
    COORD *at_coord;
 
    /* olc stuff */
-   LIST *workspace;
+   WORKSPACE *workspace;
 
 };
 
@@ -47,10 +47,10 @@ struct dMobile
 
 /* I/O */
 void save_mobile( D_MOBILE *mobile );
-void fwrite_account_data( D_MOBILE *dMob);
-void fwrite_game_data( D_MOBILE *dMob );
-void fread_mobile_account_data( const char *pFile, D_MOBILE *dMob );
-void fread_mobile_game_data( const char *gFile, D_MOBILE *dMob );
+void fwrite_account_data( FILE *fp, D_MOBILE *dMob);
+void fwrite_game_data( FILE *fp, D_MOBILE *dMob );
+void fread_mobile_account_data( FILE *fp, D_MOBILE *dMob );
+void fread_mobile_game_data( FILE *fp, D_MOBILE *dMob );
 void save_player( D_MOBILE *mobile );
 void load_mobile( ACCOUNT *account, char *player, bool partial, D_MOBILE *dMob );
 void unload_mobile( D_MOBILE *dMob, bool partial );

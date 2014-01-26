@@ -16,12 +16,14 @@
  * TABLES *
  **********/
 
-const char *const entity_types[MAX_ENTITY+1] = {
-   "mob", "room", ""
+const char *const structure_names[MAX_STRUCT+1] = {
+   "mobile", "room", "rFrame",
+   ""
 };
 
-const char *const framework_types[MAX_FRAME+1] = {
-   "room_framework", ""
+const char *const framework_names[MAX_FRAMEWORK+1] = {
+   "rFrame",
+   ""
 };
 
 const char *const nanny_strings[MAX_NANNY_TYPE][MAX_NANNY_STATES] = {

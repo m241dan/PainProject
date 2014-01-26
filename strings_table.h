@@ -3,12 +3,12 @@
  * Written by Davenge */
 
 /* Definitions */
-const char *const entity_types[MAX_ENTITY+1];
-extern const char *const framework_types[MAX_FRAME+1];
+extern const char *const structure_names[MAX_STRUCT+1];
+extern const char *const framework_names[MAX_FRAMEWORK+1];
 extern const char *const nanny_strings[MAX_NANNY_TYPE][MAX_NANNY_STATES];
 extern const char *const race_table[];
 extern const char *const race_desc_table[];
-const char *const exit_directions[MAX_DIRECTION+1];
+extern const char *const exit_directions[MAX_DIRECTION+1];
 
 /* Methods */
 /* General */

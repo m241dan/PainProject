@@ -60,6 +60,7 @@ const struct typCmd tabCmd [] =
   { "west",          cmd_west,       LEVEL_NPC, STATE_PLAYING },
   { "up",            cmd_up,         LEVEL_NPC, STATE_PLAYING },
   { "down",          cmd_down,       LEVEL_NPC, STATE_PLAYING },
+/*  { "w_open",        cmd_open_workspace, LEVEL_ADMIN, STATE_PLAYING }, */
   /* account commands */
   { "quit",          act_quit,       LEVEL_BASIC, STATE_ACCOUNT },
   { "create",        act_create_char,LEVEL_BASIC, STATE_ACCOUNT },
@@ -67,7 +68,15 @@ const struct typCmd tabCmd [] =
   /* end of table */
   { "", 0 }
 };
-
+/*
+const struct typCmd olcCmd[] =
+{
+   { "list", cmd_list, LEVEL_ADMIN, STATE_PLAYING },
+   { "create", cmd_create_framework, LEVEL_ADMIN, STATE_PLAYING },
+   { "edit", cmd_edit_framework, LEVEL_ADMIN, STATE_PLAYING },
+   { "", 0 }
+}
+*/
 void new_handle_cmd_input(D_SOCKET *dsock, char *arg)
 {
    ITERATOR Iter;
@@ -154,4 +163,4 @@ LIST *pull_flags( char *arg )
 
    arg = strdup( no_flags_arg );
    return flags;
-};
+}
