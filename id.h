@@ -2,7 +2,7 @@
    This is the header file for id.c
    Written by Davenge */
 
-extern ID_HANDLER *rFid_handler;
+extern LIST *id_handlers;
 
 typedef enum
 {
@@ -29,10 +29,12 @@ struct instance_id
 /*******************
  * Utility Methods *
  *******************/
+/* onboot */
+bool load_id_handlers();
 /* creation */
 ID_HANDLER *init_id_handler( int type );
 I_ID *create_raw_id( int id );
-I_ID *create_new_id( int type );
+I_ID *create_new_id( D_MOBILE *dMob, int type );
 /* deletion */
 void free_id_handler( ID_HANDLER *handler );
 void free_i_id( I_ID *id );
@@ -44,6 +46,7 @@ void fread_id_handler( ID_HANDLER *handler, FILE *fp );
 void fwrite_i_id( I_ID *id, FILE *fp );
 I_ID *fread_i_id( FILE *fp );
 /* utility */
+ID_HANDLER *get_id_handler( int type );
 I_ID *check_free( ID_HANDLER *handler );
 int get_top_id( ID_HANDLER *handler );
 void update_id( D_MOBILE *dMob, I_ID *id );

@@ -225,10 +225,9 @@ typedef struct buffer_type
 #include "nanny.h"
 #include "account.h"
 #include "entities.h"
-#include "strings_table.h"
 #include "mobile.h"
 #include "id.h"
-
+#include "strings_table.h"
 
 /***************************
  * Global Variables        *

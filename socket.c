@@ -32,7 +32,7 @@ LIST     * account_list = NULL;   /* the account list of active accounts -Daveng
 LIST     * string_free = NULL;    /* so I can use downcase the way I want -Davenge */
 LIST     * coord_map[MAX_COORD_HASH]; /* hash of the coord maps based on the absolute value of X -Davenge */
 LIST     * world_entities = NULL; /* a massive list of all entities in the world */
-ID_HANDLER *rFid_handler = NULL;
+LIST     * id_handlers = NULL;
 LIST     * workspaces = NULL;
 /* mccp support */
 const unsigned char compress_will   [] = { IAC, WILL, TELOPT_COMPRESS,  '\0' };
@@ -74,14 +74,9 @@ int main(int argc, char **argv)
   /* note that we are booting up */
   log_string("Program starting.");
 
-   log_string( "Loading rFrame ID Handler" );
-   rFid_handler = init_id_handler( RFRAME_HANDLER );
-   if( !load_id_handler( rFid_handler ) )
-   {
-      bug( "Could Not Load rFrame ID Handler, exiting program" );
-      free_id_handler( rFid_handler );
+   log_string( "Loading ID Handlers" );
+   if( !load_id_handlers() )
       return 0;
-   }
 
    log_string( "Loading Workspaces" );
    load_workspaces();

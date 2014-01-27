@@ -44,7 +44,7 @@ void free_framework( FRAMEWORK *frame )
    switch( frame->type )
    {
       case ROOM_FRAME:
-         free_rFrame( (R_FRAMEWORK *)frame->content );
+         free_rFramework( (R_FRAMEWORK *)frame->content );
          break;
    }
    free_i_id( frame->id );
@@ -105,12 +105,12 @@ bool load_framework( const char *location, FRAMEWORK *frame )
 {
    FILE *fp;
    char *word;
-   bool false, done = FALSE;
+   bool found, done = FALSE;
 
    if( ( fp = fopen( location, "r" ) ) == NULL )
    {
       bug( "%s: cannot open %s to read from.", __FUNCTION__, location );
-      return;
+      return FALSE;
    }
 
    word = ( feof( fp ) ? FILE_TERMINATOR : fread_word( fp ) );
@@ -124,9 +124,10 @@ bool load_framework( const char *location, FRAMEWORK *frame )
    {
       found = FALSE;
 
-      if( word[0] != '#' || word[1] = '\0' || !word[1] )
+      if( word[0] != '#' || word[1] == '\0' || !word[1] )
       {
          bug( "%s: getting bad file format, word is %s", __FUNCTION__, word );
+         free_framework( frame );
          return FALSE;
       }
       switch( word[1] )
@@ -171,7 +172,7 @@ void fwrite_framework( FRAMEWORK *frame, FILE *fp )
    fprintf( fp, "#FRAMEWORK\n" );
    fprintf( fp, "Type         %d\n", frame->type );
    if( frame->id )
-      fwrite_i_id( frame->id );
+      fwrite_i_id( frame->id, fp );
    fprintf( fp, "#END\n" );
    return;
 }
@@ -229,7 +230,7 @@ R_FRAMEWORK *fread_rFramework( FILE *fp )
       switch( word[0] )
       {
          case '#':
-            if( strcasecmp( "#END", word ) ) { done = TRUE; found = TRUE; break }
+            if( strcasecmp( "#END", word ) ) { done = TRUE; found = TRUE; break; }
             break;
          case 'D':
             SREAD( "Descr", rFrame->description );
@@ -241,7 +242,7 @@ R_FRAMEWORK *fread_rFramework( FILE *fp )
       if( !found )
       {
          bug( "%s: bad file format %s.", __FUNCTION__, word );
-         free_rFrame( rFrame );
+         free_rFramework( rFrame );
          return NULL;
       }
       if( !done )

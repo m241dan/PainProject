@@ -10,6 +10,24 @@
 
 /* creation */
 
+bool load_id_handlers( void )
+{
+   int x;
+   ID_HANDLER *handler;
+
+   for( x = 0; x < MAX_ID_HANDLER; x++ )
+   {
+      handler = init_id_handler( x );
+      if( !load_id_handler( handler ) )
+      {
+         bug( "%s: could not load %s id handler.", __FUNCTION__, id_handler_names[x] );
+         return FALSE;
+      }
+      AttachToList( handler, id_handlers );
+   }
+   return TRUE;
+}
+
 ID_HANDLER *init_id_handler( int type )
 {
    ID_HANDLER *handler;
@@ -17,7 +35,7 @@ ID_HANDLER *init_id_handler( int type )
    CREATE( handler, ID_HANDLER, 1 );
    handler->free_ids = AllocList();
    handler->type = type;
-   handler->id = 0;
+   handler->top_id = 0;
    return handler;
 }
 
@@ -35,14 +53,11 @@ I_ID *create_raw_id( int id )
 I_ID *create_new_id( D_MOBILE *dMob, int type )
 {
    I_ID *id;
+   ID_HANDLER *handler = get_id_handler( type );
 
-   switch( type )
-   {
-      case ROOM_ENTITY:
-         if( ( id = check_free( rid_handler ) ) == NULL )
-            id = create_raw_id( get_top_id( rid_handler ) );
-         break;
-   }
+   if( ( id = check_free( handler ) ) == NULL )
+      id = create_raw_id( get_top_id( handler ) );
+
    id->created_by = strdup( dMob->name );
    id->modified_by = strdup( dMob->name );
    return id;
@@ -55,11 +70,11 @@ void free_id_handler( ID_HANDLER *handler )
    ITERATOR Iter;
 
    /* no other pointers to free at the moment */
-
+   DetachFromList( handler, id_handlers );
    AttachIterator( &Iter, handler->free_ids );
    while ( ( id = (I_ID *)NextInList(&Iter) ) == NULL )
       free_i_id( id );
-   DetatchIterator( &Iter );
+   DetachIterator( &Iter );
 
    free( handler ); /*free the memory alotted for the handler*/
    return;
@@ -95,7 +110,7 @@ void save_id_handler( ID_HANDLER *handler )
    AttachIterator( &Iter, handler->free_ids );
    while( ( id = (I_ID *)NextInList(&Iter) ) != NULL )
       fwrite_i_id( id, fp );
-   DetatchIterator( &Iter );
+   DetachIterator( &Iter );
 
    fprintf( fp, "%s\n", FILE_TERMINATOR );
    fclose( fp );
@@ -108,7 +123,7 @@ bool load_id_handler( ID_HANDLER *handler )
    I_ID *id;
    char *word;
    char location[MAX_BUFFER];
-   bool false, done = FALSE;
+   bool found, done = FALSE;
 
    mud_printf( location, "../system/%s.handler", id_handler_names[handler->type] );
    if( ( fp = fopen( location, "r" ) ) == NULL )
@@ -117,7 +132,8 @@ bool load_id_handler( ID_HANDLER *handler )
       return FALSE;
    }
 
-    word = ( feof( fp ) ? FILE_TERMINATOR : fread_word( fp ) );
+   word = ( feof( fp ) ? FILE_TERMINATOR : fread_word( fp ) );
+
    if( strcmp( word, "#IDHANDLER" ) )
    {
       bug( "%s: %s not started with proper tag.", __FUNCTION__, location );
@@ -128,9 +144,10 @@ bool load_id_handler( ID_HANDLER *handler )
    {
       found = FALSE;
 
-      if( word[0] != '#' || word[1] = '\0' || !word[1] )
+      if( word[0] != '#' || word[1] == '\0' || !word[1] )
       {
          bug( "%s: getting bad file format, word is %s", __FUNCTION__, word );
+         free_id_handler( handler );
          return FALSE;
       }
 
@@ -146,7 +163,7 @@ bool load_id_handler( ID_HANDLER *handler )
                fread_id_handler( handler, fp );
                break;
             }
-            if( !str_cmp( word, "#I_ID" ) )
+            if( !strcmp( word, "#I_ID" ) )
             {
                found = TRUE;
                id = fread_i_id( fp );
@@ -157,7 +174,7 @@ bool load_id_handler( ID_HANDLER *handler )
       }
       if( !found )
       {
-         bug( "%s: word key not known, %s" __FUNCTION__, word );
+         bug( "%s: word key not known, %s", __FUNCTION__, word );
          free_id_handler( handler );
          return FALSE;
       }
@@ -179,7 +196,7 @@ void fwrite_id_handler( ID_HANDLER *handler, FILE *fp )
 void fread_id_handler( ID_HANDLER *handler, FILE *fp )
 {
    char *word;
-   bool false, done = FALSE;
+   bool found, done = FALSE;
 
    word = ( feof( fp ) ? "#END" : fread_word( fp ) );
    while( !done )
@@ -212,7 +229,7 @@ void fwrite_i_id( I_ID *id, FILE *fp )
    fprintf( fp, "CreatedOn    %s~\n", id->created_on );
    fprintf( fp, "ModifiedBy   %s~\n", id->modified_by );
    fprintf( fp, "ModifiedLast %s~\n", id->last_modified );
-   fpritnf( fp, "#END\n" );
+   fprintf( fp, "#END\n" );
    return;
 
 }
@@ -257,6 +274,19 @@ I_ID *fread_i_id( FILE *fp )
 }
 
 /* utility */
+ID_HANDLER *get_id_handler( int type )
+{
+   ID_HANDLER *handler = NULL;
+   ITERATOR Iter;
+
+   AttachToList( &Iter, id_handlers );
+   while( ( handler = (ID_HANDLER *)NextInList( &Iter ) ) != NULL )
+      if( handler->type == type )
+         continue;
+   DetachIterator( &Iter );
+   return handler;
+}
+
 I_ID *check_free( ID_HANDLER *handler )
 {
    ITERATOR Iter;
