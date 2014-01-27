@@ -75,8 +75,8 @@ int main(int argc, char **argv)
   log_string("Program starting.");
 
    log_string( "Loading Room ID Handler" );
-   rid_handler = init_id_handler();
-   fread_id_handler( rid_handler, "../system/rid_handler.dat" );
+   rid_handler = init_id_handler( RFRAME_HANDLER );
+   load_id_handler( rid_handler );
 
    log_string( "Loading Workspaces" );
    load_workspaces();

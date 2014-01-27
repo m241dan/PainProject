@@ -58,21 +58,106 @@ R_FRAMEWORK *create_rFramework( void )
 }
 
 /* i/o */
-R_FRAMEWORK *load_rFramework( char *location )
+void save_framework( FRAMEWORK *frame )
 {
-   return NULL;
-}
+   FILE *fp;
+   char location[MAX_BUFFER];
 
-void fread_rFramework( R_FRAMEWORK *rFrame, FILE *fp )
-{
+   mud_printf( location, "../frameworks/%ss/%c%d.frame", framework_names[frame->type], framework_names[frame->type][0], frame->id );
+   if( ( fp = fopen( location, "w" ) ) == NULL )
+   {
+      bug( "%s: cannot open %s to write.", __FUNCTION__, location );
+      return;
+   }
+
+   fwrite_framework( frame, fp );
+
+   switch( frame->type )
+   {
+      case ROOM_FRAME:
+         fwrite_rFramework( (R_FRAMEWORK *)frame->content, fp );
+         break;
+   }
+   fprintf( fp, "%s\n", FILE_TERMINATOR );
+   fclose( fp );
    return;
 }
-
-void save_rFramework( R_FRAMEWORK *rFrame )
+bool load_framework( const char *location, FRAMEWORK *frame )
 {
-   return;
+   FILE *fp;
+   char *word;
+   bool false, done = FALSE;
+
+   if( ( fp = fopen( location, "r" ) ) == NULL )
+   {
+      bug( "%s: cannot open %s to read from.", __FUNCTION__, location );
+      return;
+   }
+
+   word = fread_word( fp );
+   if( strcmp( word, "#FRAMEWORK" ) )
+   {
+      bug( "%s: attempting to read a file that isn't tagged as a framework.", __FUNCTION__ );
+      fclose( fp );
+      return FALSE;
+   }
+   while( !done )
+   {
+      found = FALSE;
+
+      if( word[0] != '#' || word[1] = '\0' || !word[1] )
+      {
+         bug( "%s: getting bad file format, word is %s", __FUNCTION__, word );
+         return FALSE;
+      }
+      switch( word[1] )
+      {
+         case 'F':
+            if( !strcmp( word, "#FRAMEWORK" ) )
+            {
+               found = TRUE;
+               fread_framework( frame, fp );
+               break;
+            }
+            break;
+         case 'R':
+            if( !strcmp( word, "#ROOMFRAME" ) )
+            {
+               found = TRUE;
+               frame->content = fread_rFramework( fp );
+               break;
+            }
+            break;
+      }
+      if( !found )
+      {
+         bug( "%s: word key not known, %s", __FUNCTION__, word );
+         return FALSE;
+      }
+      if( !done )
+         word = fread_word( fp );
+   }
+   fclose( fp );
+   return TRUE;
 }
 
+
+/* general framework data */
+void fwrite_framework( FRAMEWORK *frame, FILE *fp )
+{
+   fprintf( fp, "#FRAMEWORK\n" );
+   fprintf( fp, "Type         %d\n", frame->type );
+   fprintf( fp, "CreatedBy    %s~\n", frame->created_by );
+   fprintf( fp, "ModifiedBy   %s~\n", frame->modified_by );
+   
+}
+
+void fread_framework( FRAMEWORK *frame, FILE *fp )
+{
+
+}
+
+/* data specific to room frameworks */
 void fwrite_rFramework( R_FRAMEWORK *rFrame, FILE *fp )
 {
    fprintf( fp, "#ROOMFRAME\n" );
@@ -80,6 +165,11 @@ void fwrite_rFramework( R_FRAMEWORK *rFrame, FILE *fp )
    fprintf( fp, "Descr     %s~\n", rFrame->description );
    fprintf( fp, "#END\n" );
 }
+R_FRAMEWORK *fread_rFramework( FILE *fp )
+{
+   return;
+}
+
 
 /* -checking- */
 

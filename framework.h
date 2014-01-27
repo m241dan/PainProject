@@ -13,10 +13,6 @@ struct framework
 {
    void *content;
    int type;
-   char *created_on;
-   char *last_modified;
-   char *created_by;
-   char *modified_by;
    I_ID *id;
 };
 

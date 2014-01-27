@@ -4,17 +4,25 @@
 
 extern ID_HANDLER *rid_handler;
 
+typedef enum
+{
+   RFRAME_HANDLER, MAX_ID_HANDLER
+} id_handler_types;
+
 struct id_handler
 {
    LIST *free_ids;
+   int type;
    int top_id;
 };
 
 struct instance_id
 {
    int id;
+   char *created_by;
    char *created_on;
-   char * last_modified;
+   char *modified_by;
+   char *last_modified;
 };
 
 
