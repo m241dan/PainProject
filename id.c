@@ -21,18 +21,18 @@ ID_HANDLER *init_id_handler( int type )
    return handler;
 }
 
-I_ID *create_raw_id( int id, const char *create, const char *modify )
+I_ID *create_raw_id( int id )
 {
    I_ID *i_id;
 
    CREATE( i_id, I_ID, 1 );
    i_id->id = id;
-   i_id->created_on = strdup( create );
-   i_id->last_modified = strdup( modify );
+   i_id->created_on = ctime( &current_time );
+   i_id->last_modified = ctime( &current_time );
    return i_id;
 }
 
-I_ID *create_new_id( int type )
+I_ID *create_new_id( D_MOBILE *dMob, int type )
 {
    I_ID *id;
 
@@ -40,42 +40,220 @@ I_ID *create_new_id( int type )
    {
       case ROOM_ENTITY:
          if( ( id = check_free( rid_handler ) ) == NULL )
-            id = create_raw_id( get_top_id( rid_handler ), ctime( &current_time ), ctime( &current_time ) );
+            id = create_raw_id( get_top_id( rid_handler ) );
          break;
    }
+   id->created_by = strdup( dMob->name );
+   id->modified_by = strdup( dMob->name );
    return id;
+}
+
+/* deletion */
+void free_id_handler( ID_HANDLER *handler )
+{
+   I_ID *id;
+   ITERATOR Iter;
+
+   /* no other pointers to free at the moment */
+
+   AttachIterator( &Iter, handler->free_ids );
+   while ( ( id = (I_ID *)NextInList(&Iter) ) == NULL )
+      free_i_id( id );
+   DetatchIterator( &Iter );
+
+   free( handler ); /*free the memory alotted for the handler*/
+   return;
+}
+
+void free_i_id( I_ID *id )
+{
+   free(id->created_by);
+   free(id->created_on);
+   free(id->modified_by);
+   free(id->last_modified);
+   free(id);
 }
 
 /* i/o */
 
 void save_id_handler( ID_HANDLER *handler )
 {
+   FILE *fp;
+   ITERATOR Iter;
+   I_ID *id;
+   char location[MAX_BUFFER];
 
+   mud_printf( location, "../system/%s.handler", id_handler_names[handler->type] );
+   if( ( fp = fopen( location, "w" ) ) == NULL )
+   {
+      bug( "%s: unable to open file to write: %s", __FUNCTION__, location );
+      return;
+   }
+
+   fwrite_id_handler( handler, fp );
+
+   AttachIterator( &Iter, handler->free_ids );
+   while( ( id = (I_ID *)NextInList(&Iter) ) != NULL )
+      fwrite_i_id( id, fp );
+   DetatchIterator( &Iter );
+
+   fprintf( fp, "%s\n", FILE_TERMINATOR );
+   fclose( fp );
+   return;
 }
 
 bool load_id_handler( ID_HANDLER *handler )
 {
+   FILE *fp;
+   I_ID *id;
+   char *word;
+   char location[MAX_BUFFER];
+   bool false, done = FALSE;
 
+   mud_printf( location, "../system/%s.handler", id_handler_names[handler->type] );
+   if( ( fp = fopen( location, "r" ) ) == NULL )
+   {
+      bug( "%s: unable to open file to read: %s", __FUNCTION__, location );
+      return FALSE;
+   }
+
+    word = ( feof( fp ) ? FILE_TERMINATOR : fread_word( fp ) );
+   if( strcmp( word, "#IDHANDLER" ) )
+   {
+      bug( "%s: %s not started with proper tag.", __FUNCTION__, location );
+      return FALSE;
+   }
+
+   while( !done )
+   {
+      found = FALSE;
+
+      if( word[0] != '#' || word[1] = '\0' || !word[1] )
+      {
+         bug( "%s: getting bad file format, word is %s", __FUNCTION__, word );
+         return FALSE;
+      }
+
+      switch( word[1] )
+      {
+         case 'O':
+            if( !strcasecmp( word, "EOF" ) ) {done = TRUE; found = TRUE; break; }
+            break;
+         case 'I':
+            if( !strcmp( word, "#IDHANDLER" ) )
+            {
+               found = TRUE;
+               fread_id_handler( handler, fp );
+               break;
+            }
+            if( !str_cmp( word, "#I_ID" ) )
+            {
+               found = TRUE;
+               id = fread_i_id( fp );
+               AttachToList( id, handler->free_ids );
+               break;
+            }
+            break;
+      }
+      if( !found )
+      {
+         bug( "%s: word key not known, %s" __FUNCTION__, word );
+         free_id_handler( handler );
+         return FALSE;
+      }
+      if( !done )
+         word = ( feof( fp ) ? FILE_TERMINATOR : fread_word( fp ) );
+   }
+   fclose( fp );
+   return TRUE;
 }
 
 void fwrite_id_handler( ID_HANDLER *handler, FILE *fp )
 {
-
+   fprintf( fp, "#IDHANDLER\n" );
+   fprintf( fp, "TopID      %d\n", handler->top_id );
+   fprintf( fp, "#END\n" );
+   return;
 }
 
 void fread_id_handler( ID_HANDLER *handler, FILE *fp )
 {
+   char *word;
+   bool false, done = FALSE;
 
+   word = ( feof( fp ) ? "#END" : fread_word( fp ) );
+   while( !done )
+   {
+      found = FALSE;
+      switch( word[0] )
+      {
+         case '#':
+            if( !strcasecmp( word, "#END" ) ) { done = TRUE; found = TRUE; break; }
+         case 'T':
+            IREAD( "TopID", handler->top_id );
+            break;
+      }
+      if( !found )
+      {
+         bug( "%s: bad file format %s.", __FUNCTION__, word );
+         return;
+      }
+      if( !done )
+         word = ( feof( fp ) ? "#END" : fread_word( fp ) );
+   }
+   return;
 }
 
 void fwrite_i_id( I_ID *id, FILE *fp )
 {
+   fprintf( fp, "#I_ID\n" );
+   fprintf( fp, "ID           %d\n", id->id );
+   fprintf( fp, "CreatedBy    %s~\n", id->created_by );
+   fprintf( fp, "CreatedOn    %s~\n", id->created_on );
+   fprintf( fp, "ModifiedBy   %s~\n", id->modified_by );
+   fprintf( fp, "ModifiedLast %s~\n", id->last_modified );
+   fpritnf( fp, "#END\n" );
+   return;
 
 }
 
-void fread_i_id( I_ID *id, FILE *fp )
+I_ID *fread_i_id( FILE *fp )
 {
+   I_ID *id = NULL;
+   char *word;
+   bool found, done = FALSE;
 
+   CREATE( id, I_ID, 1 );
+   word = ( feof( fp ) ? "#END" : fread_word( fp ) );
+   while( ! done )
+   {
+      found = FALSE;
+      switch( word[0] )
+      {
+         case '#':
+            if( !strcasecmp( word, "#END" ) ){done = TRUE; found = TRUE; break;}
+         case 'C':
+            SREAD( "CreatedBy", id->created_by );
+            SREAD( "CreatedOn", id->created_on );
+            break;
+         case 'I':
+            IREAD( "ID", id->id );
+            break;
+         case 'M':
+            SREAD( "ModifiedBy", id->modified_by );
+            SREAD( "ModifeidLast", id->last_modified );
+            break;
+      }
+      if( !found )
+      {
+         bug( "%s: bad file format %s.", __FUNCTION__, word );
+         free_i_id( id );
+         return NULL;
+      }
+      if( !done )
+         word = ( feof( fp ) ? "#END" : fread_word( fp ) );
+   }
+   return id;
 }
 
 /* utility */
@@ -91,8 +269,6 @@ I_ID *check_free( ID_HANDLER *handler )
    id = NextInList( &Iter );
    DetachFromList( id, handler->free_ids );
    DetachIterator( &Iter );
-   id->created_on = ctime( &current_time );
-   id->last_modified = ctime( &current_time );
    return id;
 }
 
@@ -100,4 +276,11 @@ int get_top_id( ID_HANDLER *handler )
 {
    handler->top_id += 1;
    return handler->top_id;
+}
+
+void update_id( D_MOBILE *dMob, I_ID *id )
+{
+   id->last_modified = ctime( &current_time );
+   id->modified_by = strdup( dMob->name );
+   return;
 }

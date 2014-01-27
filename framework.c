@@ -24,15 +24,11 @@ FRAMEWORK *create_framework( D_MOBILE *dMob, int type )
 
    CREATE( fWork, FRAMEWORK, 1 );
    fWork->type = type;
-   fWork->created_on = ctime( &current_time );
-   fWork->last_modified = ctime( &current_time );
-   fWork->created_by = strdup( dMob->name );
-   fWork->modified_by = strdup( dMob->name );
 
    switch( fWork->type )
    {
       case ROOM_FRAME:
-         fWork->id = create_new_id( ROOM_FRAME );
+         fWork->id = create_new_id( dMob, ROOM_FRAME );
          fWork->content = create_rFramework();
          break;
    }
@@ -41,6 +37,21 @@ FRAMEWORK *create_framework( D_MOBILE *dMob, int type )
 
    return fWork;
 }
+
+/* deletion */
+void free_framework( FRAMEWORK *frame )
+{
+   switch( frame->type )
+   {
+      case ROOM_FRAME:
+         free_rFrame( (R_FRAMEWORK *)frame->content );
+         break;
+   }
+   free_i_id( frame->id );
+   free( frame );
+   return;
+}
+
 
 /* i/o */
 
@@ -55,6 +66,14 @@ R_FRAMEWORK *create_rFramework( void )
    rFrame->description = strdup( "none" );
 
    return rFrame;
+}
+
+/* deletion */
+void free_rFramework( R_FRAMEWORK *rFrame )
+{
+   free( rFrame->title );
+   free( rFrame->description );
+   free( rFrame );
 }
 
 /* i/o */
@@ -94,7 +113,7 @@ bool load_framework( const char *location, FRAMEWORK *frame )
       return;
    }
 
-   word = fread_word( fp );
+   word = ( feof( fp ) ? FILE_TERMINATOR : fread_word( fp ) );
    if( strcmp( word, "#FRAMEWORK" ) )
    {
       bug( "%s: attempting to read a file that isn't tagged as a framework.", __FUNCTION__ );
@@ -112,6 +131,9 @@ bool load_framework( const char *location, FRAMEWORK *frame )
       }
       switch( word[1] )
       {
+         case 'O':
+            if (!strcasecmp(word, "EOF")) {done = TRUE; found = TRUE; break;}
+            break;
          case 'F':
             if( !strcmp( word, "#FRAMEWORK" ) )
             {
@@ -132,6 +154,7 @@ bool load_framework( const char *location, FRAMEWORK *frame )
       if( !found )
       {
          bug( "%s: word key not known, %s", __FUNCTION__, word );
+         free_framework( frame );
          return FALSE;
       }
       if( !done )
@@ -147,14 +170,40 @@ void fwrite_framework( FRAMEWORK *frame, FILE *fp )
 {
    fprintf( fp, "#FRAMEWORK\n" );
    fprintf( fp, "Type         %d\n", frame->type );
-   fprintf( fp, "CreatedBy    %s~\n", frame->created_by );
-   fprintf( fp, "ModifiedBy   %s~\n", frame->modified_by );
-   
+   if( frame->id )
+      fwrite_i_id( frame->id );
+   fprintf( fp, "#END\n" );
+   return;
 }
 
 void fread_framework( FRAMEWORK *frame, FILE *fp )
 {
+   char *word;
+   bool found, done = FALSE;
 
+   word = ( feof( fp ) ? "#END" : fread_word( fp ) );
+   while( !done )
+   {
+      found = FALSE;
+      switch( word[0] )
+      {
+         case '#':
+            if( !strcasecmp( word, "#END" ) ){ done = TRUE; found = TRUE; break; }
+            break;
+         case 'T':
+            IREAD( "Type", frame->type );
+            break;
+      }
+      if( !found )
+      {
+         bug( "%s: bad file format %s", __FUNCTION__, word );
+         free_framework( frame );
+         return;
+      }
+      if( !done )
+         word = ( feof( fp ) ? "#END" : fread_word( fp ) );
+   }
+   return;
 }
 
 /* data specific to room frameworks */
@@ -164,10 +213,41 @@ void fwrite_rFramework( R_FRAMEWORK *rFrame, FILE *fp )
    fprintf( fp, "Title     %s~\n", rFrame->title );
    fprintf( fp, "Descr     %s~\n", rFrame->description );
    fprintf( fp, "#END\n" );
+   return;
 }
 R_FRAMEWORK *fread_rFramework( FILE *fp )
 {
-   return;
+   R_FRAMEWORK *rFrame;
+   char *word;
+   bool found, done = FALSE;
+
+   CREATE( rFrame, R_FRAMEWORK, 1 );
+
+   word = ( feof( fp ) ? "#END" : fread_word( fp ) );
+   while( !done )
+   {
+      switch( word[0] )
+      {
+         case '#':
+            if( strcasecmp( "#END", word ) ) { done = TRUE; found = TRUE; break }
+            break;
+         case 'D':
+            SREAD( "Descr", rFrame->description );
+            break;
+         case 'T':
+            SREAD( "Title", rFrame->title );
+            break;
+      }
+      if( !found )
+      {
+         bug( "%s: bad file format %s.", __FUNCTION__, word );
+         free_rFrame( rFrame );
+         return NULL;
+      }
+      if( !done )
+         word = ( feof( fp ) ? "#END" : fread_word( fp ) );
+   }
+   return rFrame;
 }
 
 

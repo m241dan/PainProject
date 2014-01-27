@@ -28,18 +28,22 @@ struct room_framework
 
 /* general */
 /* creation */
-FRAMEWORK *create_framework( D_MOBILE *dMob, int type );
+FRAMEWORK *create_framework( D_MOBILE *dMob, int type );\
+/* deletion */
+void free_framework( FRAMEWORK *frame );
 /* i/o */
-void load_frameworks( void );
-void save_frameworks( void );
-void save_framework( D_MOBILE *dMob, FRAMEWORK *fwork );
-void load_framework( char *location );
+void save_framework( FRAMEWORK *frame );
+bool load_framework( const char *location, FRAMEWORK *frame );
+void fwrite_framework( FRAMEWORK *frame, FILE *fp );
+void fread_framework( FRAMEWORK *frame, FILE *fp );
 /* room specific */
 /* creation */
 R_FRAMEWORK *create_rFramework( void );
+/* deletion */
+void free_rFramework( R_FRAMEWORK *rFrame );
 /* i/o */
-R_FRAMEWORK *load_rFramework( char *location );
-void save_rFramework( R_FRAMEWORK *rFrame );
+void fwrite_rFramework( R_FRAMEWORK *rFrame, FILE *fp );
+R_FRAMEWORK *fread_rFramework( FILE *fp );
 
 /* checking */
 bool valid_ftype( int type );
