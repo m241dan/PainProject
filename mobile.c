@@ -112,335 +112,132 @@ void save_mobile( D_MOBILE *dMob )
          bug( "%s: attempting to save unknown level type.", __FUNCTION__ );
          return;
       case LEVEL_NPC:
-         log_string( "%s: not ready to save NPCs yet.", __FUNCTION__ );
-         return;
+         mud_printf( location, "../instances/mobiles/npcs/%s%d.instance", capitalize( dMob->name ), dMob->id->id );
+         break;
       case LEVEL_PLAYER:
+         mud_printf( location, "../instances/mobiles/players/%s.pfile", capitalize( dMob->name ) );
+         break;
       case LEVEL_ADMIN:
+         mud_printf( location, "../instances/mobiles/admin/%s.pfile", capitalize( dMob->name ) );
+         break;
       case LEVEL_GOD:
-         mud_printf( location, "../players/%s.pfile", capitalize( dMob->name ) );
+         mud_printf( location, "../instances/mobiles/gods/%s.pfile", capitalize( dMob->name ) );
          break;
    }
-}
 
-
-/* Method to save any mobile to its proper place */
-
-void save_mobile( D_MOBILE *dMob )
-{
-   FILE *fp;
-   char location[MAX_BUFFER];
-
-   if( !valid_mobile( dMob ) )
-      return;
-
-   switch( dMob->level )
+   if( ( fp = fopen( location, "w" ) ) == NULL )
    {
-      default:
-         text_to_mobile( dMob, "Unknown mobile level, cannot save." );
-         bug( "%s: %s attempting to save with %d level.", __FUNCTION__, dMob->name, dMob->level );
-         return;
-      case LEVEL_GOD:
-      case LEVEL_ADMIN:
-      case LEVEL_PLAYER:
-         mud_printf( location, "../accounts/%s/%s.pfile", capitalize( dMob->account->name ), capitalize( dMob->name ) );
-         if( ( fp = fopen( location, "w" ) ) == NULL )
-         {
-            bug( "%s: Unable to write account data to %s's pfile.", __FUNCTION__, dMob->name );
-            return;
-         }
-         fwrite_account_data( fp, dMob );
-         fprintf( fp, "%s\n", FILE_TERMINATOR );
-         fclose( fp );
-         if( dMob->loaded )
-         {
-            mud_printf( location, "../accounts/%s/%s.gfile", capitalize( dMob->account->name ), capitalize( dMob->name ) );
-            if( ( fp = fopen( location, "w" ) ) == NULL )
-            {
-               bug( "%s: Unable to write game data to %s's gfile.", __FUNCTION__, dMob->name );
-               return;
-            }
-            fwrite_game_data( fp, dMob );
-         }
-         break;
+      bug( "%s: cannot open %s to write.", __FUNCTION__, location );
+      return;
    }
-   fprintf( fp, "%s\n", FILE_TERMINATOR );
+
+   fwrite_mobile( dMob, fp );
+   fprintf( fp, "%s", FILE_TERMINATOR );
    fclose( fp );
    return;
 }
 
-void fwrite_account_data( FILE *fp, D_MOBILE *dMob )
-{
-   fprintf( fp, "#ACCOUNT\n" );
-   fprintf( fp, "Name            %s~\n", dMob->name);
-   fprintf( fp, "Level           %d\n",  dMob->level);
-   fprintf( fp, "Password        %s~\n", dMob->password);
-   fprintf( fp, "Race            %d\n",  dMob->race);
-   fprintf( fp, "#END\n" );
-   return;
-}
-
-void fwrite_game_data( FILE *fp, D_MOBILE *dMob )
-{
-   fprintf( fp, "#PLAYER\n" );
-   fprintf( fp, "#END\n" );
-   return;
-}
-
-/* unload a mobile, with options */
-
-void unload_mobile( D_MOBILE *dMob, bool partial )
-{
-   if( !dMob->loaded && partial ) /* a character already logged out and want a partial unload, do nothing */
-      return;
-   else if( dMob->loaded && partial ) /* logging out of a character to an account */
-      free_mobile_game_data( dMob );
-   else if( dMob->loaded && !partial ) /* character logged in and we want to completely quit the game */
-   {
-      free_mobile_game_data( dMob );
-      free_mobile_account_data( dMob );
-      PushStack( dMob, dmobile_free );
-      return;
-   }
-   else if( !dMob->loaded && !partial ) /* this would be quitting the game from an account and freeing up the LIST *character in account structure */
-   {
-      free_mobile_account_data( dMob );
-      PushStack( dMob, dmobile_free );
-      return;
-   }
-   return;
-}
-
-void alloc_mobile_lists( D_MOBILE *dMob ) /* alloc the dMobiles lists */
-{
-   dMob->commands = AllocList();
-   dMob->events = AllocList();
-   return;
-}
-
-void free_mobile_lists( D_MOBILE *dMob ) /* deallocate the dMobiles list memory */
-{
-   if( dMob->commands )
-      FreeList( dMob->commands );
-   if( dMob->events )
-      FreeList( dMob->events );
-   return;
-}
-
-/* Free all the data related to playing the game only */
-void free_mobile_game_data(D_MOBILE *dMob)
-{
-   if( dMob->loaded )
-   {
-      DetachFromList(dMob, dmobile_list);
-
-      if (dMob->socket) dMob->socket->player = NULL;
-
-      /* Free Up Event List */
-      clear_mobile_event_list( dMob );
-      /* Free up Comand List */
-      clear_mobile_command_list( dMob );
-      /* Now for the List's Memory */
-      free_mobile_lists( dMob );
-   }
-   return;
-}
-
-/* Free all dMob account data */
-void free_mobile_account_data( D_MOBILE *dMob )
-{
-   free( dMob->name );
-   free( dMob->password );
-   return;
-}
-
-void clear_mobile( D_MOBILE *dMob )
-{
-   dMob->name         =  NULL;
-   dMob->password     =  NULL;
-   dMob->level        =  LEVEL_PLAYER;
-   dMob->race         =  RACE_HUMAN;
-
-   if( dMob->loaded )
-      alloc_mobile_lists( dMob );
-}
-
-void load_mobile( ACCOUNT *account, char *player, bool partial, D_MOBILE *dMob )
+bool load_mobile( const char *location, D_MOBILE *dMob )
 {
    FILE *fp;
    char *word;
    bool found, done = FALSE;
-   char pFile[MAX_BUFFER];
-   char gFile[MAX_BUFFER];
 
-   if( account ) /* if its a player */
+   if( ( fp = fopen( location, "r" ) ) == NULL )
+      return FALSE;
+
+   word = ( feof( fp ) ? FILE_TERMINATOR : fread_word( fp ) );
+
+   if( strcmp( word, "#MOBILE" ) )
    {
-      mud_printf( pFile, "../accounts/%s/%s.pfile", capitalize( account->name ), capitalize( player ) );
-      if( ( fp = fopen( pFile, "r" ) ) == NULL )
-      {
-         bug( "%s: Unable to read account data %s.", __FUNCTION__, player );
-         return;
-      }
-      word = fread_word( fp );
-      while( !done )
-      {
-         found = FALSE;
-         switch( word[0] )
-         {
-            case '#':
-               if( !strcmp( word, "#ACCOUNT" ) )
-               {
-                  found = TRUE;
-                  fread_mobile_account_data( fp, dMob );
-               }
-               break;
-            case 'E':
-               if (!strcasecmp(word, "EOF")) {done = TRUE; found = TRUE; break;}
-               break;
-         }
-         if( !found )
-         {
-            bug( "%s: unexpected '%s' in %s.", __FUNCTION__, word, pFile );
-            unload_mobile( dMob, FALSE );
-            dMob = NULL;
-            return;
-         }
-         /* read one more */
-         if( !done )
-            word = fread_word(fp);
-      }
-      if( !partial )
-      {
-         fclose( fp );
-         mud_printf( gFile, "../accounts/%s/%s.gfile", capitalize( account->name), capitalize( player ) );
-         if( ( fp = fopen( gFile, "r" ) ) == NULL )
-         {
-            bug( "%s: Unable to read game data %s.", __FUNCTION__, player );
-            return;
-         }
-         word = fread_word( fp );
-         while( !done )
-         {
-            found = FALSE;
-            switch( word[0] )
-            {
-               case '#':
-                  if( !strcmp( word, "#PLAYER" ) )
-                  {
-                     found = TRUE;
-                     fread_mobile_game_data( fp, dMob );
-                  }
-                  break;
-               case 'E':
-                  if (!strcasecmp(word, "EOF")) {done = TRUE; found = TRUE; break;}
-                  break;
-            }
-            if( !found )
-            {
-               bug( "%s: unexpected '%s' in %s.", __FUNCTION__, word, gFile );
-               unload_mobile( dMob, FALSE );
-               dMob = NULL;
-               return;
-            }
-            /* read one more */
-            if( !done )
-               word = fread_word(fp);
-         }
-      }
-   }
-   else /* if its an npc */
-   {
-      return; /* nothing yet */
-   }
-   fclose( fp );
-   return;
-}
-
-void fread_mobile_account_data( FILE *fp, D_MOBILE *dMob )
-{
-   char *word;
-   bool found, done = FALSE;
-
-
-   if( !dMob )
-   {
-     if( StackSize( dmobile_free ) <= 0 )
-        CREATE( dMob, D_MOBILE, 1 );
-     else
-       dMob = (D_MOBILE *)PopStack( dmobile_free );
-   }
-  /* load data */
-  word = fread_word(fp);
-  while (!done)
-  {
-    found = FALSE;
-    switch (word[0])
-    {
-      case '#':
-        if( !strcmp( word, "#END" ) ) { done = TRUE; found = TRUE; break; }
-        break;
-      case 'L':
-        IREAD( "Level",     dMob->level     );
-        break;
-      case 'N':
-        SREAD( "Name",      dMob->name      );
-        break;
-      case 'P':
-        SREAD( "Password",  dMob->password  );
-        break;
-      case 'R':
-        IREAD( "Race", dMob->race );
-        break;
-    }
-    if (!found)
-    {
-      bug("%s: unexpected '%s' in %s.", __FUNCTION__, word, dMob->name);
-      unload_mobile( dMob, FALSE );
-      dMob = NULL;
-      return;
-    }
-
-    /* read one more */
-    if (!done) word = fread_word(fp);
-  }
-  return;
-}
-
-void fread_mobile_game_data( FILE *fp, D_MOBILE *dMob )
-{
-   char *word;
-   bool found, done = FALSE;
-
-   alloc_mobile_lists( dMob );
-
-   if( !dMob ) /* don't relaly need this but decided to keep it there JUST in case I ever want to just load game data */
-   {
-      if( StackSize( dmobile_free ) <= 0 )
-         CREATE( dMob, D_MOBILE, 1 );
-      else
-         dMob = (D_MOBILE *)PopStack( dmobile_free );
+      bug( "%s: attempting to read a mobile file that is not tagged as such.", __FUNCTION__ );
+      fclose( fp );
+      return FALSE;
    }
 
-   word = fread_word( fp );
    while( !done )
    {
-      found - FALSE;
-      switch( word[0] )
+      switch( word[1] )
       {
-         case '#':
-            if( !strcmp( word, "#END" ) ) { done = TRUE; found = TRUE; break; }
+         case 'O':
+            if( !strcasecmp( word, "EOF" ) ) { found = TRUE; done = TRUE; break };
+            break;
+         case 'M':
+            if( !strcmp( word, "#MOBILE" ) )
+            {
+               found = TRUE;
+               if( !fread_mobile( dMob, fp ) )
+                  found = FALSE;
+               break;
+            }
             break;
       }
       if( !found )
       {
-         bug( "%s: unexpected '%s' in %s.", __FUNCTION__, word, dMob->name );
-         unload_mobile( dMob, FALSE );
-         return;
+         bug( "%s: bad file format %s.", __FUNCTION__, word );
+         free_mobile( dMob );
+         fclose( fp );
+         return FALSE;
       }
-      if( !done ) word = fread_word( fp );
+      if( !done )
+         word = ( feof( fp ) ? FILE_TERMINATOR : fread_word( fp ) );
    }
+   fclose( fp );
+   return TRUE;
+}
+
+void fwrite_mobile ( D_MOBILE *dMob, FILE *fp )
+{
+   fprintf( fp, "#MOBILE\n" );
+   fprintf( fp, "Name          %s~\n", dMob->name );
+   fprintf( fp, "Password      %s~\n", dMob->password );
+   fprintf( fp, "Level         %d\n", dMob->level );
+   fprintf( fp, "Race          %d\n", dMob->race );
+   fprintf( fp, "#END\n" );
    return;
 }
 
+bool fread_mobile( D_MOBILE *dMob, FILE *fp )
+{
+   char *word;
+   bool found, done = FALSE;
+
+   word = ( feof( fp ) ? "#END" : fread_word( fp ) );
+
+   while( !done )
+   {
+      found = FALSE;
+
+      switch( word[0] )
+      {
+         case '#':
+            if( !strcasecmp( word, "#END" ) ) { found = TRUE; done = TRUE; break; }
+            break;
+         case 'L':
+            IREAD( "Level", dMob->level );
+            break;
+         case 'N':
+            SREAD( "Name", dMob->name );
+            break;
+         case 'P':
+            SREAD( "Password", dMob->password );
+            break;
+         case 'R':
+            IREAD( "Race", dMob->race );
+            break;
+      }
+      if( !found )
+      {
+         bug( "%s: bad file foramt %s", __FUNCTION__, word );
+         return FALSE;
+      }
+      if( !done )
+         word = ( feof( fp ) ? "#END" : fread_word( fp ) );
+   }
+   return TRUE;
+}
+
+/* utility */
 
 void load_mobile_commands( D_MOBILE *dMob )
 {

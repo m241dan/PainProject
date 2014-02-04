@@ -29,6 +29,7 @@ struct dMobile
    ENTITY *ent_wrapper;
    LIST *commands;
    COORD *at_coord;
+   I_ID *id;
 
    /* olc stuff */
    WORKSPACE *workspace;
@@ -56,21 +57,7 @@ bool load_mobile( const char *location, D_MOBILE *dMob );
 void fwrite_mobile( D_MOBILE *dMob, FILE *fp );
 bool fread_mobile( D_MOBILE *dMob, FILE *fp );
 
-/* I/O */
-void save_mobile( D_MOBILE *mobile );
-void fwrite_account_data( FILE *fp, D_MOBILE *dMob);
-void fwrite_game_data( FILE *fp, D_MOBILE *dMob );
-void fread_mobile_account_data( FILE *fp, D_MOBILE *dMob );
-void fread_mobile_game_data( FILE *fp, D_MOBILE *dMob );
-void save_player( D_MOBILE *mobile );
-void load_mobile( ACCOUNT *account, char *player, bool partial, D_MOBILE *dMob );
-void unload_mobile( D_MOBILE *dMob, bool partial );
-void alloc_mobile_lists( D_MOBILE *dMob );
-void free_mobile_lists( D_MOBILE *dMob );
-void free_mobile_game_data(D_MOBILE *dMob );
-void free_mobile_account_data( D_MOBILE *dMob );
-void clear_mobile( D_MOBILE *dMob );
-void load_player( ACCOUNT *account, char *player, bool partial, D_MOBILE *dMob );
+/* utility */
 void load_mobile_commands args( ( D_MOBILE *dMob ) );
 void clear_mobile_command_list args( ( D_MOBILE *dMob ) );
 void clear_mobile_event_list( D_MOBILE *dMob );

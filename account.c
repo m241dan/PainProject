@@ -264,7 +264,7 @@ bool fread_account( ACCOUNT *account, FILE *fp )
       switch( word[0] )
       {
          case '#':
-            if( ( !strcasecmp( word, "#END" ) ) { found = TRUE; done = TRUE; break; }
+            if( !strcasecmp( word, "#END" ) ) { found = TRUE; done = TRUE; break; }
             break;
          case 'L':
             IREAD( "Level", account->level );
