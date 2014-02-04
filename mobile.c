@@ -26,7 +26,7 @@ void clear_mobile( D_MOBILE *dMob )
 {
    dMob->socket = NULL;
    dMob->name = NULL;
-   dMob->passowrd = NULL;
+   dMob->password = NULL;
    dMob->level = 0;
    dMob->race = 0;
    dMob->account = NULL;
@@ -106,7 +106,7 @@ void save_mobile( D_MOBILE *dMob )
    if( !valid_mobile( dMob ) )
       return;
 
-   swtich( dMob->level )
+   switch( dMob->level )
    {
       default:
          bug( "%s: attempting to save unknown level type.", __FUNCTION__ );
@@ -118,7 +118,7 @@ void save_mobile( D_MOBILE *dMob )
          mud_printf( location, "../instances/mobiles/players/%s.pfile", capitalize( dMob->name ) );
          break;
       case LEVEL_ADMIN:
-         mud_printf( location, "../instances/mobiles/admin/%s.pfile", capitalize( dMob->name ) );
+         mud_printf( location, "../instances/mobiles/admins/%s.pfile", capitalize( dMob->name ) );
          break;
       case LEVEL_GOD:
          mud_printf( location, "../instances/mobiles/gods/%s.pfile", capitalize( dMob->name ) );
@@ -160,7 +160,7 @@ bool load_mobile( const char *location, D_MOBILE *dMob )
       switch( word[1] )
       {
          case 'O':
-            if( !strcasecmp( word, "EOF" ) ) { found = TRUE; done = TRUE; break };
+            if( !strcasecmp( word, "EOF" ) ) { found = TRUE; done = TRUE; break; }
             break;
          case 'M':
             if( !strcmp( word, "#MOBILE" ) )
@@ -257,13 +257,8 @@ void load_mobile_commands( D_MOBILE *dMob )
 
 void char_to_game( D_SOCKET *dsock, D_MOBILE *dMob )
 {
-   dsock->player = dMob;
-   dMob->socket = dsock;
-   dMob->loaded = TRUE;
-   load_mobile( dMob->account, dMob->name, FALSE, dMob );
-   wrap_entity( dMob, MOBILE_ENTITY );
-   change_socket_state( dsock, STATE_PLAYING );
    dsock->bust_prompt = TRUE;
+   AttachToList( dMob, dmobile_list );
    text_to_buffer( dsock, "You enter the Mud.\r\n" );
 
    /* a temporary hack */

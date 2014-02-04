@@ -9,15 +9,52 @@
  * UILITY METHODS *
  ******************/
 
-/* This method is for freeing up a nanny once its done its job -Davenge */
-void free_nanny( NANNY *nanny )
+/* creation */
+NANNY *init_nanny( int type )
 {
-   nanny->socket->nanny = NULL;
+   NANNY *nanny;
+
+   CREATE( nanny, NANNY, 1 );
+   clear_nanny( nanny );
+   nanny->type = type;
+   switch( type )
+   {
+      case NANNY_CREATE_CHARACTER:
+         nanny->creation = init_mobile();
+         ((D_MOBILE *)nanny)->level = LEVEL_PLAYER;
+         break;
+   }
+
+   return nanny;
+}
+
+void clear_nanny( NANNY *nanny )
+{
    nanny->socket = NULL;
+   nanny->state = -1;
+   nanny->type = -1;
    nanny->creation = NULL;
-   free(nanny);
    return;
 }
+
+
+/* deletion */
+void unload_nanny( NANNY *nanny )
+{
+   free_nanny( nanny );
+   return;
+}
+
+void free_nanny( NANNY *nanny )
+{
+   if( nanny->socket )
+      nanny->socket->nanny = NULL; /* unhook from socket */
+   if( nanny->creation )
+      nanny->creation = NULL;
+   return;
+}
+
+/* general utiltiy */
 
 /* This method changes the state of the nanny and spits out the corresponding message -Davenge */
 void change_nanny_state( NANNY *nanny, int state, bool message )
@@ -36,29 +73,6 @@ void change_nanny_state( NANNY *nanny, int state, bool message )
    return;
 }
 
-/* This method universally creates nannys of the given types and places the correct structures in the creation pointer -Davenge */
-NANNY *create_nanny( D_SOCKET *dsock, int type )
-{
-   NANNY *nanny;
-
-   CREATE( nanny, NANNY, 1 );
-   nanny->state = 0;
-   nanny->type = type;
-   nanny->socket = dsock;
-   switch( type )
-   {
-      case NANNY_CREATE_CHARACTER:
-         CREATE( nanny->creation, D_MOBILE, 1 );
-         ((D_MOBILE *)nanny->creation)->loaded = TRUE;
-         ((D_MOBILE *)nanny->creation)->level = LEVEL_PLAYER;
-         break;
-   }
-   return nanny;
-}
-
-/***********************
- * END UTILITY METHODS *
- ***********************/
 
 /*************************
  * General Nanny Handler *
@@ -226,9 +240,9 @@ void nanny_complete_character( D_SOCKET *dsock )
    text_to_buffer( dsock, "New Character Successfully Created\r\n\r\n" );
    char_list_add( dsock->account, new_char );
    save_mobile( new_char );
-   unload_mobile( new_char, TRUE );
+   unload_mobile( new_char );
 
-   free_nanny( dsock->nanny );
+   unload_nanny( dsock->nanny );
    change_socket_state( dsock,  STATE_ACCOUNT );
    return;
 }

@@ -12,9 +12,20 @@ struct the_nanny
    void *creation;
 };
 
+/********************
+ * Utility  Methods *
+ ********************/
+
+/* creation */
+NANNY *init_nanny( int type );
+void clear_nanny( NANNY *nanny );
+
+/* deletion */
+void unload_nanny( NANNY *nanny );
 void free_nanny( NANNY *nanny );
+
+/* general utility */
 void change_nanny_state( NANNY *nanny, int state, bool message );
-NANNY *create_nanny( D_SOCKET *dsock, int type );
 void nanny_handle_input( D_SOCKET *dsock, char *arg );
 
 /* Character Creation */

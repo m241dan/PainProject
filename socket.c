@@ -431,7 +431,7 @@ void close_socket(D_SOCKET *dsock, bool reconnect)
     }
   }
   else if (dsock->player)
-    unload_mobile( dsock->player, FALSE );
+    unload_mobile( dsock->player );
 
    if( dsock->account )
    {

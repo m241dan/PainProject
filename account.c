@@ -69,7 +69,7 @@ void unload_account( ACCOUNT *account )
 
 void free_account( ACCOUNT *account )
 {
-   clear_char_sheet( account );
+   clear_char_sheet_list( account );
    FreeList( account->characters );
 
    clear_account_command_list( account );
@@ -92,7 +92,7 @@ void free_character_sheet( CHAR_SHEET *cSheet )
    return;
 }
 
-void clear_char_sheet( ACCOUNT *account )
+void clear_char_sheet_list( ACCOUNT *account )
 {
    ITERATOR Iter;
    CHAR_SHEET *cSheet;
@@ -100,7 +100,7 @@ void clear_char_sheet( ACCOUNT *account )
    AttachIterator( &Iter, account->characters );
    while( ( cSheet = (CHAR_SHEET *)NextInList( &Iter ) ) != NULL )
    {
-      DetachfromList( cSheet, account->characters );
+      DetachFromList( cSheet, account->characters );
       free_character_sheet( cSheet );
    }
    DetachIterator( &Iter );
@@ -163,7 +163,7 @@ void save_account( ACCOUNT *account )
       fwrite_char_sheet( cSheet, fp );
    DetachIterator( &Iter );
 
-   fprintf( "%s\n", FILE_TERMINATOR );
+   fprintf( fp, "%s\n", FILE_TERMINATOR );
    fclose( fp );
    return;
 }
@@ -229,7 +229,7 @@ bool load_account( const char *location, ACCOUNT *account )
    return TRUE;
 }
 
-void fwrite_account( ACCOUNT *account, FILE *Fp )
+void fwrite_account( ACCOUNT *account, FILE *fp )
 {
    /* dump the data */
    fprintf( fp, "#ACCOUNT\n" );
@@ -316,10 +316,11 @@ CHAR_SHEET *fread_char_sheet( FILE *fp )
       if( !found )
       {
          bug( "%s: bad file format %s", __FUNCTION__, word );
-         free_char_sheet( cSheet );
+         free_character_sheet( cSheet );
          return NULL;
       }
    }
+   return cSheet;
 }
 
 /* Utility */
@@ -429,17 +430,39 @@ bool char_list_remove( ACCOUNT *account, D_MOBILE *player )
       return FALSE;
    }
 
-   AttachIterator( account->characters );
+   AttachIterator( &Iter, account->characters );
    while( ( cSheet = (CHAR_SHEET *)NextInList( &Iter ) ) != NULL )
       if( !strcmp( cSheet->name, player->name ) )
       {
          DetachFromList( cSheet, account->characters );
          DetachIterator( &Iter );
-         free_char_sheet( cSheet );
+         free_character_sheet( cSheet );
          return TRUE;
       }
    DetachIterator( &Iter );
    return FALSE;
+}
+
+/* retrieval */
+const char *get_loc_from_char_sheet( CHAR_SHEET *cSheet )
+{
+   static char buf[MAX_BUFFER];
+
+   buf[0] = '\0';
+
+   switch( cSheet->level )
+   {
+      case LEVEL_PLAYER:
+         mud_printf( buf, "../instances/mobiles/players/%s.pfile", capitalize( cSheet->name ) );
+         return buf;
+      case LEVEL_ADMIN:
+         mud_printf( buf, "../instances/mobiles/admins/%s.pfile", capitalize( cSheet->name ) );
+         return buf;
+      case LEVEL_GOD:
+         mud_printf( buf, "../instances/mobiles/gods/%s.pfile", capitalize( cSheet->name ) );
+         return buf;
+   }
+   return buf;
 }
 
 /********************
@@ -474,7 +497,8 @@ void act_create_char( void *passed, char *argument )
       return;
    }
    account->socket->state = STATE_NANNY;
-   account->socket->nanny = create_nanny( account->socket, NANNY_CREATE_CHARACTER );
+   account->socket->nanny = init_nanny( NANNY_CREATE_CHARACTER );
+   account->socket->nanny->socket = account->socket; /* hook the nanny up to our socket for messaging */
    change_nanny_state( account->socket->nanny, NANNY_ASK_CHARACTER_NAME, TRUE );
    return;
 }

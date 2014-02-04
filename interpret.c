@@ -116,12 +116,17 @@ void new_handle_cmd_input(D_SOCKET *dsock, char *arg)
 
    if( !found_cmd && dsock->state == STATE_ACCOUNT && SizeOfList( dsock->account->characters ) >= 1 )
    {
-      D_MOBILE *character;
+      CHAR_SHEET *character;
       AttachIterator( &Iter, dsock->account->characters );
-      while( ( character = (D_MOBILE *)NextInList( &Iter ) ) != NULL )
+      while( ( character = (CHAR_SHEET *)NextInList( &Iter ) ) != NULL )
          if( !strcasecmp( command, character->name ) )
          {
-            char_to_game( dsock, character );
+            dsock->player = init_mobile();
+            load_mobile( get_loc_from_char_sheet( character ), dsock->player );
+            char_to_game( dsock, dsock->player );
+            dsock->player->socket = dsock;
+            wrap_entity( dsock->player, MOBILE_ENTITY );
+            change_socket_state( dsock, STATE_PLAYING );
             found_cmd = TRUE;
          }
       DetachIterator( &Iter );
