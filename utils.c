@@ -191,7 +191,7 @@ COMMAND *copy_command( const struct typCmd to_copy )
    COMMAND *copy;
 
    CREATE( copy, COMMAND, 1 );
-   copy->cmd_name = strdup( to_copy.cmd_name );
+   copy->cmd_name = to_copy.cmd_name;
    copy->cmd_funct = to_copy.cmd_funct;
    copy->level = to_copy.level;
    copy->state = to_copy.state;

@@ -143,14 +143,6 @@ bool load_id_handler( ID_HANDLER *handler )
    while( !done )
    {
       found = FALSE;
-
-      if( word[0] != '#' || word[1] == '\0' || !word[1] )
-      {
-         bug( "%s: getting bad file format, word is %s", __FUNCTION__, word );
-         free_id_handler( handler );
-         return FALSE;
-      }
-
       switch( word[1] )
       {
          case 'O':

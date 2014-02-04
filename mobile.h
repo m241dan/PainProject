@@ -18,19 +18,14 @@ struct dMobile
    char          * name; /* account data */
    char          * password; /* account data */
    sh_int        level; /* account data */
+   sh_int        race; 
 
    /***************
     * New Content *
     ***************/
 
    /* Utility Variables */
-   bool loaded;
    ACCOUNT *account;
-
-   /* account data */
-   sh_int  race;
-
-   /* game data */
    ENTITY *ent_wrapper;
    LIST *commands;
    COORD *at_coord;
@@ -44,6 +39,22 @@ struct dMobile
 /*******************
  * Utility Methods *
  *******************/
+
+/* creation */
+D_MOBILE *init_mobile( void );
+void clear_mobile( D_MOBILE *dMob );
+
+/* deletion */
+void unload_mobile( D_MOBILE *dMob );
+void free_mobile( D_MOBILE *dMob );
+void clear_mobile_event_list( D_MOBILE *dMob );
+void clear_mobile_command_list( D_MOBILE *dMob );
+
+/* i/o */
+void save_mobile( D_MOBILE *dMob );
+bool load_mobile( const char *location, D_MOBILE *dMob );
+void fwrite_mobile( D_MOBILE *dMob, FILE *fp );
+bool fread_mobile( D_MOBILE *dMob, FILE *fp );
 
 /* I/O */
 void save_mobile( D_MOBILE *mobile );

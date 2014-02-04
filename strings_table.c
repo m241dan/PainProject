@@ -26,8 +26,13 @@ const char *const framework_names[MAX_FRAMEWORK+1] = {
    ""
 };
 
+const char *const framework_names_initials[MAX_FRAMEWORK+1] = {
+   "r",
+   ""
+};
+
 const char *const id_handler_names[MAX_ID_HANDLER+1] = {
-   "rFrame_Handler"
+   "rFrame_Handler", "Workspace_Handler",
    ""
 };
 

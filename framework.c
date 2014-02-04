@@ -12,6 +12,15 @@ LIST *frameworks = NULL;
 
 /* -general- */
 /* creation */
+FRAMEWORK *init_framework( int type )
+{
+   FRAMEWORK *frame;
+
+   CREATE( frame, FRAMEWORK, 1 );
+   frame->type = type;
+   return frame;
+}
+
 FRAMEWORK *create_framework( D_MOBILE *dMob, int type )
 {
    FRAMEWORK *fWork;
@@ -22,8 +31,7 @@ FRAMEWORK *create_framework( D_MOBILE *dMob, int type )
       return NULL;
    }
 
-   CREATE( fWork, FRAMEWORK, 1 );
-   fWork->type = type;
+   fWork = init_framework( type );
 
    switch( fWork->type )
    {
@@ -53,8 +61,6 @@ void free_framework( FRAMEWORK *frame )
 }
 
 
-/* i/o */
-
 /* -room specific- */
 /* creation */
 R_FRAMEWORK *create_rFramework( void )
@@ -76,7 +82,46 @@ void free_rFramework( R_FRAMEWORK *rFrame )
    free( rFrame );
 }
 
+
 /* i/o */
+/* -general- */
+bool load_frameworks( void )
+{
+   FRAMEWORK *fWork;
+   char dir_name[MAX_BUFFER];
+   char location[MAX_BUFFER];
+   DIR *directory;
+   struct dirent *entry;
+   int x;
+
+   for( x = 0; x < MAX_FRAMEWORK; x++ )
+   {
+      mud_printf( dir_name, "../frameworks/%ss/", framework_names[x] );
+      puts( dir_name );
+      if( ( directory = opendir( dir_name ) ) == NULL )
+      {
+         bug( "%s: could not load %s directory.", __FUNCTION__, dir_name );
+         return FALSE;
+      }
+
+      for( entry = readdir( directory ); entry; entry = readdir( directory ) )
+      {
+         if( !string_contains( entry->d_name, ".frame" ) )
+            continue;
+
+         fWork = init_framework( x );
+         mud_printf( location, "%s%s", dir_name, entry->d_name );
+         if( !load_framework( location, fWork ) )
+         {
+            bug( "%s: could not load framework %s from file.", __FUNCTION__, location );
+            continue;
+         }
+         AttachToList( fWork, all_frameworks );
+      }
+   }
+   return TRUE;
+}
+
 void save_framework( FRAMEWORK *frame )
 {
    FILE *fp;
@@ -90,7 +135,7 @@ void save_framework( FRAMEWORK *frame )
    }
 
    fwrite_framework( frame, fp );
-
+   fwrite_i_id( frame->id, fp );
    switch( frame->type )
    {
       case ROOM_FRAME:
@@ -124,12 +169,6 @@ bool load_framework( const char *location, FRAMEWORK *frame )
    {
       found = FALSE;
 
-      if( word[0] != '#' || word[1] == '\0' || !word[1] )
-      {
-         bug( "%s: getting bad file format, word is %s", __FUNCTION__, word );
-         free_framework( frame );
-         return FALSE;
-      }
       switch( word[1] )
       {
          case 'O':
@@ -143,6 +182,13 @@ bool load_framework( const char *location, FRAMEWORK *frame )
                break;
             }
             break;
+         case 'I':
+            if( !strcmp( word, "#I_ID" ) )
+            {
+               found = TRUE;
+               frame->id = fread_i_id( fp );
+               break;
+            }
          case 'R':
             if( !strcmp( word, "#ROOMFRAME" ) )
             {
@@ -165,14 +211,11 @@ bool load_framework( const char *location, FRAMEWORK *frame )
    return TRUE;
 }
 
-
 /* general framework data */
 void fwrite_framework( FRAMEWORK *frame, FILE *fp )
 {
    fprintf( fp, "#FRAMEWORK\n" );
    fprintf( fp, "Type         %d\n", frame->type );
-   if( frame->id )
-      fwrite_i_id( frame->id, fp );
    fprintf( fp, "#END\n" );
    return;
 }
@@ -207,6 +250,7 @@ void fread_framework( FRAMEWORK *frame, FILE *fp )
    return;
 }
 
+/* -room specific- */
 /* data specific to room frameworks */
 void fwrite_rFramework( R_FRAMEWORK *rFrame, FILE *fp )
 {
@@ -252,6 +296,21 @@ R_FRAMEWORK *fread_rFramework( FILE *fp )
 }
 
 
+/* retrieval */
+FRAMEWORK *get_frame( int type, int id )
+{
+   FRAMEWORK *frame;
+   ITERATOR Iter;
+
+   AttachIterator( &Iter, all_frameworks );
+   while( ( frame = (FRAMEWORK *)NextInList( &Iter ) ) != NULL )
+      if( frame->type == type && frame->id->id == id )
+         break;
+   DetachIterator( &Iter );
+
+   return frame;
+}
+
 /* -checking- */
 
 bool valid_ftype( int type )
@@ -260,4 +319,3 @@ bool valid_ftype( int type )
       return FALSE;
    return TRUE;
 }
-

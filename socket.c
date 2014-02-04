@@ -34,6 +34,7 @@ LIST     * coord_map[MAX_COORD_HASH]; /* hash of the coord maps based on the abs
 LIST     * world_entities = NULL; /* a massive list of all entities in the world */
 LIST     * id_handlers = NULL;
 LIST     * workspaces = NULL;
+LIST     * all_frameworks = NULL;
 /* mccp support */
 const unsigned char compress_will   [] = { IAC, WILL, TELOPT_COMPRESS,  '\0' };
 const unsigned char compress_will2  [] = { IAC, WILL, TELOPT_COMPRESS2, '\0' };
@@ -67,6 +68,8 @@ int main(int argc, char **argv)
    account_list = AllocList();
    string_free = AllocList();
    world_entities = AllocList();
+   workspaces = AllocList();
+   id_handlers = AllocList();
 
    for( x = 0; x < MAX_COORD_HASH; x++ )
       coord_map[x] = AllocList();
@@ -78,8 +81,13 @@ int main(int argc, char **argv)
    if( !load_id_handlers() )
       return 0;
 
+   log_string( "Loading Frameworks" );
+   if( !load_frameworks() )
+      return 0;
+
    log_string( "Loading Workspaces" );
-   load_workspaces();
+   if( !load_workspaces() )
+      return 0;
 
   /* initialize the event queue - part 1 */
   init_event_queue(1);
@@ -912,6 +920,7 @@ bool flush_output(D_SOCKET *dsock)
 void handle_new_connections(D_SOCKET *dsock, char *arg)
 {
   ACCOUNT *a_new;
+  char aName[MAX_BUFFER];
   int i;
 
   switch(dsock->state)
@@ -933,15 +942,10 @@ void handle_new_connections(D_SOCKET *dsock, char *arg)
       arg[0] = toupper(arg[0]);
       log_string("%s is trying to connect.", arg);
 
-      /* Check for a new Player */
-      if ((a_new = load_account( arg, TRUE ) ) == NULL) /* True because I only want to partially load the account, name and password only */
+      mud_printf( aName, "../accounts/%s/account.afile", capitalize( arg ) ); /* format the file location of where such an account may be located */
+      a_new = init_account(); /* initialize a new account structure */
+      if( !load_account( aName, a_new ) )/* attempt to load data into it */
       {
-        if (StackSize(account_free) <= 0)
-           CREATE( a_new, ACCOUNT, 1 );
-        else
-          a_new = (ACCOUNT *) PopStack(account_free);
-        clear_account(a_new);
-
         /* give the player it's name */
         a_new->name = strdup(arg);
 
@@ -967,8 +971,9 @@ void handle_new_connections(D_SOCKET *dsock, char *arg)
         text_to_buffer(dsock, "Between 5 and 12 chars please!\n\rPlease enter a new password: ");
         return;
       }
+      if( dsock->account->password ) /* just incase */
+         free(dsock->account->password);
 
-      free(dsock->account->password);
       dsock->account->password = strdup(crypt(arg, dsock->account->name));
 
       for (i = 0; dsock->account->password[i] != '\0'; i++)
@@ -997,7 +1002,7 @@ void handle_new_connections(D_SOCKET *dsock, char *arg)
         change_socket_state( dsock, STATE_ACCOUNT );
 
         text_to_buffer(dsock, motd);
-        fwrite_account( dsock->account ); /* write the new account */
+        save_account( dsock->account ); /* write the new account */
 
         /* initialize events on the player */
         /* commented out for now
@@ -1008,7 +1013,8 @@ void handle_new_connections(D_SOCKET *dsock, char *arg)
       }
       else
       {
-        free(dsock->account->password);
+        if( dsock->account->password )
+           free(dsock->account->password);
         dsock->account->password = NULL;
         text_to_buffer(dsock, "Password mismatch!\n\rPlease enter a new password: ");
         dsock->state = STATE_NEW_PASSWORD;
@@ -1021,7 +1027,7 @@ void handle_new_connections(D_SOCKET *dsock, char *arg)
         if ((a_new = check_account_reconnect(dsock->account->name)) != NULL)
         {
           /* attach the new player */
-          unload_account(dsock->account);
+          free_account(dsock->account);
           dsock->account = a_new;
           a_new->socket = dsock;
 
@@ -1034,23 +1040,10 @@ void handle_new_connections(D_SOCKET *dsock, char *arg)
           /* strip the idle event from this socket */
           strip_event_socket(dsock, EVENT_SOCKET_IDLE);
         }
-        else if ((a_new = load_account( dsock->account->name, FALSE ) ) == NULL) /* false because I want a full load of the account */
-        {
-          text_to_socket(dsock, "ERROR: Your afile is missing!\n\r");
-          unload_account(dsock->account);
-          dsock->account = NULL;
-          close_socket(dsock, FALSE);
-          return;
-       }
         else
         {
-          /* attach the new player */
-          unload_account(dsock->account);
-          dsock->account = a_new;
-          a_new->socket = dsock;
-
           /* put him in the active list */
-          AttachToList(a_new, account_list);
+          AttachToList(dsock->account, account_list);
 
           log_string("%s has entered the game.", dsock->account->name);
 

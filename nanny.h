@@ -4,16 +4,6 @@
    It's organized, but hardcoded and process potentially raw input.
    Written by Davenge */
 
-#define MAX_NANNY_STATES 10
-
-typedef enum {
-   NANNY_CREATE_CHARACTER, NANNY_TERMINATOR, MAX_NANNY_TYPE
-} nanny_types;
-
-typedef enum {
-   NANNY_ASK_CHARACTER_NAME, NANNY_ADDITIONAL_PASSWORD, NANNY_CONFIRM_ADDITIONAL_PASSWORD, NANNY_PICK_RACE, MAX_CHARACTER_NANNY_STATE
-} character_nanny_states;
-
 struct the_nanny
 {
    D_SOCKET *socket;

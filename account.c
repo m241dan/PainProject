@@ -10,112 +10,128 @@
 #include "mud.h"
 
 
-/* Account Utilities -Davenge */
-/*----------------------------*/
-
-ACCOUNT *load_account( const char *act_name, bool partial )
+/* creation */
+ACCOUNT *init_account( void )
 {
-   FILE *fp;
-   ACCOUNT *account = NULL;
-   D_MOBILE *dMob;
-   char *word;
-   char *pFile;
-   char aFile[MAX_BUFFER];
-   char aFolder[MAX_BUFFER];
-   bool done = FALSE, found;
-   DIR *directory;
-   struct dirent *entry;
+   ACCOUNT *account;
 
-   mud_printf( aFolder, "../accounts/%s/", capitalize( act_name ) );
-   mud_printf( aFile, "%saccount.afile", aFolder );
-
-   if( ( fp = fopen( aFile, "r" ) ) == NULL )
-      return NULL;
-
-   /* grab an account from the stack or create a new one */
-   if( StackSize( account_free ) <= 0 )
-      CREATE( account, ACCOUNT, 1 );
-   else
-      account = (ACCOUNT *)PopStack(account_free);
-
-   clear_account(account);
-   account->loaded = TRUE;
-
-   word = fread_word( fp );
-   while( !done )
-   {
-      found = FALSE;
-      switch( word[0] )
-      {
-         case 'E':
-            if( !strcasecmp( word, "EOF" ) )
-            {
-               done = TRUE;
-               found = TRUE;
-               break;
-            }
-            break;
-         case 'L':
-            IREAD( "Level", account->level );
-            break;
-         case 'N':
-            SREAD( "Name", account->name );
-            break;
-         case 'P':
-            if( !strcmp( word, "Password" ) )
-            {
-               account->password = fread_string( fp );
-               found = TRUE;
-               if( partial )
-               {
-                  done = TRUE;
-                  account->loaded = FALSE;
-               }
-               break;
-            }
-            break;
-      }
-      if( !found )
-      {
-         bug( "Load_account: unexpected '%s' in %s's aFile.", word, act_name );
-         unload_account(account);
-         return NULL;
-      }
-
-      if( !done )
-         word = fread_word( fp );
-   }
-   fclose( fp );
-
-   /* account data is loaded, now load the char_list */
-   if( !partial )
-   {
-      directory = opendir( aFolder );
-      for( entry = readdir( directory ); entry; entry = readdir( directory ) )
-         if( string_contains( entry->d_name, ".pfile" ) )
-         {
-            pFile = strdup( entry->d_name ); /* hack wizardry to make this work */
-            pFile[ strlen( entry->d_name ) - 6 ] = '\0';
-            if( StackSize( dmobile_free ) <= 0 )
-               CREATE( dMob, D_MOBILE, 1 );
-            else
-               dMob = (D_MOBILE *)PopStack( dmobile_free );
-
-            load_mobile( account, pFile, TRUE, dMob );
-            if( !dMob )
-            {
-               bug( "%s: can't load %s.", __FUNCTION__, entry->d_name );
-               continue;
-            }
-            char_list_add( account, dMob );
-         }
-   }
+   CREATE( account, ACCOUNT, 1 );
+   clear_account( account );
+   account->characters = AllocList();
+   account->commands = AllocList();
    return account;
 }
 
-void fwrite_account( ACCOUNT *account )
+void clear_account( ACCOUNT *account )
+{
+   account->socket = NULL;
+   account->name = NULL;
+   account->password = NULL;
+   account->level = LEVEL_BASIC;
+   return;
+}
+
+CHAR_SHEET *init_char_sheet( void )
+{
+   CHAR_SHEET *cSheet;
+
+   CREATE( cSheet, CHAR_SHEET, 1 );
+   clear_char_sheet( cSheet );
+   return cSheet;
+}
+
+void clear_char_sheet( CHAR_SHEET *cSheet )
+{
+   if( cSheet->name )
+      free( cSheet->name );
+   cSheet->race = 0;
+   cSheet->level = 1;
+   return;
+}
+
+CHAR_SHEET *create_char_sheet( D_MOBILE *dMob )
+{
+   CHAR_SHEET *cSheet = init_char_sheet();
+
+   cSheet->name = strdup( dMob->name );
+   cSheet->race = dMob->race;
+   cSheet->level = dMob->level;
+   return cSheet;
+}
+
+/* deletion */
+void unload_account( ACCOUNT *account )
+{
+   DetachFromList( account, account_list );
+   free_account( account );
+   return;
+}
+
+void free_account( ACCOUNT *account )
+{
+   clear_char_sheet( account );
+   FreeList( account->characters );
+
+   clear_account_command_list( account );
+   FreeList( account->commands );
+
+   if( account->name )
+      free( account->name );
+   if( account->password )
+      free( account->password );
+   account->socket = NULL;
+   free( account );
+   return;
+}
+
+void free_character_sheet( CHAR_SHEET *cSheet )
+{
+   if( cSheet->name )
+      free( cSheet->name );
+   free( cSheet );
+   return;
+}
+
+void clear_char_sheet( ACCOUNT *account )
+{
+   ITERATOR Iter;
+   CHAR_SHEET *cSheet;
+
+   AttachIterator( &Iter, account->characters );
+   while( ( cSheet = (CHAR_SHEET *)NextInList( &Iter ) ) != NULL )
+   {
+      DetachfromList( cSheet, account->characters );
+      free_character_sheet( cSheet );
+   }
+   DetachIterator( &Iter );
+
+   return;
+}
+
+void clear_account_command_list( ACCOUNT *account )
+{
+   COMMAND *com;
+   ITERATOR Iter;
+
+   if( !account->commands )
+      return;
+
+   AttachIterator(&Iter, account->commands );
+   while( ( com = (COMMAND *)NextInList(&Iter) ) != NULL )
+   {
+      DetachFromList( com, account->commands );
+      free_command( com );
+   }
+   DetachIterator(&Iter);
+   return;
+}
+
+/* i/o */
+void save_account( ACCOUNT *account )
 {
    FILE *fp;
+   CHAR_SHEET *cSheet;
+   ITERATOR Iter;
    char aDir[MAX_BUFFER], aFile[MAX_BUFFER];
 
    /* create the "file directory" for the account, so we can check if it exists */
@@ -140,66 +156,173 @@ void fwrite_account( ACCOUNT *account )
       return;
    }
 
+   fwrite_account( account, fp );
 
+   AttachIterator( &Iter, account->characters );
+   while( ( cSheet = (CHAR_SHEET *)NextInList( &Iter ) ) != NULL )
+      fwrite_char_sheet( cSheet, fp );
+   DetachIterator( &Iter );
+
+   fprintf( "%s\n", FILE_TERMINATOR );
+   fclose( fp );
+   return;
+}
+
+bool load_account( const char *location, ACCOUNT *account )
+{
+   FILE *fp;
+   CHAR_SHEET *cSheet;
+   char *word;
+   bool found, done = FALSE;
+
+   if( ( fp = fopen( location, "r" ) ) == NULL )
+      return FALSE;
+
+   word = ( feof( fp ) ? FILE_TERMINATOR : fread_word( fp ) );
+   if( strcmp( word, "#ACCOUNT" ) )
+   {
+      bug( "%s: attempting to read an account file that is not tagged as such.", __FUNCTION__ );
+      fclose( fp );
+      return FALSE;
+   }
+
+   while( !done )
+   {
+      found = FALSE;
+      switch( word[1] )
+      {
+         case 'O':
+            if( strcasecmp( word, "EOF" ) ) { done = TRUE; found = TRUE; break; }
+            break;
+         case 'A':
+            if( !strcmp( word, "#ACCOUNT" ) )
+            {
+               found = TRUE;
+               if( !fread_account( account, fp ) )
+                  found = FALSE;
+               break;
+            }
+            break;
+         case 'C':
+            if( !strcmp( word, "#CHAR_SHEET" ) )
+            {
+               if( ( cSheet = fread_char_sheet( fp ) ) != NULL )
+               {
+                  found = TRUE;
+                  AttachToList( cSheet, account->characters );
+               }
+               break;
+            }
+            break;
+      }
+      if( !found )
+      {
+         bug( "%s: bad file format %s.", __FUNCTION__, word );
+         free_account( account );
+         fclose( fp );
+         return FALSE;
+      }
+      if( !done )
+         word = ( feof ( fp ) ? FILE_TERMINATOR : fread_word( fp ) );
+   }
+   fclose( fp );
+   return TRUE;
+}
+
+void fwrite_account( ACCOUNT *account, FILE *Fp )
+{
    /* dump the data */
+   fprintf( fp, "#ACCOUNT\n" );
    fprintf( fp, "Name              %s~\n", account->name );
    fprintf( fp, "Password          %s~\n", account->password );
-   /* don't put anything above this point unless you want it included in the partial load -Davenge */
-
    fprintf( fp, "Level             %d\n", account->level );
-
-   /* make sure file has a terminator on it */
-   fprintf( fp, "%s\n", FILE_TERMINATOR );
-   fclose( fp );
-}
-
-void clear_account( ACCOUNT *account )
-{
-   account->name = NULL;
-   account->password = NULL;
-   account->level = LEVEL_BASIC;
-   account->commands = AllocList();
-   account->characters = AllocList();
+   fprintf( fp, "#END\n" );
    return;
 }
 
-void unload_account( ACCOUNT *account )
+void fwrite_char_sheet( CHAR_SHEET *cSheet, FILE *fp )
 {
-   DetachFromList( account, account_list );
-
-   clear_character_list( account );
-   FreeList( account->characters );
-   clear_account_command_list( account );
-   FreeList( account->commands );
-   account->socket = NULL;
-   free( account->name );
-   free( account->password );
-
-   PushStack( account, account_free );
+   fprintf( fp, "#CHAR_SHEET\n" );
+   fprintf( fp, "Name            %s~\n", cSheet->name );
+   fprintf( fp, "Race            %d\n", cSheet->race );
+   fprintf( fp, "Level           %d\n", cSheet->level );
+   fprintf( fp, "#END\n" );
    return;
 }
 
-ACCOUNT *check_account_reconnect(const char *act_name)
+bool fread_account( ACCOUNT *account, FILE *fp )
 {
-  ACCOUNT *account;
-  ITERATOR Iter;
+   char *word;
+   bool found, done = FALSE;
 
-  AttachIterator(&Iter, account_list);
-  while ((account = (ACCOUNT *) NextInList(&Iter)) != NULL)
-  {
-    if (!strcasecmp(account->name, act_name))
-    {
-      if (account->socket)
-        close_socket(account->socket, TRUE);
+   word = ( feof( fp ) ? "#END" : fread_word( fp ) );
 
-      break;
-    }
-  }
-  DetachIterator(&Iter);
+   while( !done )
+   {
+      found = FALSE;
 
-  return account;
+      switch( word[0] )
+      {
+         case '#':
+            if( ( !strcasecmp( word, "#END" ) ) { found = TRUE; done = TRUE; break; }
+            break;
+         case 'L':
+            IREAD( "Level", account->level );
+            break;
+         case 'N':
+            SREAD( "Name", account->name );
+            break;
+         case 'P':
+            SREAD( "Password", account->password );
+            break;
+      }
+      if( !found )
+      {
+         bug( "%s: bad file format %s", __FUNCTION__, word );
+         return FALSE;
+      }
+      if( !done )
+         word = ( feof( fp ) ? "#END" : fread_word( fp ) );
+   }
+   return TRUE;
 }
 
+CHAR_SHEET *fread_char_sheet( FILE *fp )
+{
+   CHAR_SHEET *cSheet = init_char_sheet();
+   char *word;
+   bool found, done = FALSE;
+
+   word = ( feof( fp ) ? "#END" : fread_word( fp ) );
+   while( !done )
+   {
+      found = FALSE;
+
+      switch( word[0] )
+      {
+         case '#':
+            if( !strcasecmp( word, "#END" ) ) { found = TRUE; done = TRUE; break; }
+            break;
+         case 'L':
+            IREAD( "Level", cSheet->level );
+            break;
+         case 'N':
+            SREAD( "Name", cSheet->name );
+            break;
+         case 'R':
+            IREAD( "Race", cSheet->race );
+            break;
+      }
+      if( !found )
+      {
+         bug( "%s: bad file format %s", __FUNCTION__, word );
+         free_char_sheet( cSheet );
+         return NULL;
+      }
+   }
+}
+
+/* Utility */
 void account_prompt( D_SOCKET *dsock )
 {
    /* should convert to lua later */
@@ -232,6 +355,27 @@ void account_prompt( D_SOCKET *dsock )
    return;
 }
 
+ACCOUNT *check_account_reconnect(const char *act_name)
+{
+  ACCOUNT *account;
+  ITERATOR Iter;
+
+  AttachIterator(&Iter, account_list);
+  while ((account = (ACCOUNT *) NextInList(&Iter)) != NULL)
+  {
+    if (!strcasecmp(account->name, act_name))
+    {
+      if (account->socket)
+        close_socket(account->socket, TRUE);
+
+      break;
+    }
+  }
+  DetachIterator(&Iter);
+
+  return account;
+}
+
 void load_account_commands( ACCOUNT *account )
 {
    COMMAND *com;
@@ -248,80 +392,59 @@ void load_account_commands( ACCOUNT *account )
    return;
 }
 
-void clear_account_command_list( ACCOUNT *account )
+
+bool char_list_add( ACCOUNT *account, D_MOBILE *player )
 {
-   COMMAND *com;
-   ITERATOR Iter;
+   CHAR_SHEET *cSheet;
 
-   if( !account->commands )
-      return;
-
-   AttachIterator(&Iter, account->commands );
-   while( ( com = (COMMAND *)NextInList(&Iter) ) != NULL )
-   {
-      DetachFromList( com, account->commands );
-      free_command( com );
-   }
-   DetachIterator(&Iter);
-   return;
-}
-
-void clear_character_list( ACCOUNT *account )
-{
-   D_MOBILE *character;
-   ITERATOR Iter;
-
-   if( !account->characters )
-      return;
-
-   AttachIterator( &Iter, account->characters );
-   while( ( character = ( D_MOBILE *)NextInList( &Iter ) ) != NULL )
-   {
-      char_list_remove( account, character );
-      unload_mobile( character, FALSE );
-   }
-   DetachIterator( &Iter );
-   return;
-}
-
-void char_list_add( ACCOUNT *account, D_MOBILE *player )
-{
    if( !player )
    {
       bug( "%s: trying to add a NULL player to %s's account.", __FUNCTION__, account->name );
-      return;
+      return FALSE;
    }
    if( SizeOfList( account->characters ) >= MAX_CHARACTER )
    {
       bug( "%s: trying to add a char to a full char_list on account: %s", __FUNCTION__, account->name );
-      unload_mobile( player, FALSE );
-      return;
+      return FALSE;
    }
-   player->account = account;
-   AttachToList( player, account->characters );
-   return;
+   cSheet = create_char_sheet( player );
+   AttachToList( cSheet, account->characters );
+   return TRUE;
 }
 
-void char_list_remove( ACCOUNT *account, D_MOBILE *player )
+bool char_list_remove( ACCOUNT *account, D_MOBILE *player )
 {
+   CHAR_SHEET *cSheet;
+   ITERATOR Iter;
+
    if( !player )
    {
       bug( "%s: trying to remove a NULL player from %s's char list.", __FUNCTION__, account->name );
-      return;
+      return FALSE;
    }
 
    if( SizeOfList( account->characters ) <= 0 )
    {
       bug( "%s: trying to remove a player from a list that is empty on %s's account.", __FUNCTION__, account->name );
-      return;
+      return FALSE;
    }
-   player->account = NULL;
-   DetachFromList( player, account->characters );
-   return;
+
+   AttachIterator( account->characters );
+   while( ( cSheet = (CHAR_SHEET *)NextInList( &Iter ) ) != NULL )
+      if( !strcmp( cSheet->name, player->name ) )
+      {
+         DetachFromList( cSheet, account->characters );
+         DetachIterator( &Iter );
+         free_char_sheet( cSheet );
+         return TRUE;
+      }
+   DetachIterator( &Iter );
+   return FALSE;
 }
 
-/* Account Commands - Davenge */
-/*----------------------------*/
+/********************
+ * Account Commands *
+ ********************/
 void act_quit( void *passed, char *argument )
 {
    ACCOUNT *account = (ACCOUNT *)passed;

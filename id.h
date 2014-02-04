@@ -4,11 +4,6 @@
 
 extern LIST *id_handlers;
 
-typedef enum
-{
-   RFRAME_HANDLER, MAX_ID_HANDLER
-} id_handler_types;
-
 struct id_handler
 {
    LIST *free_ids;

@@ -9,6 +9,120 @@
  * Utility Methods *
  *******************/
 
+/* creation */
+
+D_MOBILE *init_mobile( void )
+{
+   D_MOBILE *dMob;
+
+   CREATE( dMob, D_MOBILE, 1 );
+   clear_mobile( dMob );
+   dMob->events = AllocList();
+   dMob->commands = AllocList();
+   return dMob;
+}
+
+void clear_mobile( D_MOBILE *dMob )
+{
+   dMob->socket = NULL;
+   dMob->name = NULL;
+   dMob->passowrd = NULL;
+   dMob->level = 0;
+   dMob->race = 0;
+   dMob->account = NULL;
+   dMob->ent_wrapper = NULL;
+   dMob->at_coord = NULL;
+   dMob->workspace = NULL;
+   return;
+}
+
+/* deletion */
+void unload_mobile( D_MOBILE *dMob )
+{
+   DetachFromList( dMob, dmobile_list );
+   free_mobile( dMob );
+   return;
+}
+
+void free_mobile( D_MOBILE *dMob )
+{
+   clear_mobile_event_list( dMob );
+   FreeList( dMob->events );
+
+   clear_mobile_command_list( dMob );
+   FreeList( dMob->commands );
+
+   dMob->socket = NULL;
+
+   if( dMob->name )
+      free( dMob->name );
+   if( dMob->password )
+      free( dMob->password );
+   dMob->account = NULL;
+   dMob->ent_wrapper = NULL; /* this needs work */
+   dMob->at_coord = NULL;
+   dMob->workspace = NULL; /* this needs work */
+   free( dMob );
+}
+
+void clear_mobile_command_list( D_MOBILE *dMob )
+{
+   COMMAND *com;
+   ITERATOR Iter;
+
+   if( !dMob->commands )
+      return;
+
+   AttachIterator(&Iter, dMob->commands );
+   while( ( com = (COMMAND *)NextInList(&Iter) ) != NULL )
+   {
+      DetachFromList( com, dMob->commands );
+      free_command( com );
+   }
+   DetachIterator(&Iter);
+   return;
+}
+
+void clear_mobile_event_list( D_MOBILE *dMob )
+{
+   EVENT_DATA *pEvent;
+   ITERATOR Iter;
+
+   if( !dMob->events )
+      return;
+
+   AttachIterator(&Iter, dMob->events);
+   while ((pEvent = (EVENT_DATA *) NextInList(&Iter)) != NULL)
+     dequeue_event(pEvent);
+   DetachIterator(&Iter);
+   return;
+}
+
+void save_mobile( D_MOBILE *dMob )
+{
+   FILE *fp;
+   char location[MAX_BUFFER];
+
+   if( !valid_mobile( dMob ) )
+      return;
+
+   swtich( dMob->level )
+   {
+      default:
+         bug( "%s: attempting to save unknown level type.", __FUNCTION__ );
+         return;
+      case LEVEL_NPC:
+         log_string( "%s: not ready to save NPCs yet.", __FUNCTION__ );
+         return;
+      case LEVEL_PLAYER:
+      case LEVEL_ADMIN:
+      case LEVEL_GOD:
+         mud_printf( location, "../players/%s.pfile", capitalize( dMob->name ) );
+         break;
+   }
+}
+
+
 /* Method to save any mobile to its proper place */
 
 void save_mobile( D_MOBILE *dMob )
@@ -185,7 +299,7 @@ void load_mobile( ACCOUNT *account, char *player, bool partial, D_MOBILE *dMob )
          }
          if( !found )
          {
-            bug( "Load_player: unexpected '%s' in %s.", word, pFile );
+            bug( "%s: unexpected '%s' in %s.", __FUNCTION__, word, pFile );
             unload_mobile( dMob, FALSE );
             dMob = NULL;
             return;
@@ -194,9 +308,9 @@ void load_mobile( ACCOUNT *account, char *player, bool partial, D_MOBILE *dMob )
          if( !done )
             word = fread_word(fp);
       }
-      fclose( fp );
       if( !partial )
       {
+         fclose( fp );
          mud_printf( gFile, "../accounts/%s/%s.gfile", capitalize( account->name), capitalize( player ) );
          if( ( fp = fopen( gFile, "r" ) ) == NULL )
          {
@@ -222,7 +336,7 @@ void load_mobile( ACCOUNT *account, char *player, bool partial, D_MOBILE *dMob )
             }
             if( !found )
             {
-               bug( "Load_player: unexpected '%s' in %s.", word, gFile );
+               bug( "%s: unexpected '%s' in %s.", __FUNCTION__, word, gFile );
                unload_mobile( dMob, FALSE );
                dMob = NULL;
                return;
@@ -279,7 +393,7 @@ void fread_mobile_account_data( FILE *fp, D_MOBILE *dMob )
     }
     if (!found)
     {
-      bug("Load_player: unexpected '%s' in %s.", word, dMob->name);
+      bug("%s: unexpected '%s' in %s.", __FUNCTION__, word, dMob->name);
       unload_mobile( dMob, FALSE );
       dMob = NULL;
       return;
@@ -341,39 +455,6 @@ void load_mobile_commands( D_MOBILE *dMob )
          com = copy_command( tabCmd[x] );
          AttachToList( com, dMob->commands );
       }
-   return;
-}
-
-void clear_mobile_command_list( D_MOBILE *dMob )
-{
-   COMMAND *com;
-   ITERATOR Iter;
-
-   if( !dMob->commands )
-      return;
-
-   AttachIterator(&Iter, dMob->commands );
-   while( ( com = (COMMAND *)NextInList(&Iter) ) != NULL )
-   {
-      DetachFromList( com, dMob->commands );
-      free_command( com );
-   }
-   DetachIterator(&Iter);
-   return;
-}
-
-void clear_mobile_event_list( D_MOBILE *dMob )
-{
-   EVENT_DATA *pEvent;
-   ITERATOR Iter;
-
-   if( !dMob->events )
-      return;
-
-   AttachIterator(&Iter, dMob->events);
-   while ((pEvent = (EVENT_DATA *) NextInList(&Iter)) != NULL)
-     dequeue_event(pEvent);
-   DetachIterator(&Iter);
    return;
 }
 

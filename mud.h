@@ -12,6 +12,7 @@
 #include <string.h>
 #include <stdio.h>
 #include <regex.h>
+#include <dirent.h>
 #include "list.h"
 #include "stack.h"
 
@@ -77,6 +78,44 @@ typedef enum {
 /* define simple types */
 typedef  unsigned char     bool;
 typedef  short int         sh_int;
+
+/* The levels an account can be */
+typedef enum {
+   LEVEL_BASIC, LEVEL_ENFORCER, LEVEL_DEVELOPER, LEVEL_OWNER, MAX_ACCOUNT_LEVEL
+} account_levels;
+
+/* Global Coordinate Variables */
+#define MAX_COORD_HASH     1000
+
+typedef enum {
+   DIR_NORTH, DIR_EAST, DIR_SOUTH, DIR_WEST, DIR_UP, DIR_DOWN, MAX_DIRECTION
+} direction_integers;
+
+typedef enum
+{
+   ROOM_FRAME, MAX_FRAMEWORK
+} framework_name_ids;
+
+typedef enum
+{
+   RFRAME_HANDLER, WORKSPACE_HANDLER, MAX_ID_HANDLER
+} id_handler_types;
+
+#define MAX_NANNY_STATES 10
+
+typedef enum {
+   NANNY_CREATE_CHARACTER, NANNY_TERMINATOR, MAX_NANNY_TYPE
+} nanny_types;
+
+typedef enum {
+   NANNY_ASK_CHARACTER_NAME, NANNY_ADDITIONAL_PASSWORD, NANNY_CONFIRM_ADDITIONAL_PASSWORD, NANNY_PICK_RACE, MAX_CHARACTER_NANNY_STATE
+} character_nanny_states;
+
+typedef enum
+{
+   WORKSPACE_PUBLIC, WORKSPACE_PRIVATE, MAX_WORKSPACE_TYPE
+} workspace_permissions;
+
 
 /******************************
  * End of standard definitons *
@@ -156,6 +195,7 @@ typedef struct cmdFlag CMD_FLAG;
 typedef struct workspace WORKSPACE;
 typedef struct framework FRAMEWORK;
 typedef struct room_framework R_FRAMEWORK;
+typedef struct character_sheet CHAR_SHEET;
 
 /* the actual structures */
 struct dSocket

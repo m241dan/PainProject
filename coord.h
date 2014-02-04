@@ -3,14 +3,7 @@
    Written by Davenge */
 
 
-/* Global Coordinate Variables */
-#define MAX_COORD_HASH     1000
-
 extern LIST *coord_map[MAX_COORD_HASH];
-
-typedef enum {
-   DIR_NORTH, DIR_EAST, DIR_SOUTH, DIR_WEST, DIR_UP, DIR_DOWN, MAX_DIRECTION
-} direction_integers;
 
 struct coordinate
 {
