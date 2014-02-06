@@ -27,7 +27,7 @@ void clear_mobile( D_MOBILE *dMob )
    dMob->socket = NULL;
    dMob->name = NULL;
    dMob->password = NULL;
-   dMob->level = 0;
+   dMob->level = LEVEL_NPC;
    dMob->race = 0;
    dMob->account = NULL;
    dMob->ent_wrapper = NULL;
@@ -109,7 +109,7 @@ void save_mobile( D_MOBILE *dMob )
    switch( dMob->level )
    {
       default:
-         bug( "%s: attempting to save unknown level type.", __FUNCTION__ );
+         bug( "%s: attempting to save unknown level '%d'.", __FUNCTION__, dMob->level );
          return;
       case LEVEL_NPC:
          mud_printf( location, "../instances/mobiles/npcs/%s%d.instance", capitalize( dMob->name ), dMob->id->id );
@@ -175,7 +175,6 @@ bool load_mobile( const char *location, D_MOBILE *dMob )
       if( !found )
       {
          bug( "%s: bad file format %s.", __FUNCTION__, word );
-         free_mobile( dMob );
          fclose( fp );
          return FALSE;
       }
@@ -191,6 +190,7 @@ void fwrite_mobile ( D_MOBILE *dMob, FILE *fp )
    fprintf( fp, "#MOBILE\n" );
    fprintf( fp, "Name          %s~\n", dMob->name );
    fprintf( fp, "Password      %s~\n", dMob->password );
+   fprintf( fp, "Account       %s~\n", dMob->account->name );
    fprintf( fp, "Level         %d\n", dMob->level );
    fprintf( fp, "Race          %d\n", dMob->race );
    fprintf( fp, "#END\n" );
@@ -212,6 +212,18 @@ bool fread_mobile( D_MOBILE *dMob, FILE *fp )
       {
          case '#':
             if( !strcasecmp( word, "#END" ) ) { found = TRUE; done = TRUE; break; }
+            break;
+         case 'A':
+            if( !strcmp( word, "Account" ) )
+            {
+               found = TRUE;
+               if( ( dMob->account = get_account_from_name( fread_string( fp ) ) ) == NULL )
+               {
+                  bug( "%s: can't find account from name.", __FUNCTION__ );
+                  found = FALSE;
+               }
+               break;
+            }
             break;
          case 'L':
             IREAD( "Level", dMob->level );

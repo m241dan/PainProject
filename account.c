@@ -192,7 +192,7 @@ bool load_account( const char *location, ACCOUNT *account )
       switch( word[1] )
       {
          case 'O':
-            if( strcasecmp( word, "EOF" ) ) { done = TRUE; found = TRUE; break; }
+            if( !strcasecmp( word, "EOF" ) ) { done = TRUE; found = TRUE; break; }
             break;
          case 'A':
             if( !strcmp( word, "#ACCOUNT" ) )
@@ -218,7 +218,6 @@ bool load_account( const char *location, ACCOUNT *account )
       if( !found )
       {
          bug( "%s: bad file format %s.", __FUNCTION__, word );
-         free_account( account );
          fclose( fp );
          return FALSE;
       }
@@ -319,6 +318,8 @@ CHAR_SHEET *fread_char_sheet( FILE *fp )
          free_character_sheet( cSheet );
          return NULL;
       }
+      if( !done )
+         word = ( feof( fp ) ? "#END" : fread_word( fp ) );
    }
    return cSheet;
 }
@@ -328,7 +329,7 @@ void account_prompt( D_SOCKET *dsock )
 {
    /* should convert to lua later */
    COMMAND *command;
-   D_MOBILE *character;
+   CHAR_SHEET *character;
    BUFFER *buf = buffer_new(MAX_BUFFER);
    ITERATOR Iter;
    int count = 0;
@@ -344,7 +345,7 @@ void account_prompt( D_SOCKET *dsock )
       bprintf( buf, "\r\nCharacters:\r\n" );
 
       AttachIterator( &Iter, dsock->account->characters );
-      while( ( character = (D_MOBILE *)NextInList( &Iter ) ) != NULL )
+      while( ( character = (CHAR_SHEET *)NextInList( &Iter ) ) != NULL )
          bprintf( buf, "%s the %s\r\n", character->name, race_table[character->race] );
       DetachIterator( &Iter );
    }
@@ -441,6 +442,19 @@ bool char_list_remove( ACCOUNT *account, D_MOBILE *player )
       }
    DetachIterator( &Iter );
    return FALSE;
+}
+
+ACCOUNT *get_account_from_name( const char *name )
+{
+   ACCOUNT *account;
+   ITERATOR Iter;
+
+   AttachIterator( &Iter, account_list );
+   while( ( account = (ACCOUNT *)NextInList( &Iter ) ) != NULL )
+      if( !strcmp( account->name, name ) )
+         break;
+   DetachIterator( &Iter );
+   return account;
 }
 
 /* retrieval */

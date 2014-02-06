@@ -167,7 +167,6 @@ bool load_id_handler( ID_HANDLER *handler )
       if( !found )
       {
          bug( "%s: word key not known, %s", __FUNCTION__, word );
-         free_id_handler( handler );
          return FALSE;
       }
       if( !done )

@@ -21,7 +21,7 @@ NANNY *init_nanny( int type )
    {
       case NANNY_CREATE_CHARACTER:
          nanny->creation = init_mobile();
-         ((D_MOBILE *)nanny)->level = LEVEL_PLAYER;
+         ((D_MOBILE *)nanny->creation)->level = LEVEL_PLAYER;
          break;
    }
 
@@ -239,10 +239,11 @@ void nanny_complete_character( D_SOCKET *dsock )
 
    text_to_buffer( dsock, "New Character Successfully Created\r\n\r\n" );
    char_list_add( dsock->account, new_char );
+   new_char->account = dsock->account;
    save_mobile( new_char );
    unload_mobile( new_char );
-
    unload_nanny( dsock->nanny );
+   save_account( dsock->account );
    change_socket_state( dsock,  STATE_ACCOUNT );
    return;
 }

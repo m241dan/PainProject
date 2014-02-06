@@ -51,6 +51,7 @@ bool load_workspaces( void )
       mud_printf( location, "../workspaces/%s", entry->d_name );
       if( !load_workspace( location, wSpace ) )
       {
+         free_workspace( wSpace );
          bug( "%s: could not load workspace from file %s.", __FUNCTION__, location );
          continue;
       }
@@ -111,7 +112,6 @@ bool load_workspace( const char *location, WORKSPACE *wSpace )
             if( !strcmp( word, "#WORKSPACE" ) )
             {
                found = TRUE;
-               fread_workspace( wSpace, fp );
                break;
             }
             break;
@@ -127,7 +127,6 @@ bool load_workspace( const char *location, WORKSPACE *wSpace )
       if( !found )
       {
          bug( "%s: bad file format %s.", __FUNCTION__, word );
-         free_workspace( wSpace );
          fclose( fp );
          return FALSE;
       }
@@ -191,7 +190,6 @@ void fread_workspace( WORKSPACE *wSpace, FILE *fp )
       if( !found )
       {
          bug( "%s: bad file format %s.", __FUNCTION__, word );
-         free_workspace( wSpace );
          return;
       }
       if( !done )

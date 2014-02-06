@@ -228,11 +228,5 @@ bool valid_mobile( D_MOBILE *dMob )
       bug( "%s: attempting to save a mobile with no name.", __FUNCTION__ );
       return FALSE;
    }
-
-   if( dMob->level >= LEVEL_PLAYER && ( !dMob->account || !dMob->account->name || dMob->account->name[0] == '\0' ) )
-   {
-      bug( "%s: attempting to save with no account.", __FUNCTION__ );
-      return FALSE;
-   }
    return TRUE;
 }

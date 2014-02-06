@@ -61,6 +61,7 @@ ACCOUNT *check_account_reconnect( const char *act_name );
 void load_account_commands args( ( ACCOUNT *account ) );
 bool char_list_add( ACCOUNT *account, D_MOBILE *player );
 bool char_list_remove( ACCOUNT *account, D_MOBILE *player );
+ACCOUNT *get_account_from_name( const char *name );
 
 /* retrieval */
 

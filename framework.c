@@ -113,6 +113,7 @@ bool load_frameworks( void )
          mud_printf( location, "%s%s", dir_name, entry->d_name );
          if( !load_framework( location, fWork ) )
          {
+            free_framework( fWork );
             bug( "%s: could not load framework %s from file.", __FUNCTION__, location );
             continue;
          }
@@ -201,7 +202,6 @@ bool load_framework( const char *location, FRAMEWORK *frame )
       if( !found )
       {
          bug( "%s: word key not known, %s", __FUNCTION__, word );
-         free_framework( frame );
          return FALSE;
       }
       if( !done )
