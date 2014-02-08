@@ -23,6 +23,9 @@ NANNY *init_nanny( int type )
          nanny->creation = init_mobile();
          ((D_MOBILE *)nanny->creation)->level = LEVEL_PLAYER;
          break;
+      case NANNY_CHAR_PASS_CHECK:
+         nanny->creation = init_mobile();
+         break;
    }
 
    return nanny;
@@ -47,14 +50,24 @@ void unload_nanny( NANNY *nanny )
 
 void free_nanny( NANNY *nanny )
 {
-   if( nanny->socket )
-      nanny->socket->nanny = NULL; /* unhook from socket */
-   if( nanny->creation )
-      nanny->creation = NULL;
+   nanny->socket->nanny = NULL; /* unhook from socket */
+   switch( nanny->type )
+   {
+      case NANNY_CREATE_CHARACTER:
+      case NANNY_CHAR_PASS_CHECK:
+         unload_mobile( (D_MOBILE *)nanny->creation );
+         break;
+   }
+   nanny->creation = NULL;
    return;
 }
 
 /* general utiltiy */
+
+D_MOBILE *nanny_to_player( NANNY *nanny )
+{
+   return (D_MOBILE *)dsock->nanny->creation;
+}
 
 /* This method changes the state of the nanny and spits out the corresponding message -Davenge */
 void change_nanny_state( NANNY *nanny, int state, bool message )
@@ -62,7 +75,7 @@ void change_nanny_state( NANNY *nanny, int state, bool message )
    char output[MAX_BUFFER];
 
    nanny->state = state;
-   if( ( nanny->state == NANNY_ADDITIONAL_PASSWORD || nanny->state == NANNY_CONFIRM_ADDITIONAL_PASSWORD ) && nanny->type == NANNY_CREATE_CHARACTER )
+   if( ( nanny->state == NANNY_CHAR_PASS_CHECK_CONFIRM || nanny->state == NANNY_ADDITIONAL_PASSWORD || nanny->state == NANNY_CONFIRM_ADDITIONAL_PASSWORD ) && ( nanny->type == NANNY_CREATE_CHARACTER || nanny->type == NANNY_CHAR_PASS_CHECK )  )
       text_to_buffer( nanny->socket, (char *) dont_echo );
 
    if( !message )
@@ -104,6 +117,9 @@ void nanny_handle_input( D_SOCKET *dsock, char *arg )
          return;
       case NANNY_CREATE_CHARACTER:
          nanny_create_character( dsock, arg );
+         return;
+      case NANNY_CHAR_PASS_CHECK:
+         nanny_character_password_check( dsock, arg );
          return;
    }
 }
@@ -252,3 +268,23 @@ void nanny_complete_character( D_SOCKET *dsock )
  * END CHARACTER CREATION NANNY *
  ********************************/
 
+/******************************
+ * Character Password Checker *
+ ******************************/
+
+/* Doesn't need an individual control method, only has one step... for now */
+
+void nanny_character_password_check( D_SOCK *dsock, char *arg )
+{
+   text_to_buffer(dsock, (char *) do_echo);
+   if( strcmp( crypt( arg, dsock->account->name ), ((D_MOBILE *)dsock->nanny->creation)->password ) )
+   {
+      text_to_buffer( dsock, "Invalid password\r\n" );
+      free_nanny( dsock->nanny );
+      change_socket_state( dsock, dsock->previous_state );
+      return;
+   }
+   control_player( dsock, nanny_to_player( dsock->nanny ) );
+   char_to_game( dsock->player );
+   change_socket_state( dsock, STATE_PLAYING );
+}

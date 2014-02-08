@@ -10,6 +10,14 @@ struct entity
    int type;
 };
 
+
+/* creation */
+ENTITY *init_entity( void );
+void clear_entity( ENTITY *ent );
+
+/* deletion */
+void free_entity( ENTITY *ent );
+
 /*******************
  * Utility Methods *
  *******************/

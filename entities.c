@@ -4,16 +4,38 @@
 
 #include "mud.h"
 
+/* creation */
+ENTITY *init_entity( void )
+{
+   ENTITY *ent;
+
+   CREATE( ent, ENTITY, 1 ):
+   clear_entity( ent );
+   return ent;
+}
+
+void clear_entity( ENTITY *ent )
+{
+   ent->passed = NULL;
+   ent->type = -1;
+   return;
+}
+
+/* deletion */
+void free_entity( ENTITY *ent )
+{
+   ent->passed = NULL;
+   free( ent );
+   return;
+}
 /*******************
  * Utility Methods *
  *******************/
 
 void wrap_entity( void *passed, int type )
 {
-   ENTITY *ent;
+   ENTITY *ent = init_entity();
 
-   CREATE( ent, ENTITY, 1 );
-   ent->content = passed;
    ent->type = type;
    switch( type )
    {

@@ -510,7 +510,7 @@ void act_create_char( void *passed, char *argument )
       text_to_buffer( account->socket, "You cannot do that.\r\n" );
       return;
    }
-   account->socket->state = STATE_NANNY;
+   change_socket_state( account->socket, STATE_NANNY );
    account->socket->nanny = init_nanny( NANNY_CREATE_CHARACTER );
    account->socket->nanny->socket = account->socket; /* hook the nanny up to our socket for messaging */
    change_nanny_state( account->socket->nanny, NANNY_ASK_CHARACTER_NAME, TRUE );

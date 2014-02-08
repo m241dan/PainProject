@@ -1150,6 +1150,7 @@ void recycle_sockets()
  */
 void change_socket_state( D_SOCKET *dsock, int state )
 {
+   dsock->previous_state = dsock->state;
    dsock->state = state;
    switch( state )
    {
@@ -1160,5 +1161,14 @@ void change_socket_state( D_SOCKET *dsock, int state )
          load_account_commands( dsock->account );
          break;
    }
+   return;
+}
+
+/* Set this socket up to control given player */
+
+void control_player( D_SOCKET *dsock, D_MOBILE *player )
+{
+   dsock->player = player;
+   player->socket = dsock;
    return;
 }

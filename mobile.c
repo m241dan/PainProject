@@ -59,7 +59,11 @@ void free_mobile( D_MOBILE *dMob )
    if( dMob->password )
       free( dMob->password );
    dMob->account = NULL;
+
+   if( dMob->ent_wrapper )
+      free_entity( dMob->ent_wrapper );
    dMob->ent_wrapper = NULL; /* this needs work */
+
    dMob->at_coord = NULL;
    dMob->workspace = NULL; /* this needs work */
    free( dMob );
@@ -267,11 +271,14 @@ void load_mobile_commands( D_MOBILE *dMob )
    return;
 }
 
-void char_to_game( D_SOCKET *dsock, D_MOBILE *dMob )
+void char_to_game( D_MOBILE *dMob )
 {
    dsock->bust_prompt = TRUE;
    AttachToList( dMob, dmobile_list );
    text_to_buffer( dsock, "You enter the Mud.\r\n" );
+
+   if( !dMob->ent_wrapper )
+      wrap_entity( dMob, MOBILE_ENTITY );
 
    /* a temporary hack */
    if( !check_coord( 0, 0, 0 ) )
@@ -292,6 +299,11 @@ void mob_to_coord( D_MOBILE *dMob, COORD *coordinate)
    if( !coordinate )
    {
       bug( "%s: attempting to move %s to a NULL coordinate", __FUNCTION__, dMob->name );
+      return;
+   }
+   if( dMob->ent_wrapper )
+   {
+      bug( "%s: %s does not have an entity wrapper.", __FUNCTION__, dMob->name );
       return;
    }
    dMob->at_coord = coordinate;

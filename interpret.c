@@ -121,10 +121,13 @@ void new_handle_cmd_input(D_SOCKET *dsock, char *arg)
       while( ( character = (CHAR_SHEET *)NextInList( &Iter ) ) != NULL )
          if( !strcasecmp( command, character->name ) )
          {
-            dsock->player = init_mobile();
-            load_mobile( get_loc_from_char_sheet( character ), dsock->player );
+            found_cmd = TRUE;
+            change_socket_state( dsock, STATE_NANNY );
+            dsock->nanny = init_nanny( NANNY_CHAR_PASS_CHECK );
+            change_nanny_state( dsock->nanny, NANNY_CHAR_PASS_CHECK_CONFIRM, TRUE );
+            load_mobile( get_loc_from_char_sheet( character ), (D_MOBILE *)dsock->nanny->creation );
+         }
             char_to_game( dsock, dsock->player );
-            dsock->player->socket = dsock;
             wrap_entity( dsock->player, MOBILE_ENTITY );
             change_socket_state( dsock, STATE_PLAYING );
             found_cmd = TRUE;

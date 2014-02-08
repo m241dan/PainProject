@@ -104,13 +104,16 @@ typedef enum
 #define MAX_NANNY_STATES 10
 
 typedef enum {
-   NANNY_CREATE_CHARACTER, NANNY_TERMINATOR, MAX_NANNY_TYPE
+   NANNY_CREATE_CHARACTER, NANNY_CHAR_PASS_CHECK, NANNY_TERMINATOR, MAX_NANNY_TYPE
 } nanny_types;
 
 typedef enum {
    NANNY_ASK_CHARACTER_NAME, NANNY_ADDITIONAL_PASSWORD, NANNY_CONFIRM_ADDITIONAL_PASSWORD, NANNY_PICK_RACE, MAX_CHARACTER_NANNY_STATE
 } character_nanny_states;
 
+typedef enum {
+   NANNY_CHAR_PASS_CHECK_CONFIRM, MAX_CHAR_PASS_CHECK_STATE
+} char_pass_check_states;
 typedef enum
 {
    WORKSPACE_PUBLIC, WORKSPACE_PRIVATE, MAX_WORKSPACE_TYPE
@@ -209,6 +212,7 @@ struct dSocket
   bool            bust_prompt;
   sh_int          lookup_status;
   sh_int          state;
+  sh_int          previous_state;
   sh_int          control;
   sh_int          top_output;
   unsigned char   compressing;                 /* MCCP support */
@@ -344,6 +348,8 @@ void  clear_socket            ( D_S *sock_new, int sock );
 void  recycle_sockets         ( void );
 void *lookup_address          ( void *arg );
 void change_socket_state( D_S *dsock, int state );
+void control_player( D_SOCKET *dsock, D_MOBILE *player );
+
 /*
  * interpret.c
  */
