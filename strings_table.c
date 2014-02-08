@@ -38,7 +38,7 @@ const char *const id_handler_names[MAX_ID_HANDLER+1] = {
 
 const char *const nanny_strings[MAX_NANNY_TYPE][MAX_NANNY_STATES] = {
    { "What would you like to name this character?", "(Optional)Enter an Additional Password(blank space for none): ", "Retype Password to Confirm: ", "Please type in your race: ", "" }, /* type 1 Nanny */
-   { "Password: " }, /* NANNY_CHAR_PASS_CHECK */
+   { "Password?" }, /* NANNY_CHAR_PASS_CHECK */
    /* The terminator */
    { "" }
 };

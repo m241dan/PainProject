@@ -25,6 +25,7 @@ void unload_nanny( NANNY *nanny );
 void free_nanny( NANNY *nanny );
 
 /* general utility */
+void set_nanny_creation( NANNY *nanny, void *passed );
 D_MOBILE *nanny_to_player( NANNY *nanny );
 void change_nanny_state( NANNY *nanny, int state, bool message );
 void nanny_handle_input( D_SOCKET *dsock, char *arg );

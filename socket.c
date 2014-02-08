@@ -962,8 +962,7 @@ void handle_new_connections(D_SOCKET *dsock, char *arg)
       text_to_buffer(dsock, (char *) dont_echo);
 
       /* socket <-> player */
-      a_new->socket = dsock;
-      dsock->account = a_new;
+      control_account( dsock, a_new );
       break;
     case STATE_NEW_PASSWORD:
       if (strlen(arg) < 5 || strlen(arg) > 12)
@@ -1028,8 +1027,7 @@ void handle_new_connections(D_SOCKET *dsock, char *arg)
         {
           /* attach the new player */
           free_account(dsock->account);
-          dsock->account = a_new;
-          a_new->socket = dsock;
+          control_account( dsock, a_new );
 
           log_string("%s has reconnected.", dsock->account->name);
 
@@ -1170,5 +1168,19 @@ void control_player( D_SOCKET *dsock, D_MOBILE *player )
 {
    dsock->player = player;
    player->socket = dsock;
+   return;
+}
+
+void control_nanny( D_SOCKET *dsock, NANNY *nanny )
+{
+   dsock->nanny = nanny;
+   nanny->socket = dsock;
+   return;
+}
+
+void control_account( D_SOCKET *dsock, ACCOUNT *account )
+{
+   dsock->account = account;
+   account->socket = dsock;
    return;
 }

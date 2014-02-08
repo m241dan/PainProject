@@ -37,6 +37,7 @@ void wrap_entity( void *passed, int type )
    ENTITY *ent = init_entity();
 
    ent->type = type;
+   ent->content = passed;
    switch( type )
    {
       case MOBILE_ENTITY:

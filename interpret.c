@@ -117,15 +117,35 @@ void new_handle_cmd_input(D_SOCKET *dsock, char *arg)
    if( !found_cmd && dsock->state == STATE_ACCOUNT && SizeOfList( dsock->account->characters ) >= 1 )
    {
       CHAR_SHEET *character;
+      D_MOBILE *player;
+      NANNY *nanny;
       AttachIterator( &Iter, dsock->account->characters );
       while( ( character = (CHAR_SHEET *)NextInList( &Iter ) ) != NULL )
          if( !strcasecmp( command, character->name ) )
          {
             found_cmd = TRUE;
-            change_socket_state( dsock, STATE_NANNY );
-            dsock->nanny = init_nanny( NANNY_CHAR_PASS_CHECK );
-            change_nanny_state( dsock->nanny, NANNY_CHAR_PASS_CHECK_CONFIRM, TRUE );
-            load_mobile( get_loc_from_char_sheet( character ), (D_MOBILE *)dsock->nanny->creation );
+            player = init_mobile();
+            if( !load_mobile( get_loc_from_char_sheet( character ), player ) )
+            {
+               text_to_buffer( dsock, "The pFile could not be loaded.\r\n" );
+               bug( "%s: could not load the mobile %s.", __FUNCTION__, character->name );
+               free_mobile( player );
+               return;
+            }
+            if( player->password && player->password[0] != '\0' )
+            {
+               change_socket_state( dsock, STATE_NANNY );
+               nanny = init_nanny( NANNY_CHAR_PASS_CHECK );
+               control_nanny( dsock, nanny );
+               set_nanny_creation( nanny, player );
+               change_nanny_state( dsock->nanny, NANNY_CHAR_PASS_CHECK_CONFIRM, TRUE );
+            }
+            else
+            {
+               control_player( dsock, player );
+               char_to_game( player );
+               change_socket_state( dsock, STATE_PLAYING );
+            }
          }
       DetachIterator( &Iter );
    }

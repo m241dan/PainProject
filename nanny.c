@@ -64,10 +64,18 @@ void free_nanny( NANNY *nanny )
 
 /* general utiltiy */
 
+void set_nanny_creation( NANNY *nanny, void *passed )
+{
+   nanny->creation = passed;
+   return;
+}
+
 D_MOBILE *nanny_to_player( NANNY *nanny )
 {
    return (D_MOBILE *)nanny->creation;
 }
+
+
 
 /* This method changes the state of the nanny and spits out the corresponding message -Davenge */
 void change_nanny_state( NANNY *nanny, int state, bool message )
@@ -75,14 +83,16 @@ void change_nanny_state( NANNY *nanny, int state, bool message )
    char output[MAX_BUFFER];
 
    nanny->state = state;
-   if( ( nanny->state == NANNY_CHAR_PASS_CHECK_CONFIRM || nanny->state == NANNY_ADDITIONAL_PASSWORD || nanny->state == NANNY_CONFIRM_ADDITIONAL_PASSWORD ) && ( nanny->type == NANNY_CREATE_CHARACTER || nanny->type == NANNY_CHAR_PASS_CHECK )  )
+   if( ( nanny->state == NANNY_ADDITIONAL_PASSWORD || nanny->state == NANNY_CONFIRM_ADDITIONAL_PASSWORD ) && nanny->type == NANNY_CREATE_CHARACTER )
+      text_to_buffer( nanny->socket, (char *) dont_echo );
+   if( nanny->state == NANNY_CHAR_PASS_CHECK_CONFIRM && nanny->type == NANNY_CHAR_PASS_CHECK )
       text_to_buffer( nanny->socket, (char *) dont_echo );
 
-   if( !message )
-      return;
-
-   snprintf( output, MAX_BUFFER, "%s\r\n", nanny_strings[nanny->type][nanny->state] );
-   text_to_buffer( nanny->socket, output );
+   if( message )
+   {
+      snprintf( output, MAX_BUFFER, "%s\r\n", nanny_strings[nanny->type][nanny->state] );
+      text_to_buffer( nanny->socket, output );
+   }
    return;
 }
 
@@ -257,7 +267,6 @@ void nanny_complete_character( D_SOCKET *dsock )
    char_list_add( dsock->account, new_char );
    new_char->account = dsock->account;
    save_mobile( new_char );
-   unload_mobile( new_char );
    unload_nanny( dsock->nanny );
    save_account( dsock->account );
    change_socket_state( dsock,  STATE_ACCOUNT );

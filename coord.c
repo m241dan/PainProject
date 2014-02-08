@@ -4,10 +4,7 @@
 
 #include "mud.h"
 
-/*******************
- * Utility Methods *
- *******************/
-
+/* creation */
 COORD *create_coord( int x, int y, int z )
 {
    COORD *coordinate;
@@ -28,6 +25,12 @@ COORD *create_coord( int x, int y, int z )
    AttachToList( coordinate, coord_map[hash] );
    return coordinate;
 }
+
+/* deletion */
+
+/*******************
+ * Utility Methods *
+ *******************/
 
 COORD *get_coord( int x, int y, int z )
 {

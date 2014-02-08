@@ -17,6 +17,7 @@ D_MOBILE *init_mobile( void )
 
    CREATE( dMob, D_MOBILE, 1 );
    clear_mobile( dMob );
+   wrap_entity( dMob, MOBILE_ENTITY );
    dMob->events = AllocList();
    dMob->commands = AllocList();
    return dMob;
@@ -46,11 +47,11 @@ void unload_mobile( D_MOBILE *dMob )
 
 void free_mobile( D_MOBILE *dMob )
 {
-   clear_mobile_event_list( dMob );
-   FreeList( dMob->events );
-
    clear_mobile_command_list( dMob );
    FreeList( dMob->commands );
+
+   clear_mobile_event_list( dMob );
+   FreeList( dMob->events );
 
    dMob->socket = NULL;
 
@@ -193,7 +194,8 @@ void fwrite_mobile ( D_MOBILE *dMob, FILE *fp )
 {
    fprintf( fp, "#MOBILE\n" );
    fprintf( fp, "Name          %s~\n", dMob->name );
-   fprintf( fp, "Password      %s~\n", dMob->password );
+   if( dMob->password )
+      fprintf( fp, "Password      %s~\n", dMob->password );
    fprintf( fp, "Account       %s~\n", dMob->account->name );
    fprintf( fp, "Level         %d\n", dMob->level );
    fprintf( fp, "Race          %d\n", dMob->race );
@@ -271,21 +273,18 @@ void load_mobile_commands( D_MOBILE *dMob )
    return;
 }
 
-void char_to_game( D_MOBILE *dMob )
+bool char_to_game( D_MOBILE *dMob )
 {
    dMob->socket->bust_prompt = TRUE;
    AttachToList( dMob, dmobile_list );
    text_to_mobile( dMob, "You enter the Mud.\r\n" );
-
-   if( !dMob->ent_wrapper )
-      wrap_entity( dMob, MOBILE_ENTITY );
 
    /* a temporary hack */
    if( !check_coord( 0, 0, 0 ) )
       create_coord( 0, 0, 0 );
 
    mob_to_coord( dMob, get_coord( 0, 0, 0 ) );
-   return;
+   return TRUE;
 }
 
 void mob_from_coord( D_MOBILE *dMob )
@@ -301,7 +300,7 @@ void mob_to_coord( D_MOBILE *dMob, COORD *coordinate)
       bug( "%s: attempting to move %s to a NULL coordinate", __FUNCTION__, dMob->name );
       return;
    }
-   if( dMob->ent_wrapper )
+   if( !dMob->ent_wrapper )
    {
       bug( "%s: %s does not have an entity wrapper.", __FUNCTION__, dMob->name );
       return;

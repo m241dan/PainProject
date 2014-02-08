@@ -349,7 +349,8 @@ void  recycle_sockets         ( void );
 void *lookup_address          ( void *arg );
 void change_socket_state( D_S *dsock, int state );
 void control_player( D_SOCKET *dsock, D_MOBILE *player );
-
+void control_nanny( D_SOCKET *dsock, NANNY *nanny );
+void control_account( D_SOCKET *dsock, ACCOUNT *account );
 /*
  * interpret.c
  */
