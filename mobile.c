@@ -273,9 +273,9 @@ void load_mobile_commands( D_MOBILE *dMob )
 
 void char_to_game( D_MOBILE *dMob )
 {
-   dsock->bust_prompt = TRUE;
+   dMob->socket->bust_prompt = TRUE;
    AttachToList( dMob, dmobile_list );
-   text_to_buffer( dsock, "You enter the Mud.\r\n" );
+   text_to_mobile( dMob, "You enter the Mud.\r\n" );
 
    if( !dMob->ent_wrapper )
       wrap_entity( dMob, MOBILE_ENTITY );

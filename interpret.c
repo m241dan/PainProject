@@ -127,11 +127,6 @@ void new_handle_cmd_input(D_SOCKET *dsock, char *arg)
             change_nanny_state( dsock->nanny, NANNY_CHAR_PASS_CHECK_CONFIRM, TRUE );
             load_mobile( get_loc_from_char_sheet( character ), (D_MOBILE *)dsock->nanny->creation );
          }
-            char_to_game( dsock, dsock->player );
-            wrap_entity( dsock->player, MOBILE_ENTITY );
-            change_socket_state( dsock, STATE_PLAYING );
-            found_cmd = TRUE;
-         }
       DetachIterator( &Iter );
    }
 

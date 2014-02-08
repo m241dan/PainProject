@@ -9,14 +9,14 @@ ENTITY *init_entity( void )
 {
    ENTITY *ent;
 
-   CREATE( ent, ENTITY, 1 ):
+   CREATE( ent, ENTITY, 1 );
    clear_entity( ent );
    return ent;
 }
 
 void clear_entity( ENTITY *ent )
 {
-   ent->passed = NULL;
+   ent->content = NULL;
    ent->type = -1;
    return;
 }
@@ -24,7 +24,7 @@ void clear_entity( ENTITY *ent )
 /* deletion */
 void free_entity( ENTITY *ent )
 {
-   ent->passed = NULL;
+   ent->content = NULL;
    free( ent );
    return;
 }
