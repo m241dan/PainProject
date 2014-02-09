@@ -59,8 +59,7 @@ bool fread_mobile( D_MOBILE *dMob, FILE *fp );
 
 /* utility */
 void load_mobile_commands args( ( D_MOBILE *dMob ) );
-void clear_mobile_command_list args( ( D_MOBILE *dMob ) );
-void clear_mobile_event_list( D_MOBILE *dMob );
+void mobile_prompt( D_SOCKET *dsock );
 
 /* Movement */
 bool char_to_game( D_MOBILE *dMob );
@@ -85,3 +84,4 @@ void cmd_down( void *passed, char *arg );
 
 /* Building */
 void cmd_load( void *passed, char *arg );
+void cmd_open_workspace( void *passed, char *arg );

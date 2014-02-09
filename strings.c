@@ -33,6 +33,13 @@ bool is_prefix(const char *aStr, const char *bStr)
   return TRUE;
 }
 
+char *remove_leading( char *lStr )
+{
+   while( isspace( *lStr ) )
+      lStr++;
+   return lStr;
+}
+
 char *one_arg(char *fStr, char *bStr) /* upgraded to take "" -Davenge */
 {
    char cEnd = ' ';
@@ -40,6 +47,7 @@ char *one_arg(char *fStr, char *bStr) /* upgraded to take "" -Davenge */
   /* skip leading spaces */
   while (isspace(*fStr))
     fStr++;
+
 
    if( *fStr == '"' )
       cEnd = *fStr++;
@@ -435,4 +443,15 @@ void clear_strings( void )
    }
    DetachIterator(&Iter);
    return;
+}
+
+void replace_string( char *dest, char *str )
+{
+   while( isspace( *str ) )
+      str++;
+
+   while( *str != '\0' )
+      *dest++ = *str++;
+
+   dest[strlen(dest)] = '\0';
 }

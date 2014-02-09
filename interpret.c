@@ -60,7 +60,7 @@ const struct typCmd tabCmd [] =
   { "west",          cmd_west,       LEVEL_NPC, STATE_PLAYING },
   { "up",            cmd_up,         LEVEL_NPC, STATE_PLAYING },
   { "down",          cmd_down,       LEVEL_NPC, STATE_PLAYING },
-/*  { "w_open",        cmd_open_workspace, LEVEL_ADMIN, STATE_PLAYING }, */
+  { "w_open",        cmd_open_workspace, LEVEL_ADMIN, STATE_PLAYING },
   /* account commands */
   { "quit",          act_quit,       LEVEL_BASIC, STATE_ACCOUNT },
   { "create",        act_create_char,LEVEL_BASIC, STATE_ACCOUNT },
@@ -163,12 +163,10 @@ CMD_FLAG *create_flag( char *flag )
    cFlag->flag = strdup( flag );
    return cFlag;
 }
-
-LIST *pull_flags( char *arg )
+/*
+void pull_flags( LIST *flags, char *arg )
 {
-   LIST *flags = AllocList();
    CMD_FLAG *cFlag;
-   char no_flags_arg[MAX_BUFFER];
    char analyzed[MAX_BUFFER];
 
    while( arg && arg[0] != '\0' )
@@ -180,10 +178,97 @@ LIST *pull_flags( char *arg )
          cFlag = create_flag( analyzed );
          AttachToList( cFlag, flags );
       }
-      else
-         mud_cat( no_flags_arg, analyzed );
+
    }
 
-   arg = strdup( no_flags_arg );
-   return flags;
+   return;
+}
+*/
+void pull_flags( LIST *flags, char *arg, char *arg_no_flags )
+{
+   CMD_FLAG *cFlag;
+   char parambuf[MAX_BUFFER];
+   char flagbuf[MAX_BUFFER];
+   char *ptr;
+   int mode = 1; /* 1 arg_no_flags, 2 parambuf, 3 flagbuf */
+
+   ptr = arg_no_flags;
+
+   /* remove leading spaces */
+   while( isspace( *arg ) )
+      arg++;
+
+   while( *arg != '\0' )
+   {
+      if( *arg == '-' && mode == 1 )
+      {
+         mode = 3;
+         ptr = flagbuf;
+      }
+      else if( *arg == '(' && mode == 3 )
+      {
+         arg++;
+         mode = 2;
+         ptr = parambuf;
+         cFlag = create_flag( flagbuf );
+         AttachToList( cFlag, flags );
+         memset( &flagbuf[0], 0, sizeof(flagbuf) );
+         continue;
+      }
+      else if( *arg == ')' && mode == 2 )
+      {
+         arg++;
+         mode = 1;
+         ptr = arg_no_flags;
+         cFlag->params = strdup( parambuf );
+         memset( &parambuf[0], 0, sizeof(parambuf) );
+         continue;
+      }
+      else if( isspace( *arg ) && mode == 3 )
+      {
+         mode = 1;
+         ptr = arg_no_flags;
+         cFlag = create_flag( flagbuf );
+         AttachToList( cFlag, flags );
+         memset( &flagbuf[0], 0, sizeof(flagbuf) );
+      }
+      *ptr++ = *arg++;
+   }
+   return;
+}
+
+void free_flag_list( LIST *flag_list )
+{
+   CMD_FLAG *cmdFlag;
+   ITERATOR Iter;
+
+   AttachIterator( &Iter, flag_list );
+   while( ( cmdFlag = (CMD_FLAG *)NextInList( &Iter ) ) != NULL )
+      free_flag( cmdFlag );
+   DetachIterator( &Iter );
+   FreeList( flag_list );
+   return;
+}
+
+void free_flag( CMD_FLAG *cmdFlag )
+{
+   if( cmdFlag->flag )
+      free( cmdFlag->flag );
+   free( cmdFlag );
+   return;
+}
+
+CMD_FLAG *get_flag( LIST *flag_list, const char *flag )
+{
+   CMD_FLAG *cmdFlag;
+   ITERATOR Iter;
+
+   AttachIterator( &Iter, flag_list );
+   while( ( cmdFlag = (CMD_FLAG *)NextInList( &Iter ) ) != NULL )
+      if( !strcmp( cmdFlag->flag, flag ) )
+         break;
+   DetachIterator( &Iter );
+
+
+   return cmdFlag;
 }

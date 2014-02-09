@@ -16,6 +16,19 @@
 extern FILE *stderr;
 time_t current_time;
 
+void mob_printf( D_MOBILE *dMob, const char *txt, ... )
+{
+   char buf[MAX_BUFFER];
+   va_list args;
+
+   va_start( args, txt );
+   vsnprintf( buf, MAX_BUFFER, txt, args );
+   va_end( args );
+
+   text_to_mobile( dMob, buf );
+   return;
+}
+
 /*
  * Nifty little extendable logfunction,
  * if it wasn't for Erwins social editor,

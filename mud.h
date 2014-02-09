@@ -13,6 +13,7 @@
 #include <stdio.h>
 #include <regex.h>
 #include <dirent.h>
+#include <ctype.h>
 #include "list.h"
 #include "stack.h"
 
@@ -158,12 +159,11 @@ do                                                                      \
 {                                                                       \
    if (!((result) = (type *) calloc ((number), sizeof(type))))          \
    {                                                                    \
-      perror("malloc failure");                                         \
+      perror("calloc failure");                                         \
       fprintf(stderr, "Malloc failure @ %s:%d\n", __FILE__, __LINE__ ); \
       abort();                                                          \
    }                                                                    \
 } while(0)
-
 
 /***********************
  * End of Macros       *
@@ -248,6 +248,7 @@ struct typCmd
 struct cmdFlag
 {
    char *flag;
+   char *params;
 };
 
 typedef struct buffer_type
@@ -357,11 +358,16 @@ void control_account( D_SOCKET *dsock, ACCOUNT *account );
 void  handle_cmd_input        ( D_S *dsock, char *arg );
 void new_handle_cmd_input ( D_S *dsock, char *arg );
 CMD_FLAG *create_flag( char *flag );
-LIST *pull_flags( char *arg );
+void pull_flags( LIST *flags, char *arg, char *arg_no_flags );
+CMD_FLAG *get_flag( LIST *flag_list, const char *flag );
+void free_flag_list( LIST *flag_list );
+void free_flag( CMD_FLAG *cmdFlag );
+
 
 /*
  * io.c
  */
+void    mob_printf( D_MOBILE *dMob, const char *txt, ... );
 void    log_string            ( const char *txt, ... );
 void    bug                   ( const char *txt, ... );
 time_t  last_modified         ( char *helpfile );
@@ -374,6 +380,7 @@ int     fread_number          ( FILE *fp );                 /* just an integer *
 /*
  * strings.c
  */
+char *remove_leading( char *lStr );
 char   *one_arg               ( char *fStr, char *bStr );
 char   *strdup                ( const char *s );
 int     strcasecmp            ( const char *s1, const char *s2 );
@@ -397,6 +404,7 @@ bool string_contains( char *string, const char *regex_string );
 int mud_printf( char *dest, const char *format, ... );
 int mud_cat( char *dest, const char *format );
 void clear_strings( void );
+void replace_string( char *dest, char *str );
 /*
  * help.c
  */

@@ -43,6 +43,7 @@ I_ID *fread_i_id( FILE *fp );
 /* utility */
 ID_HANDLER *get_id_handler( int type );
 I_ID *check_free( ID_HANDLER *handler );
+int use_top_id( ID_HANDLER *handler );
 int get_top_id( ID_HANDLER *handler );
 void update_id( D_MOBILE *dMob, I_ID *id );
 

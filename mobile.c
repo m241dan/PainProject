@@ -265,7 +265,7 @@ void load_mobile_commands( D_MOBILE *dMob )
    clear_mobile_command_list( dMob ); /* clear it out before we lost new commands */
 
    for( x = 0; tabCmd[x].cmd_name[0] != '\0'; x++ ) /* load the new commands that fit our criteria */
-      if( tabCmd[x].state == STATE_PLAYING && tabCmd[x].level <= 2 )
+      if( tabCmd[x].state == STATE_PLAYING && tabCmd[x].level <= dMob->level )
       {
          com = copy_command( tabCmd[x] );
          AttachToList( com, dMob->commands );
@@ -273,6 +273,29 @@ void load_mobile_commands( D_MOBILE *dMob )
    return;
 }
 
+void mobile_prompt( D_SOCKET *dsock )
+{
+   BUFFER *buf;
+   D_MOBILE *dMob;
+
+   if( ( dMob = dsock->player ) == NULL )
+   {
+      bug( "%s: socket has no player to send prompt to.", __FUNCTION__ );
+      return;
+   }
+
+   buf = buffer_new( MAX_BUFFER );
+
+   if( dMob->workspace && dMob->workspace->name && dMob->workspace->name[0] != '\0' )
+      bprintf( buf, "Workspace: %s\r\n", dMob->workspace->name );
+
+   bprintf( buf, "Davengine's NULL Prompt:> " );
+   text_to_buffer( dsock, buf->data );
+   buffer_free( buf );
+   return;
+}
+
+/* Movement */
 bool char_to_game( D_MOBILE *dMob )
 {
    dMob->socket->bust_prompt = TRUE;
@@ -460,11 +483,48 @@ void cmd_down( void *passed, char *arg )
 void cmd_open_workspace( void *passed, char *arg )
 {
    D_MOBILE *dMob = (D_MOBILE *)passed;
-   LIST *flags = pull_flags( arg );
+   LIST *flags = AllocList();
+   WORKSPACE *wSpace;
+   char no_flags_buf[MAX_BUFFER];
+   char buf[MAX_BUFFER];
 
    if( dMob->workspace )
    {
+      mob_printf( dMob, "You already have a workspace opened: %s\r\n", dMob->workspace->name );
+      return;
    }
+
+   if( !arg || arg[0] == '\0' )
+   {
+      mob_printf( dMob, "Proper Usage: w_open <name>\r\n - valid flags: -new\r\n" );
+      return;
+   }
+
+   pull_flags( flags, arg, no_flags_buf );
+   one_arg( no_flags_buf, buf );
+
+   if( ( wSpace = get_workspace_from_list( buf ) ) == NULL )
+   {
+      if( get_flag( flags, "-new" ) )
+      {
+         wSpace = init_workspace();
+         if( !create_workspace( dMob, wSpace, buf ) )
+            mob_printf( dMob, "You could not create the workspace titled: %s\r\n", buf );
+         else
+         {
+            mob_printf( dMob, "Workspace '%s': Created on %s.\r\n", buf, ctime( &current_time ) );
+            save_workspace( wSpace );
+         }
+      }
+      else
+         mob_printf( dMob, "That Workspace does not exist.\r\n" );
+   }
+   else
+      mob_printf( dMob, "You open %s workspace.\r\n", wSpace->name );
+
+   set_mobile_workspace( dMob, wSpace );
+   free_flag_list( flags );
+   return;
 }
 
 void cmd_create_framework( void *passed, char *arg )

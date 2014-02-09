@@ -56,7 +56,7 @@ I_ID *create_new_id( D_MOBILE *dMob, int type )
    ID_HANDLER *handler = get_id_handler( type );
 
    if( ( id = check_free( handler ) ) == NULL )
-      id = create_raw_id( get_top_id( handler ) );
+      id = create_raw_id( use_top_id( handler ) );
 
    id->created_by = strdup( dMob->name );
    id->modified_by = strdup( dMob->name );
@@ -249,7 +249,7 @@ I_ID *fread_i_id( FILE *fp )
             break;
          case 'M':
             SREAD( "ModifiedBy", id->modified_by );
-            SREAD( "ModifeidLast", id->last_modified );
+            SREAD( "ModifiedLast", id->last_modified );
             break;
       }
       if( !found )
@@ -270,10 +270,10 @@ ID_HANDLER *get_id_handler( int type )
    ID_HANDLER *handler = NULL;
    ITERATOR Iter;
 
-   AttachToList( &Iter, id_handlers );
+   AttachIterator( &Iter, id_handlers );
    while( ( handler = (ID_HANDLER *)NextInList( &Iter ) ) != NULL )
       if( handler->type == type )
-         continue;
+         break;
    DetachIterator( &Iter );
    return handler;
 }
@@ -293,9 +293,15 @@ I_ID *check_free( ID_HANDLER *handler )
    return id;
 }
 
+int use_top_id( ID_HANDLER *handler )
+{
+   handler->top_id++;
+   save_id_handler( handler );
+   return handler->top_id;
+}
+
 int get_top_id( ID_HANDLER *handler )
 {
-   handler->top_id += 1;
    return handler->top_id;
 }
 

@@ -15,14 +15,46 @@ WORKSPACE *init_workspace( void )
 
    CREATE( wSpace, WORKSPACE, 1 );
    wSpace->contents = AllocList();
+   wSpace->type = WORKSPACE_PRIVATE;
    return wSpace;
 }
+
+bool create_workspace( D_MOBILE *dMob, WORKSPACE *wSpace, const char *name )
+{
+   if( !dMob )
+   {
+      bug( "%s: called with NULL dMob.", __FUNCTION__ );
+      return FALSE;
+   }
+   if( !wSpace )
+   {
+      bug( "%s: called with a NULL wSpace by %s.", __FUNCTION__, dMob->name );
+      return FALSE;
+   }
+   if( !name || name[0] == '\0' )
+   {
+      bug( "%s: called with bad name given.", __FUNCTION__ );
+      return FALSE;
+   }
+   if( get_workspace_from_list( name ) )
+   {
+      text_to_mobile( dMob, "A workspace with that name already exists.\r\n" );
+      return FALSE;
+   }
+   wSpace->id = create_new_id( dMob, WORKSPACE_HANDLER );
+   wSpace->name = strdup( name );
+   AttachToList( wSpace, workspaces );
+   return TRUE;
+}
+
 /* deletion */
 void free_workspace( WORKSPACE *wSpace )
 {
    FRAMEWORK *frame;
    ITERATOR Iter;
 
+   wSpace->who_using->workspace = NULL;
+   wSpace->who_using = NULL;
    free( wSpace->name );
    free_i_id( wSpace->id );
    while( ( frame = (FRAMEWORK *)NextInList( &Iter ) ) != NULL )
@@ -46,6 +78,7 @@ bool load_workspaces( void )
    {
       if( !string_contains( entry->d_name, ".workspace" ) )
          continue;
+
       wSpace = init_workspace();
 
       mud_printf( location, "../workspaces/%s", entry->d_name );
@@ -86,6 +119,7 @@ bool load_workspace( const char *location, WORKSPACE *wSpace )
    char *word;
    bool found, done = FALSE;
 
+
    if( ( fp = fopen( location, "r" ) ) == NULL )
    {
       bug( "%s: cannot open %s to read from.", __FUNCTION__, location );
@@ -112,6 +146,7 @@ bool load_workspace( const char *location, WORKSPACE *wSpace )
             if( !strcmp( word, "#WORKSPACE" ) )
             {
                found = TRUE;
+               fread_workspace( wSpace, fp );
                break;
             }
             break;
@@ -222,3 +257,31 @@ void add_frame_to_workspace( FRAMEWORK *frame, D_MOBILE *dMob )
    return;
 }
 
+void set_mobile_workspace( D_MOBILE *dMob, WORKSPACE *wSpace )
+{
+   if( !wSpace || !dMob )
+      return;
+   dMob->workspace = wSpace;
+   wSpace->who_using = dMob;
+   return;
+}
+
+WORKSPACE *get_workspace_from_list( const char *name )
+{
+   WORKSPACE *wSpace;
+   ITERATOR Iter;
+
+   if( SizeOfList( workspaces ) <= 0 )
+      return NULL;
+
+   AttachIterator( &Iter, workspaces );
+   while( ( wSpace = (WORKSPACE *)NextInList( &Iter ) ) != NULL )
+   {
+      log_string( "wSpace is '%c'", wSpace->name[0] );
+      if( !strcmp( wSpace->name, name ) )
+         break;
+   }
+   DetachIterator( &Iter );
+
+   return wSpace;
+}

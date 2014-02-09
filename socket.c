@@ -894,7 +894,7 @@ bool flush_output(D_SOCKET *dsock)
       switch( dsock->state )
       {
          case STATE_PLAYING:
-            text_to_buffer( dsock, "\r\nSocketMud:> " );
+            mobile_prompt( dsock );
             break;
          case STATE_ACCOUNT:
             account_prompt( dsock );
