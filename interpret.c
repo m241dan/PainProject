@@ -219,7 +219,7 @@ void pull_flags( LIST *flags, char *arg, char *arg_no_flags )
       {
          arg++;
          mode = 1;
-         ptr = arg_no_flags;
+         ptr = arg_no_flags + strlen( arg_no_flags );
          cFlag->params = strdup( parambuf );
          memset( &parambuf[0], 0, sizeof(parambuf) );
          continue;
@@ -227,12 +227,17 @@ void pull_flags( LIST *flags, char *arg, char *arg_no_flags )
       else if( isspace( *arg ) && mode == 3 )
       {
          mode = 1;
-         ptr = arg_no_flags;
+         ptr = arg_no_flags + strlen( arg_no_flags );
          cFlag = create_flag( flagbuf );
          AttachToList( cFlag, flags );
          memset( &flagbuf[0], 0, sizeof(flagbuf) );
       }
       *ptr++ = *arg++;
+   }
+   if( mode == 3 )
+   {
+      cFlag = create_flag( flagbuf );
+      AttachToList( cFlag, flags );
    }
    return;
 }

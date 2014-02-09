@@ -276,11 +276,8 @@ WORKSPACE *get_workspace_from_list( const char *name )
 
    AttachIterator( &Iter, workspaces );
    while( ( wSpace = (WORKSPACE *)NextInList( &Iter ) ) != NULL )
-   {
-      log_string( "wSpace is '%c'", wSpace->name[0] );
       if( !strcmp( wSpace->name, name ) )
          break;
-   }
    DetachIterator( &Iter );
 
    return wSpace;
