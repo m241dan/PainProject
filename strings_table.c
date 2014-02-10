@@ -63,6 +63,10 @@ const char *const race_desc_table[] = {
    "",
 };
 
+const char *const workspace_permissions[MAX_WORKSPACE_TYPE+1] = {
+   "public", "private", ""
+};
+
 /* Directions */
 
 const char *const exit_directions[MAX_DIRECTION+1] = {

@@ -25,6 +25,7 @@ struct dMobile
     ***************/
 
    /* Utility Variables */
+   FRAMEWORK *framework;
    ACCOUNT *account;
    ENTITY *ent_wrapper;
    LIST *commands;

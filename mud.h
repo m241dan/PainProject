@@ -118,7 +118,7 @@ typedef enum {
 typedef enum
 {
    WORKSPACE_PUBLIC, WORKSPACE_PRIVATE, MAX_WORKSPACE_TYPE
-} workspace_permissions;
+} workspace_permissions_type;
 
 
 /******************************

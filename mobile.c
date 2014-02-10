@@ -487,6 +487,7 @@ void cmd_open_workspace( void *passed, char *arg )
    WORKSPACE *wSpace;
    char no_flags_buf[MAX_BUFFER];
    char buf[MAX_BUFFER];
+   bool creator = FALSE;
 
    if( dMob->workspace )
    {
@@ -509,23 +510,47 @@ void cmd_open_workspace( void *passed, char *arg )
       {
          wSpace = init_workspace();
          if( !create_workspace( dMob, wSpace, buf ) )
+         {
             mob_printf( dMob, "You could not create the workspace titled: %s\r\n", buf );
+            free_workspace( wSpace );
+            free_flag_list( flags );
+            return;
+         }
          else
          {
             mob_printf( dMob, "Workspace '%s': Created on %s.\r\n", buf, ctime( &current_time ) );
             save_workspace( wSpace );
          }
       }
-      else
-         mob_printf( dMob, "That Workspace does not exist.\r\n" );
    }
-   else
-      mob_printf( dMob, "You open %s workspace.\r\n", wSpace->name );
 
-   set_mobile_workspace( dMob, wSpace );
    free_flag_list( flags );
+
+   if( !strcmp( dMob->name, wSpace->id->created_by ) )
+      creator = TRUE;
+
+   if( wSpace->type != WORKSPACE_PUBLIC && !creator )
+   {
+      mob_printf( dMob, "You don't have permission to open %s.\r\n", wSpace->name );
+      return;
+   }
+
+   if( wSpace->who_using && wSpace->who_using != dMob )
+   {
+      mob_printf( dMob, "%s is already using that workspace.\r\n", wSpace->who_using ? wSpace->who_using : "(null)" );
+      return;
+   }
+
+   mob_printf( dMob, "You open %s workspace.\r\n", wSpace->name );
+   set_mobile_workspace( dMob, wSpace );
    return;
 }
+
+void cmd_close_workspace( void *passed, char *arg )
+{
+
+}
+
 
 void cmd_create_framework( void *passed, char *arg )
 {

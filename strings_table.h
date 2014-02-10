@@ -10,6 +10,7 @@ extern const char *const id_handler_names[MAX_ID_HANDLER+1];
 extern const char *const nanny_strings[MAX_NANNY_TYPE][MAX_NANNY_STATES];
 extern const char *const race_table[];
 extern const char *const race_desc_table[];
+extern const char *const workspace_permissions[MAX_WORKSPACE_TYPE+1];
 extern const char *const exit_directions[MAX_DIRECTION+1];
 
 /* Methods */

@@ -53,10 +53,11 @@ void free_workspace( WORKSPACE *wSpace )
    FRAMEWORK *frame;
    ITERATOR Iter;
 
-   wSpace->who_using->workspace = NULL;
-   wSpace->who_using = NULL;
+   if( wSpace->who_using )
+      unset_mobile_workspace( wSpace->who_using );
    free( wSpace->name );
-   free_i_id( wSpace->id );
+   if( wSpace->id )
+      free_i_id( wSpace->id );
    while( ( frame = (FRAMEWORK *)NextInList( &Iter ) ) != NULL )
       DetachFromList( frame, wSpace->contents );
    DetachIterator( &Iter );
@@ -259,10 +260,41 @@ void add_frame_to_workspace( FRAMEWORK *frame, D_MOBILE *dMob )
 
 void set_mobile_workspace( D_MOBILE *dMob, WORKSPACE *wSpace )
 {
-   if( !wSpace || !dMob )
+   if( !wSpace )
+   {
+      bug( "%s: wSpace is NULL.", __FUNCTION__ );
       return;
+   }
+   if( !dMob )
+   {
+      bug( "%s: dMob is NULL.", __FUNCTION__ );
+      return;
+   }
+   if( wSpace->who_using )
+   {
+      bug( "%s: wSpace is being used, cannot set to a different mobile.", __FUCNTION__ );
+      return;
+
    dMob->workspace = wSpace;
    wSpace->who_using = dMob;
+   return;
+}
+
+void unset_mobile_workspace( D_MOBILE *dMob );
+{
+   if( !dMob )
+   {
+      bug( "%s: dMob is NULL.", __FUNCTION__ );
+      return;
+   }
+   if( !dMob->wSpace )
+   {
+      bug( "%s: dMob '%s' does not have a wSpace set.", __FUNCTION__, dMob->name );
+      return;
+   }
+
+   dMob->workspace->who_using = NULL;
+   dMob->workspace = NULL;
    return;
 }
 
