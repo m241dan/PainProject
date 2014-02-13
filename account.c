@@ -484,7 +484,7 @@ const char *get_loc_from_char_sheet( CHAR_SHEET *cSheet )
 /* set_account
    Using this command autosaves the account */
 
-void set_account( ACCOUNT *account, unsigned long int value, int type )
+void set_account( ACCOUNT *account, VALUE value, int type )
 {
    switch( type )
    {
@@ -606,9 +606,6 @@ void act_settings( void *passed, char *arg )
    }
 
    pull_flags( flags, arg, arg_rem );
-
-   if( ( cmdFlag = get_flag( flags, "-open" ) ) != NULL )
-      log_string( "Not NULL." );
 
    if( SizeOfList( flags ) > 1 )
    {

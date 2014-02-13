@@ -34,7 +34,8 @@ struct dMobile
 
    /* olc stuff */
    WORKSPACE *workspace;
-
+   void *editing;
+   int editing_type;
 };
 
 

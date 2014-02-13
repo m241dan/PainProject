@@ -17,8 +17,18 @@ FRAMEWORK *init_framework( int type )
    FRAMEWORK *frame;
 
    CREATE( frame, FRAMEWORK, 1 );
+   clear_framework( frame );
    frame->type = type;
    return frame;
+}
+
+void clear_framework( FRAMEWORK *frame )
+{
+   frame->name = NULL;
+   frame->short_descr = NULL;
+   frame->long_descr = NULL;
+   frame->content = NULL;
+   return;
 }
 
 FRAMEWORK *create_framework( D_MOBILE *dMob, int type )
@@ -33,11 +43,15 @@ FRAMEWORK *create_framework( D_MOBILE *dMob, int type )
 
    fWork = init_framework( type );
 
+   fWork->name = strdup( "New Frame" );
+   fWork->short_descr = strdup( "A new framework" );
+   fWork->long_descr = strdup( "A new framework is here." );
    switch( fWork->type )
    {
       case ROOM_FRAME:
          fWork->id = create_new_id( dMob, ROOM_FRAME );
          fWork->content = create_rFramework();
+         ((R_FRAMEWORK *)fWork->content)->container = fWork;
          break;
    }
 
@@ -49,13 +63,21 @@ FRAMEWORK *create_framework( D_MOBILE *dMob, int type )
 /* deletion */
 void free_framework( FRAMEWORK *frame )
 {
+   if( frame->name )
+      free(frame->name);
+   if( frame->short_descr )
+      free(frame->short_descr);
+   if( frame->long_descr )
+      free(frame->long_descr);
+
    switch( frame->type )
    {
       case ROOM_FRAME:
          free_rFramework( (R_FRAMEWORK *)frame->content );
          break;
    }
-   free_i_id( frame->id );
+   if( frame->id )
+      free_i_id( frame->id );
    free( frame );
    return;
 }
@@ -68,7 +90,7 @@ R_FRAMEWORK *create_rFramework( void )
    R_FRAMEWORK *rFrame;
 
    CREATE( rFrame, R_FRAMEWORK, 1 );
-   rFrame->title = strdup( "new room" );
+   rFrame->title = strdup( "A new room" );
    rFrame->description = strdup( "none" );
 
    return rFrame;
@@ -77,8 +99,11 @@ R_FRAMEWORK *create_rFramework( void )
 /* deletion */
 void free_rFramework( R_FRAMEWORK *rFrame )
 {
-   free( rFrame->title );
-   free( rFrame->description );
+   rFrame->container = NULL;
+   if( rFrame->title )
+      free( rFrame->title );
+   if( rFrame->description )
+      free( rFrame->description );
    free( rFrame );
 }
 
@@ -195,6 +220,7 @@ bool load_framework( const char *location, FRAMEWORK *frame )
             {
                found = TRUE;
                frame->content = fread_rFramework( fp );
+               ((R_FRAMEWORK *)frame->content)->container = frame;
                break;
             }
             break;
@@ -318,4 +344,69 @@ bool valid_ftype( int type )
    if( type >= MAX_FRAMEWORK || type < 0 )
       return FALSE;
    return TRUE;
+}
+
+bool check_frame_name( const char *name )
+{
+   FRAMEWORK *fWork;
+   ITERATOR Iter;
+   bool found = FALSE;
+
+   AttachIterator( &Iter, all_frameworks );
+   while( ( fWork = (FRAMEWORK *)NextInList( &Iter ) ) != NULL )
+      if( !strcmp( fWork->name, name ) )
+      {
+         found = TRUE;
+         break;
+      }
+   DetachIterator( &Iter );
+
+   return found;
+}
+
+/* setting */
+void set_framework( FRAMEWORK *frame, VALUE value, int type )
+{
+   switch( type )
+   {
+      default:
+         switch( frame->type )
+         {
+            default:
+               bug( "%s: bad framework type.", __FUNCTION__ );
+               return;
+            case ROOM_FRAME:
+               set_rFramework( (R_FRAMEWORK *)frame->content, value, type );
+               break;
+         }
+      case FRAME_NAME:
+         if( frame->name )
+            free( frame->name );
+         frame->name = strdup( (char * )value );
+         break;
+      case FRAME_SHORT_DESCR:
+         if( frame->short_descr )
+            free( frame->short_descr );
+         frame->short_descr = strdup( (char *)value );
+         break;
+      case FRAME_LONG_DESCR:
+         if( frame->long_descr )
+            free( frame->long_descr );
+         frame->long_descr = strdup( (char *)value );
+         break;
+   }
+   save_framework( frame );
+   return;
+}
+void set_rFramework( R_FRAMEWORK *rFrame, VALUE value, int type )
+{
+   switch( type )
+   {
+      case RFRAME_TITLE:
+         if( rFrame->title )
+            free( rFrame->title );
+         rFrame->title = strdup( (char *)value );
+         break;
+   }
+   return;
 }

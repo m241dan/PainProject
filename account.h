@@ -71,7 +71,7 @@ ACCOUNT *get_account_from_name( const char *name );
 const char *get_loc_from_char_sheet( CHAR_SHEET *cSheet );
 
 /* setting */
-void set_account( ACCOUNT *account, unsigned long int value, int type );
+void set_account( ACCOUNT *account, VALUE value, int type );
 
 /********************
  * Account Commands *

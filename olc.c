@@ -255,6 +255,7 @@ void add_frame_to_workspace( FRAMEWORK *frame, D_MOBILE *dMob )
       return;
    }
    AttachToList( frame, dMob->workspace->contents );
+   save_workspace( dMob->workspace );
    return;
 }
 

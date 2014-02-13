@@ -26,6 +26,10 @@ const char *const framework_names[MAX_FRAMEWORK+1] = {
    ""
 };
 
+const char *const rFrame_strings[MAX_RFRAME_STRING+1] = {
+   "name", "short_descr", "long_descr", "title", "description", ""
+};
+
 const char *const framework_names_initials[MAX_FRAMEWORK+1] = {
    "r",
    ""
@@ -92,7 +96,7 @@ const char *get_table( const char *const string_table[] )
    static char buf[MAX_BUFFER];
    int x;
 
-   buf[0] = '\0';
+   memset( &buf[0], 0, sizeof( buf ) );
    for( x = 0; string_table[x][0] != '\0'; x++ )
       strcat( buf, string_table[x] ); 
    buf[strlen(buf)] = '\0';

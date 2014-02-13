@@ -34,6 +34,7 @@ void clear_mobile( D_MOBILE *dMob )
    dMob->ent_wrapper = NULL;
    dMob->at_coord = NULL;
    dMob->workspace = NULL;
+   dMob->editing = NULL;
    return;
 }
 
@@ -66,7 +67,9 @@ void free_mobile( D_MOBILE *dMob )
    dMob->ent_wrapper = NULL; /* this needs work */
 
    dMob->at_coord = NULL;
-   dMob->workspace = NULL; /* this needs work */
+   if( dMob->workspace )
+      unset_mobile_workspace( dMob );
+   dMob->editing = NULL;
    free( dMob );
 }
 
@@ -493,7 +496,6 @@ void cmd_open_workspace( void *passed, char *arg )
    }
 
    pull_flags( flags, arg, no_flags_buf );
-   log_flags( flags );
    one_arg( no_flags_buf, buf );
 
    if( ( wSpace = get_workspace_from_list( buf ) ) == NULL )
@@ -513,6 +515,12 @@ void cmd_open_workspace( void *passed, char *arg )
             mob_printf( dMob, "Workspace '%s': Created on %s.\r\n", buf, ctime( &current_time ) );
             save_workspace( wSpace );
          }
+      }
+      else
+      {
+         mob_printf( dMob, "No such workspace exists.\r\n" );
+         free_flag_list( flags );
+         return;
       }
    }
 
@@ -558,19 +566,45 @@ void cmd_create_framework( void *passed, char *arg )
 {
    D_MOBILE *dMob = (D_MOBILE *)passed;
    FRAMEWORK *framework;
-   char arg2[MAX_BUFFER];
+   char arg1[MAX_BUFFER], arg2[MAX_BUFFER];
    int type;
 
-   arg = one_arg( arg, arg2 );
+   if( !arg || arg[0] == '\0' )
+   {
+      mob_printf( dMob, "Proper Usage: create <type> <name>" );
+      return;
+   }
 
    if( check_work( dMob ) )
       return;
 
-   if( ( type = match_string_table( arg2, framework_names ) ) == -1 )
+   arg = one_arg( arg, arg1 );
+   arg = one_arg( arg, arg2 );
+
+   if( arg1[0] == '\0' )
    {
-      text_to_mobile( dMob, "Invalid framework type.\r\n" );
+      mob_printf( dMob, "You need to input a type.\r\n Types: %s\r\n", get_table( framework_names ) );
       return;
    }
+
+   if( ( type = match_string_table( arg1, framework_names ) ) == -1 )
+   {
+      mob_printf( dMob, "Invalid framework type.\r\n Types: %s", get_table( framework_names ) );
+      return;
+   }
+
+   if( arg2[0] == '\0' )
+   {
+      mob_printf( dMob, "You need to name your framework.\r\n" );
+      return;
+   }
+
+   if( check_frame_name( arg2 ) )
+   {
+      mob_printf( dMob, "A framework with that name already exists.\r\n" );
+      return;
+   }
+
 
    if( ( framework = create_framework( dMob, type ) ) == NULL )
    {
@@ -578,6 +612,7 @@ void cmd_create_framework( void *passed, char *arg )
       return;
    }
 
+   set_framework( framework, (VALUE)arg2, FRAME_NAME );
    add_frame_to_workspace( framework, dMob );
    text_to_mobile( dMob, "A new room framework has been added to your workspace.\r\n" );
    return;

@@ -210,11 +210,12 @@ void pull_flags( LIST *flags, char *arg, char *arg_no_flags )
    while( isspace( *arg ) )
       arg++;
 
-   while( *arg != '\0' )
+   while( arg && *arg != '\0' )
    {
       if( *arg == '-' && mode == 1 )
       {
          mode = 3;
+         memset( &flagbuf[0], 0, sizeof( flagbuf ) );
          ptr = flagbuf;
       }
       else if( *arg == '(' && mode == 3 )
@@ -225,7 +226,7 @@ void pull_flags( LIST *flags, char *arg, char *arg_no_flags )
          flagbuf[strlen(flagbuf)] = '\0';
          cFlag = create_flag( flagbuf );
          AttachToList( cFlag, flags );
-         memset( &flagbuf[0], 0, sizeof(flagbuf) );
+         memset( &flagbuf[0], 0, sizeof( flagbuf ) );
          continue;
       }
       else if( *arg == ')' && mode == 2 )
@@ -235,7 +236,7 @@ void pull_flags( LIST *flags, char *arg, char *arg_no_flags )
          ptr = arg_no_flags + strlen( arg_no_flags );
          parambuf[strlen(parambuf)] = '\0';
          cFlag->params = strdup( parambuf );
-         memset( &parambuf[0], 0, sizeof(parambuf) );
+         memset( &parambuf[0], 0, sizeof( parambuf ) );
          continue;
       }
       else if( isspace( *arg ) && mode == 3 )
@@ -245,7 +246,7 @@ void pull_flags( LIST *flags, char *arg, char *arg_no_flags )
          flagbuf[strlen(flagbuf)] = '\0';
          cFlag = create_flag( flagbuf );
          AttachToList( cFlag, flags );
-         memset( &flagbuf[0], 0, sizeof(flagbuf) );
+         memset( &flagbuf[0], 0, sizeof( flagbuf ) );
       }
       *ptr++ = *arg++;
    }
@@ -254,6 +255,7 @@ void pull_flags( LIST *flags, char *arg, char *arg_no_flags )
       flagbuf[strlen(flagbuf)] = '\0';
       cFlag = create_flag( flagbuf );
       AttachToList( cFlag, flags );
+      memset( &flagbuf[0], 0, sizeof( flagbuf ) );
    }
    return;
 }

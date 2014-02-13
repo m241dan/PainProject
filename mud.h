@@ -126,6 +126,16 @@ typedef enum
    ACT_SOCKET, ACT_LEVEL, ACT_CHARACTERS, ACT_NAME, ACT_PASSWORD, ACT_COMMANDS, ACT_PAGEWIDTH, ACT_SETTINGS, MAX_ACT_TYPE
 } account_varId_types;
 
+typedef enum
+{
+   FRAME_NAME, FRAME_SHORT_DESCR, FRAME_LONG_DESCR
+} frame_strings_id;
+
+typedef enum
+{
+   RFRAME_TITLE = 3, RFRAME_DESCRIPTION, MAX_RFRAME_STRING
+} rFrame_strings_id;
+
 
 /******************************
  * End of standard definitons *
@@ -205,6 +215,8 @@ typedef struct workspace WORKSPACE;
 typedef struct framework FRAMEWORK;
 typedef struct room_framework R_FRAMEWORK;
 typedef struct character_sheet CHAR_SHEET;
+
+typedef unsigned long int VALUE;
 
 /* the actual structures */
 struct dSocket

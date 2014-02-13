@@ -9,10 +9,14 @@ struct framework
    void *content;
    int type;
    I_ID *id;
+   char *name;
+   char *short_descr;
+   char *long_descr;
 };
 
 struct room_framework
 {
+   FRAMEWORK *container;
    char *title;
    char *description;
 };
@@ -24,6 +28,7 @@ struct room_framework
 /* general */
 /* creation */
 FRAMEWORK *init_framework( int type );
+void clear_framework( FRAMEWORK *frame );
 FRAMEWORK *create_framework( D_MOBILE *dMob, int type );
 /* deletion */
 void free_framework( FRAMEWORK *frame );
@@ -47,3 +52,8 @@ FRAMEWORK *get_frame( int type, int id );
 
 /* checking */
 bool valid_ftype( int type );
+bool check_frame_name( const char *name );
+
+/* setting */
+void set_framework( FRAMEWORK *frame, VALUE value, int type );
+void set_rFramework( R_FRAMEWORK *frame, VALUE value, int type );
