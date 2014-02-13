@@ -62,6 +62,7 @@ const struct typCmd tabCmd [] =
   { "down",          cmd_down,       LEVEL_NPC, STATE_PLAYING },
   { "w_open",        cmd_open_workspace, LEVEL_ADMIN, STATE_PLAYING },
   { "w_close",       cmd_close_workspace, LEVEL_ADMIN, STATE_PLAYING },
+  { "create",        cmd_create_framework, LEVEL_ADMIN, STATE_PLAYING },
   { "pagewidth",     cmd_pagewidth,  LEVEL_PLAYER, STATE_PLAYING },
   /* account commands */
   { "settings",      act_settings,   LEVEL_BASIC, STATE_ACCOUNT },

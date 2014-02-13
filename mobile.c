@@ -575,7 +575,7 @@ void cmd_create_framework( void *passed, char *arg )
       return;
    }
 
-   if( check_work( dMob ) )
+   if( !check_work( dMob ) )
       return;
 
    arg = one_arg( arg, arg1 );

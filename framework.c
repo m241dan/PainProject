@@ -55,7 +55,7 @@ FRAMEWORK *create_framework( D_MOBILE *dMob, int type )
          break;
    }
 
-   AttachToList( fWork, frameworks );
+   AttachToList( fWork, all_frameworks );
 
    return fWork;
 }
@@ -153,7 +153,7 @@ void save_framework( FRAMEWORK *frame )
    FILE *fp;
    char location[MAX_BUFFER];
 
-   mud_printf( location, "../frameworks/%ss/%c%d.frame", framework_names[frame->type], framework_names[frame->type][0], frame->id );
+   mud_printf( location, "../frameworks/%ss/%c%d.frame", framework_names[frame->type], framework_names[frame->type][0], frame->id->id );
    if( ( fp = fopen( location, "w" ) ) == NULL )
    {
       bug( "%s: cannot open %s to write.", __FUNCTION__, location );
@@ -242,6 +242,9 @@ void fwrite_framework( FRAMEWORK *frame, FILE *fp )
 {
    fprintf( fp, "#FRAMEWORK\n" );
    fprintf( fp, "Type         %d\n", frame->type );
+   fprintf( fp, "Name         %s~\n", frame->name );
+   fprintf( fp, "ShortDescr   %s~\n", frame->short_descr );
+   fprintf( fp, "LongDescr    %s~\n", frame->long_descr );
    fprintf( fp, "#END\n" );
    return;
 }
@@ -259,6 +262,15 @@ void fread_framework( FRAMEWORK *frame, FILE *fp )
       {
          case '#':
             if( !strcasecmp( word, "#END" ) ){ done = TRUE; found = TRUE; break; }
+            break;
+         case 'L':
+            SREAD( "LongDescr", frame->long_descr );
+            break;
+         case 'N':
+            SREAD( "Name", frame->name );
+            break;
+         case 'S':
+            SREAD( "ShortDescr", frame->short_descr );
             break;
          case 'T':
             IREAD( "Type", frame->type );

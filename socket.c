@@ -70,6 +70,7 @@ int main(int argc, char **argv)
    world_entities = AllocList();
    workspaces = AllocList();
    id_handlers = AllocList();
+   all_frameworks = AllocList();
 
    for( x = 0; x < MAX_COORD_HASH; x++ )
       coord_map[x] = AllocList();
