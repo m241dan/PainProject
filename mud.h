@@ -372,7 +372,7 @@ void pull_flags( LIST *flags, char *arg, char *arg_no_flags );
 CMD_FLAG *get_flag( LIST *flag_list, const char *flag );
 void free_flag_list( LIST *flag_list );
 void free_flag( CMD_FLAG *cmdFlag );
-
+void log_flags( LIST *flags );
 
 /*
  * io.c
@@ -440,7 +440,7 @@ int count_color( const char * str );
 bool valid_mobile( D_MOBILE *dMob );
 bool is_number( const char *arg );
 void load_commands( LIST *commands, const struct typCmd to_load[], int state, int level );
-
+void unload_commands( LIST *commands, const struct typCmd to_unload[], int state, int level );
 /*
  * action_safe.c
  */

@@ -222,6 +222,7 @@ void pull_flags( LIST *flags, char *arg, char *arg_no_flags )
          arg++;
          mode = 2;
          ptr = parambuf;
+         flagbuf[strlen(flagbuf)] = '\0';
          cFlag = create_flag( flagbuf );
          AttachToList( cFlag, flags );
          memset( &flagbuf[0], 0, sizeof(flagbuf) );
@@ -232,6 +233,7 @@ void pull_flags( LIST *flags, char *arg, char *arg_no_flags )
          arg++;
          mode = 1;
          ptr = arg_no_flags + strlen( arg_no_flags );
+         parambuf[strlen(parambuf)] = '\0';
          cFlag->params = strdup( parambuf );
          memset( &parambuf[0], 0, sizeof(parambuf) );
          continue;
@@ -240,6 +242,7 @@ void pull_flags( LIST *flags, char *arg, char *arg_no_flags )
       {
          mode = 1;
          ptr = arg_no_flags + strlen( arg_no_flags );
+         flagbuf[strlen(flagbuf)] = '\0';
          cFlag = create_flag( flagbuf );
          AttachToList( cFlag, flags );
          memset( &flagbuf[0], 0, sizeof(flagbuf) );
@@ -248,6 +251,7 @@ void pull_flags( LIST *flags, char *arg, char *arg_no_flags )
    }
    if( mode == 3 )
    {
+      flagbuf[strlen(flagbuf)] = '\0';
       cFlag = create_flag( flagbuf );
       AttachToList( cFlag, flags );
    }
@@ -288,4 +292,17 @@ CMD_FLAG *get_flag( LIST *flag_list, const char *flag )
 
 
    return cmdFlag;
+}
+
+void log_flags( LIST *flags )
+{
+   CMD_FLAG *flag;
+   ITERATOR Iter;
+
+   AttachIterator( &Iter, flags );
+   while( ( flag = (CMD_FLAG *)NextInList( &Iter ) ) != NULL )
+      log_string( "Flag: '%s' Param: '%s'", flag->flag, flag->params );
+   DetachIterator( &Iter );
+
+   return;
 }

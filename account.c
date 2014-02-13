@@ -596,6 +596,7 @@ void act_settings( void *passed, char *arg )
 {
    ACCOUNT *account = (ACCOUNT *)passed;
    LIST *flags = AllocList();
+   CMD_FLAG *cmdFlag;
    char arg_rem[MAX_BUFFER];
 
    if( !arg || arg[0] == '\0' )
@@ -606,5 +607,37 @@ void act_settings( void *passed, char *arg )
 
    pull_flags( flags, arg, arg_rem );
 
+   if( ( cmdFlag = get_flag( flags, "-open" ) ) != NULL )
+      log_string( "Not NULL." );
+
+   if( SizeOfList( flags ) > 1 )
+   {
+      act_printf( account, "Settings only takes one flag.\r\n" );
+      free_flag_list( flags );
+      return;
+   }
+
+
+   if( ( cmdFlag = get_flag( flags, "-open" ) ) != NULL && !account->settings_loaded )
+   {
+      act_printf( account, "Opening Settings.\r\n" );
+      load_commands( account->commands, actSettingCmd, account->socket->state, account->level );
+      set_account( account, TRUE, ACT_SETTINGS );
+   }
+   else if( cmdFlag && account->settings_loaded )
+      act_printf( account, "Settings already open.\r\n" );
+   else if( ( cmdFlag = get_flag( flags, "-close" ) ) != NULL && account->settings_loaded )
+   {
+      act_printf( account, "Closing Settings.\r\n" );
+      unload_commands( account->commands, actSettingCmd, account->socket->state, account->level );
+      set_account( account, FALSE, ACT_SETTINGS );
+   }
+   else if( cmdFlag && !account->settings_loaded )
+      act_printf( account, "Settings already closed.\r\n" );
+   else
+      act_printf( account, "Invalid Flags Used.\r\n" );
+
+   free_flag_list( flags );
    return;
 }
+

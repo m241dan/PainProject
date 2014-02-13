@@ -266,3 +266,23 @@ void load_commands( LIST *commands, const struct typCmd to_load[], int state, in
 
    return;
 }
+
+void unload_commands( LIST *commands, const struct typCmd to_unload[], int state, int level )
+{
+   COMMAND *com;
+   ITERATOR Iter;
+   int x;
+
+   for( x = 0; to_unload[x].cmd_name[0] != '\0'; x++ )
+   {
+      AttachIterator( &Iter, commands );
+      while( ( com = (COMMAND *)NextInList( &Iter ) ) != NULL )
+         if( !strcmp( com->cmd_name, to_unload[x].cmd_name ) && com->state == state && com->level <= level )
+         {
+            DetachFromList( com, commands );
+            free_command( com );
+         }
+      DetachIterator( &Iter );
+   }
+   return;
+}

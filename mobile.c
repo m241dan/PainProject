@@ -493,6 +493,7 @@ void cmd_open_workspace( void *passed, char *arg )
    }
 
    pull_flags( flags, arg, no_flags_buf );
+   log_flags( flags );
    one_arg( no_flags_buf, buf );
 
    if( ( wSpace = get_workspace_from_list( buf ) ) == NULL )
