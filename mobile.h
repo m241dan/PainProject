@@ -86,6 +86,7 @@ void cmd_down( void *passed, char *arg );
 /* Building */
 void cmd_load( void *passed, char *arg );
 void cmd_open_workspace( void *passed, char *arg );
-/* to code */
 void cmd_close_workspace( void *passed, char *arg );
+void cmd_pagewidth( void *passsed, char *arg );
+/* to code */
 void cmd_create_framework( void *passed, char *arg );

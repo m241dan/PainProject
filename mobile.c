@@ -590,3 +590,35 @@ void cmd_create_framework( void *passed, char *arg )
    text_to_mobile( dMob, "A new room framework has been added to your workspace.\r\n" );
    return;
 }
+
+void cmd_pagewidth( void *passed, char *arg )
+{
+   D_MOBILE *dMob = (D_MOBILE *)passed;
+   int width;
+
+   if( !dMob )
+   {
+      bug( "%s: passed a NULL dMob.", __FUNCTION__ );
+      return;
+   }
+   if( !dMob->account )
+   {
+      bug( "%s: dMob %s has NULL account.", __FUNCTION__, dMob->name );
+      return;
+   }
+   if( !arg || arg[0] == '\0' )
+   {
+      mob_printf( dMob, "Proper usage: pagewidth #\r\n" );
+      return;
+   }
+   if( !is_number( arg ) )
+   {
+      mob_printf( dMob, "You must put in a number.\r\n" );
+      return;
+   }
+
+   width = atoi( arg );
+   set_account( dMob->account, width, ACT_PAGEWIDTH );
+   mob_printf( dMob, "Width set to %d.\r\n", width );
+   return;
+}

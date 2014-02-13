@@ -29,6 +29,19 @@ void mob_printf( D_MOBILE *dMob, const char *txt, ... )
    return;
 }
 
+void act_printf( ACCOUNT *account, const char *txt, ... )
+{
+   char buf[MAX_BUFFER];
+   va_list args;
+
+   va_start( args, txt );
+   vsnprintf( buf, MAX_BUFFER, txt, args );
+   va_end( args );
+
+   text_to_account( account, buf );
+   return;
+}
+
 /*
  * Nifty little extendable logfunction,
  * if it wasn't for Erwins social editor,

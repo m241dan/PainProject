@@ -807,12 +807,22 @@ void text_to_mobile(D_MOBILE *dMob, const char *txt)
   if (dMob->socket)
   {
      if( dMob->socket && dMob->socket->account )
-        txt = handle_pagewidth( dMob->socket->pagewidth, txt );
+        txt = handle_pagewidth( dMob->socket->account->pagewidth, txt );
      else
         txt = handle_pagewidth( DEFAULT_PAGEWIDTH, txt );
      text_to_buffer(dMob->socket, txt);
      dMob->socket->bust_prompt = TRUE;
   }
+}
+
+void text_to_account( ACCOUNT *account, const char *txt )
+{
+   if( account->socket )
+   {
+      txt = handle_pagewidth( account->pagewidth, txt );
+      text_to_buffer( account->socket, txt );
+      account->socket->bust_prompt = TRUE;
+   }
 }
 
 void next_cmd_from_buffer(D_SOCKET *dsock)
@@ -1233,7 +1243,7 @@ const char *handle_pagewidth( int width, const char *txt )
 
    memset( &buf[0], 0, sizeof(buf) );
    ptr = buf;
-   x = 1;
+   x = 0;
 
    while( *txt != '\0' )
    {
@@ -1254,11 +1264,11 @@ const char *handle_pagewidth( int width, const char *txt )
       }
 
       if( *txt == '\n' || *txt == '\r' )
-         x = 2;
+         x = 1;
 
       if( x > width )
       {
-         x = 2;
+         x = 1;
          *ptr++ = '\n';
          *ptr++ = '\r';
       }

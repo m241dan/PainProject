@@ -236,7 +236,7 @@ void fwrite_account( ACCOUNT *account, FILE *fp )
    fprintf( fp, "Name              %s~\n", account->name );
    fprintf( fp, "Password          %s~\n", account->password );
    fprintf( fp, "Level             %d\n", account->level );
-   fprintf( fp, "PageWidth         %d\b", account->pagewidth );
+   fprintf( fp, "PageWidth         %d\n", account->pagewidth );
    fprintf( fp, "#END\n" );
    return;
 }
@@ -333,25 +333,32 @@ void account_prompt( D_SOCKET *dsock )
    /* should convert to lua later */
    COMMAND *command;
    CHAR_SHEET *character;
+   char line[MAX_BUFFER];
    BUFFER *buf = buffer_new(MAX_BUFFER);
    ITERATOR Iter;
    int count = 0;
+   int width = dsock->account->pagewidth;
 
-   bprintf( buf, "%s Account Menu %s\r\n", produce_equals(30), produce_equals(30) );
+   bprintf( buf, "/%s\\\r\n", print_header( "Account Menu", "-", width - 2 ) );
    AttachIterator(&Iter, dsock->account->commands );
    while( ( command = (COMMAND *)NextInList(&Iter) ) != NULL )
-      bprintf( buf, "%d : %s\r\n", ++count, command->cmd_name );
+      bprintf( buf, "| %-2d : %-*.*s |\r\n", ++count, width - 9, width - 9, command->cmd_name );
    DetachIterator(&Iter);
-
+   bprintf( buf, "|%s|\r\n", print_header( "Characters", "-", width -2 ) );
    if( SizeOfList( dsock->account->characters ) > 0 )
    {
-      bprintf( buf, "\r\nCharacters:\r\n" );
-
       AttachIterator( &Iter, dsock->account->characters );
       while( ( character = (CHAR_SHEET *)NextInList( &Iter ) ) != NULL )
-         bprintf( buf, "%s the %s\r\n", character->name, race_table[character->race] );
+      {
+         mud_printf( line, "%s the %s", character->name, race_table[character->race] );
+         bprintf( buf, "| %-*.*s |\r\n", width - 4, width - 4, character->name, race_table[character->race] );
+      }
       DetachIterator( &Iter );
    }
+   else
+      bprintf( buf, "| %-*.*s |\r\n", width - 4, width - 4, "You have no characters created" );
+
+   bprintf( buf, "\\%s/\r\n", print_header( "End Menu", "-", width - 2 ) );
 
    bprintf( buf, "\r\nWhat is your choice?: " );
 
@@ -482,10 +489,55 @@ const char *get_loc_from_char_sheet( CHAR_SHEET *cSheet )
    return buf;
 }
 
+/* set_account
+   Using this command autosaves the account */
+
+void set_account( ACCOUNT *account, unsigned long int value, int type )
+{
+   switch( type )
+   {
+      default:
+         bug( "%s: invalid type %s passed.", __FUNCTION__, type );
+         return;
+      case ACT_SOCKET:
+         account->socket = (D_SOCKET *)value;
+         break;
+      case ACT_LEVEL:
+         account->level = (sh_int)value;
+         break;
+      case ACT_CHARACTERS:
+         clear_char_sheet_list( account );
+         FreeList( account->characters );
+         account->characters = (LIST *)value;
+         break;
+      case ACT_NAME:
+         if( account->name )
+            free( account->name );
+         account->name = strdup( (char *)value );
+         break;
+      case ACT_PASSWORD:
+         if( account->password )
+            free( account->password );
+         account->password = strdup( (char *)value );
+         break;
+      case ACT_COMMANDS:
+         clear_account_command_list( account );
+         FreeList( account->commands );
+         account->commands = (LIST *)value;
+         break;
+      case ACT_PAGEWIDTH:
+         account->pagewidth = (sh_int)value;
+         break;
+   }
+   save_account( account );
+   return;
+}
+
+
 /********************
  * Account Commands *
  ********************/
-void act_quit( void *passed, char *argument )
+void act_quit( void *passed, char *arg )
 {
    ACCOUNT *account = (ACCOUNT *)passed;
    char buf[MAX_BUFFER];
@@ -498,7 +550,7 @@ void act_quit( void *passed, char *argument )
    return;
 }
 
-void act_create_char( void *passed, char *argument )
+void act_create_char( void *passed, char *arg )
 {
    ACCOUNT *account = (ACCOUNT *)passed;
 
@@ -517,6 +569,31 @@ void act_create_char( void *passed, char *argument )
    account->socket->nanny = init_nanny( NANNY_CREATE_CHARACTER );
    account->socket->nanny->socket = account->socket; /* hook the nanny up to our socket for messaging */
    change_nanny_state( account->socket->nanny, NANNY_ASK_CHARACTER_NAME, TRUE );
+   return;
+}
+
+void act_pagewidth( void *passed, char *arg )
+{
+   ACCOUNT *account = (ACCOUNT *)passed;
+   int width;
+   if( !account )
+   {
+      bug( "%s: passed a NULL account.", __FUNCTION__ );
+      return;
+   }
+   if( !arg || arg[0] == '\0' )
+   {
+      act_printf( account, "Proper Usage: pagewidth #\r\n" );
+      return;
+   }
+   if( !is_number( arg ) )
+   {
+      act_printf( account, "You must put in a number.\r\n" );
+      return;
+   }
+   width = atoi( arg );
+   set_account( account, width, ACT_PAGEWIDTH );
+   act_printf( account, "Width set to %d.\r\n", width );
    return;
 }
 

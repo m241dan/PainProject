@@ -67,12 +67,14 @@ bool char_list_remove( ACCOUNT *account, D_MOBILE *player );
 ACCOUNT *get_account_from_name( const char *name );
 
 /* retrieval */
-
 const char *get_loc_from_char_sheet( CHAR_SHEET *cSheet );
+
+/* setting */
+void set_account( ACCOUNT *account, unsigned long int value, int type );
 
 /********************
  * Account Commands *
  ********************/
-void act_quit( void *passed, char *argument );
-void act_create_char( void *passed, char *argument );
-
+void act_quit( void *passed, char *arg );
+void act_create_char( void *passed, char *arg );
+void act_pagewidth( void *passed, char *arg );

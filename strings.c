@@ -391,6 +391,22 @@ char *append_spaces( const char *str, int amount )
    return buf;
 }
 
+const char *produce_pattern( const char *pattern, int amount )
+{
+   static char buf[MAX_BUFFER];
+   char *ptr;
+   int x;
+
+   memset( &buf, 0, sizeof( buf ) );
+   ptr = buf;
+
+   for( x = 0; x < amount; x++ )
+      *ptr++ = *pattern;
+
+   buf[ strlen( buf ) ] = '\0';
+   return buf;
+}
+
 void add_spaces( char *str, int amount )
 {
    int x;
@@ -454,4 +470,93 @@ void replace_string( char *dest, char *str )
       *dest++ = *str++;
 
    dest[strlen(dest)] = '\0';
+}
+/*
+const char *print_header( const char *title, const char *pattern, int width )
+{
+   static char buf[MAX_BUFFER];
+   char *ptr;
+   int title_len = strlen( title );
+   int side_width = ( width - ( title_len + 2 )  ) / 2;
+   bool extra = FALSE;
+   int x;
+
+   if( strlen( pattern ) > 1 )
+   {
+      bug( "%s: no pattern longer than a single character please.", __FUNCTION__ );
+      return NULL;
+   }
+
+   memset( &buf, 0, sizeof( buf ) );
+   ptr = buf;
+   if( side_width % 2 != 0 )
+   {
+      side_width -= 1;
+      extra = TRUE;
+   }
+
+   for( x = 0; x < side_width; x++ )
+      *ptr++ = *pattern;
+
+   *ptr++ = ' ';
+
+   for( x = 0; x < title_len; x++ )
+      *ptr++ = *title++;
+
+   *ptr++ = ' ';
+
+   for( x = 0; x < side_width; x++ )
+      *ptr++ = *pattern;
+
+   if( extra )
+      *ptr++ = *pattern;
+
+   buf[strlen(buf)] = '\0';
+   return buf;
+} */
+
+const char *print_header( const char *title, const char *pattern, int width )
+{
+   static char buf[MAX_BUFFER];
+   const char *pat_ptr;
+   char *buf_ptr;
+   int title_len = strlen( title );
+   int pattern_len = strlen( pattern );
+   int each_sides_pattern_len, side_pattern_remainder, loop_limit, extra, x;
+
+   memset( &buf, 0, sizeof( buf ) );
+   buf_ptr = buf;
+
+   each_sides_pattern_len = ( width - title_len - 2 ) / 2; /* minus two for preceeding and appending spaces to the title */
+   side_pattern_remainder = each_sides_pattern_len % pattern_len;
+   loop_limit = each_sides_pattern_len - side_pattern_remainder;
+   extra = width % 2;
+
+   pat_ptr = pattern;
+   for( x = 0; x < loop_limit; x++ )
+   {
+      *buf_ptr++ = *pat_ptr++;
+      if( ( x + 1 ) % pattern_len == 0 )
+         pat_ptr = pattern;
+   }
+
+   for( x = -1 ; x < side_pattern_remainder; x++ )
+      *buf_ptr++ = ' ';
+
+   for( x = 0; x < title_len; x++ )
+      *buf_ptr++ = *title++;
+
+   for( x = -1; x < ( side_pattern_remainder + extra ); x++ )
+      *buf_ptr++ = ' ';
+
+   pat_ptr = pattern;
+   for( x = 0; x < loop_limit; x++ )
+   {
+      *buf_ptr++ = *pat_ptr++;
+      if( ( x + 1 ) % pattern_len == 0 )
+         pat_ptr = pattern;
+   }
+
+   buf[strlen( buf )] = '\0';
+   return buf;
 }

@@ -230,3 +230,25 @@ bool valid_mobile( D_MOBILE *dMob )
    }
    return TRUE;
 }
+
+bool is_number( const char *arg )
+{
+   bool first = TRUE;
+   if( *arg == '\0' )
+      return FALSE;
+
+   for( ; *arg != '\0'; arg++ )
+   {
+      if( first && *arg == '-' )
+      {
+         first = FALSE;
+         continue;
+      }
+      if( !isdigit( *arg ) )
+         return FALSE;
+      first = FALSE;
+   }
+
+   return TRUE;
+}
+

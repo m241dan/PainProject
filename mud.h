@@ -121,6 +121,11 @@ typedef enum
    WORKSPACE_PUBLIC, WORKSPACE_PRIVATE, MAX_WORKSPACE_TYPE
 } workspace_permissions_type;
 
+typedef enum
+{
+   ACT_SOCKET, ACT_LEVEL, ACT_CHARACTERS, ACT_NAME, ACT_PASSWORD, ACT_COMMANDS, ACT_PAGEWIDTH
+} account_varId_types;
+
 
 /******************************
  * End of standard definitons *
@@ -344,6 +349,7 @@ bool  read_from_socket        ( D_S *dsock );
 bool  text_to_socket          ( D_S *dsock, const char *txt );  /* sends the output directly */
 void  text_to_buffer          ( D_S *dsock, const char *txt );  /* buffers the output        */
 void  text_to_mobile          ( D_M *dMob, const char *txt );   /* buffers the output        */
+void  text_to_account         ( ACCOUNT *account, const char *txt );
 void  next_cmd_from_buffer    ( D_S *dsock );
 bool  flush_output            ( D_S *dsock );
 void  handle_new_connections  ( D_S *dsock, char *arg );
@@ -371,6 +377,7 @@ void free_flag( CMD_FLAG *cmdFlag );
  * io.c
  */
 void    mob_printf( D_MOBILE *dMob, const char *txt, ... );
+void    act_printf( ACCOUNT *account, const char *txt, ... );
 void    log_string            ( const char *txt, ... );
 void    bug                   ( const char *txt, ... );
 time_t  last_modified         ( char *helpfile );
@@ -402,12 +409,15 @@ void   spit_equals            ( D_SOCKET *dsock, int amount );
 char   *produce_equals        ( int amount );
 char   *smash_color( const char *str );
 char   *append_spaces( const char *str, int amount );
+const char *produce_pattern( const char *patern, int amount );
 void add_spaces( char *str, int amount );
 bool string_contains( char *string, const char *regex_string );
 int mud_printf( char *dest, const char *format, ... );
 int mud_cat( char *dest, const char *format );
 void clear_strings( void );
 void replace_string( char *dest, char *str );
+const char *print_header( const char *title, const char *pattern, int width );
+
 /*
  * help.c
  */
@@ -427,6 +437,7 @@ COMMAND *copy_command( const struct typCmd to_copy );
 void free_command( COMMAND *command );
 int count_color( const char * str );
 bool valid_mobile( D_MOBILE *dMob );
+bool is_number( const char *arg );
 
 /*
  * action_safe.c
