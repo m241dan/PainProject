@@ -20,6 +20,9 @@ struct game_account
 
    /* account commands container */
    LIST *commands;
+
+   /* utility stuff */
+   sh_int pagewidth;
 };
 
 struct character_sheet

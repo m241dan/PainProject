@@ -28,6 +28,7 @@ void clear_account( ACCOUNT *account )
    account->name = NULL;
    account->password = NULL;
    account->level = LEVEL_BASIC;
+   account->pagewidth = DEFAULT_PAGEWIDTH;
    return;
 }
 
@@ -235,6 +236,7 @@ void fwrite_account( ACCOUNT *account, FILE *fp )
    fprintf( fp, "Name              %s~\n", account->name );
    fprintf( fp, "Password          %s~\n", account->password );
    fprintf( fp, "Level             %d\n", account->level );
+   fprintf( fp, "PageWidth         %d\b", account->pagewidth );
    fprintf( fp, "#END\n" );
    return;
 }
@@ -272,6 +274,7 @@ bool fread_account( ACCOUNT *account, FILE *fp )
             SREAD( "Name", account->name );
             break;
          case 'P':
+            IREAD( "PageWidth", account->pagewidth );
             SREAD( "Password", account->password );
             break;
       }

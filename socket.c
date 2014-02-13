@@ -806,7 +806,10 @@ void text_to_mobile(D_MOBILE *dMob, const char *txt)
 {
   if (dMob->socket)
   {
-     txt = handle_pagewidth( dMob->socket->pagewidth, txt );
+     if( dMob->socket && dMob->socket->account )
+        txt = handle_pagewidth( dMob->socket->pagewidth, txt );
+     else
+        txt = handle_pagewidth( DEFAULT_PAGEWIDTH, txt );
      text_to_buffer(dMob->socket, txt);
      dMob->socket->bust_prompt = TRUE;
   }
