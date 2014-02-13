@@ -123,7 +123,7 @@ typedef enum
 
 typedef enum
 {
-   ACT_SOCKET, ACT_LEVEL, ACT_CHARACTERS, ACT_NAME, ACT_PASSWORD, ACT_COMMANDS, ACT_PAGEWIDTH
+   ACT_SOCKET, ACT_LEVEL, ACT_CHARACTERS, ACT_NAME, ACT_PASSWORD, ACT_COMMANDS, ACT_PAGEWIDTH, ACT_SETTINGS, MAX_ACT_TYPE
 } account_varId_types;
 
 
@@ -294,6 +294,7 @@ extern  STACK       *   account_free;     /* list of free accounts -Davenge     
 extern  LIST        *   account_list;     /* list of active accounts -Davenge   */
 extern  LIST        *   string_free;      /* the string clear collection -Davenge*/
 extern  const struct    typCmd tabCmd[];  /* the command table                  */
+extern	const struct	typCmd actSettingCmd[]; /* settings */
 extern  bool            shut_down;        /* used for shutdown                  */
 extern  char        *   greeting;         /* the welcome greeting               */
 extern  char        *   motd;             /* the MOTD help file                 */
@@ -438,6 +439,7 @@ void free_command( COMMAND *command );
 int count_color( const char * str );
 bool valid_mobile( D_MOBILE *dMob );
 bool is_number( const char *arg );
+void load_commands( LIST *commands, const struct typCmd to_load[], int state, int level );
 
 /*
  * action_safe.c

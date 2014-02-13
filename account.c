@@ -29,6 +29,7 @@ void clear_account( ACCOUNT *account )
    account->password = NULL;
    account->level = LEVEL_BASIC;
    account->pagewidth = DEFAULT_PAGEWIDTH;
+   account->settings_loaded = FALSE;
    return;
 }
 
@@ -390,17 +391,8 @@ ACCOUNT *check_account_reconnect(const char *act_name)
 
 void load_account_commands( ACCOUNT *account )
 {
-   COMMAND *com;
-   int x;
-
    clear_account_command_list( account );
-
-   for( x = 0; tabCmd[x].cmd_name[0] != '\0'; x++ ) /* load the new commands that fit our criteria */
-      if( tabCmd[x].state == STATE_ACCOUNT && tabCmd[x].level <= account->level )
-      {
-         com = copy_command( tabCmd[x] );
-         AttachToList( com, account->commands );
-      }
+   load_commands( account->commands, tabCmd, STATE_ACCOUNT, account->level );
    return;
 }
 
@@ -528,6 +520,9 @@ void set_account( ACCOUNT *account, unsigned long int value, int type )
       case ACT_PAGEWIDTH:
          account->pagewidth = (sh_int)value;
          break;
+      case ACT_SETTINGS:
+         account->settings_loaded = (bool)value;
+         break;
    }
    save_account( account );
    return;
@@ -597,3 +592,19 @@ void act_pagewidth( void *passed, char *arg )
    return;
 }
 
+void act_settings( void *passed, char *arg )
+{
+   ACCOUNT *account = (ACCOUNT *)passed;
+   LIST *flags = AllocList();
+   char arg_rem[MAX_BUFFER];
+
+   if( !arg || arg[0] == '\0' )
+   {
+      act_printf( account, "Proper Usage: settings <flags>\r\n - valid flags: -open -close\r\n" );
+      return;
+   }
+
+   pull_flags( flags, arg, arg_rem );
+
+   return;
+}

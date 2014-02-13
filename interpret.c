@@ -64,13 +64,22 @@ const struct typCmd tabCmd [] =
   { "w_close",       cmd_close_workspace, LEVEL_ADMIN, STATE_PLAYING },
   { "pagewidth",     cmd_pagewidth,  LEVEL_PLAYER, STATE_PLAYING },
   /* account commands */
+  { "settings",      act_settings,   LEVEL_BASIC, STATE_ACCOUNT },
   { "quit",          act_quit,       LEVEL_BASIC, STATE_ACCOUNT },
   { "create",        act_create_char,LEVEL_BASIC, STATE_ACCOUNT },
-  { "pagewidth",     act_pagewidth,  LEVEL_BASIC, STATE_ACCOUNT },
 
   /* end of table */
   { "", 0 }
 };
+
+const struct typCmd actSettingCmd[] =
+{
+   { "pagewidth", act_pagewidth, LEVEL_BASIC, STATE_ACCOUNT },
+
+   /* end of table */
+   { "", 0 }
+};
+
 /*
 const struct typCmd olcCmd[] =
 {

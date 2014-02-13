@@ -252,3 +252,17 @@ bool is_number( const char *arg )
    return TRUE;
 }
 
+void load_commands( LIST *commands, const struct typCmd to_load[], int state, int level )
+{
+   COMMAND *com;
+   int x;
+
+   for( x = 0; to_load[x].cmd_name[0] != '\0'; x++ )
+      if( to_load[x].state == state && to_load[x].level <= level )
+      {
+         com = copy_command( to_load[x] );
+         AttachToList( com, commands );
+      }
+
+   return;
+}

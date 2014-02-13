@@ -259,17 +259,8 @@ bool fread_mobile( D_MOBILE *dMob, FILE *fp )
 
 void load_mobile_commands( D_MOBILE *dMob )
 {
-   COMMAND *com;
-   int x;
-
    clear_mobile_command_list( dMob ); /* clear it out before we lost new commands */
-
-   for( x = 0; tabCmd[x].cmd_name[0] != '\0'; x++ ) /* load the new commands that fit our criteria */
-      if( tabCmd[x].state == STATE_PLAYING && tabCmd[x].level <= dMob->level )
-      {
-         com = copy_command( tabCmd[x] );
-         AttachToList( com, dMob->commands );
-      }
+   load_commands( dMob->commands, tabCmd, STATE_PLAYING, dMob->level );
    return;
 }
 

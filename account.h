@@ -23,6 +23,7 @@ struct game_account
 
    /* utility stuff */
    sh_int pagewidth;
+   bool settings_loaded;
 };
 
 struct character_sheet
@@ -78,3 +79,4 @@ void set_account( ACCOUNT *account, unsigned long int value, int type );
 void act_quit( void *passed, char *arg );
 void act_create_char( void *passed, char *arg );
 void act_pagewidth( void *passed, char *arg );
+void act_settings( void *passed, char *arg );
