@@ -1166,6 +1166,16 @@ void change_socket_state( D_SOCKET *dsock, int state )
 
 void control_player( D_SOCKET *dsock, D_MOBILE *player )
 {
+   if( !dsock )
+   {
+      bug( "%s: given a NULL socket.", __FUNCTION__ );
+      return;
+   }
+   if( !player )
+   {
+      bug( "%s: given a NULL player.", __FUNCTION__ );
+      return;
+   }
    dsock->player = player;
    player->socket = dsock;
    return;
@@ -1173,6 +1183,16 @@ void control_player( D_SOCKET *dsock, D_MOBILE *player )
 
 void control_nanny( D_SOCKET *dsock, NANNY *nanny )
 {
+   if( !dsock )
+   {
+      bug( "%s: given a NULL socket.", __FUNCTION__ );
+      return;
+   }
+   if( !nanny )
+   {
+      bug( "%s: given a NULL nanny.", __FUNCTION__ );
+      return;
+   }
    dsock->nanny = nanny;
    nanny->socket = dsock;
    return;
@@ -1180,6 +1200,16 @@ void control_nanny( D_SOCKET *dsock, NANNY *nanny )
 
 void control_account( D_SOCKET *dsock, ACCOUNT *account )
 {
+   if( !dsock )
+   {
+      bug( "%s: given a NULL socket.", __FUNCTION__ );
+      return;
+   }
+   if( !account )
+   {
+      bug( "%s: given a NULL account.", __FUNCTION__ );
+      return;
+   }
    dsock->account = account;
    account->socket = dsock;
    return;

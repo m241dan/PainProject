@@ -537,7 +537,7 @@ void cmd_open_workspace( void *passed, char *arg )
 
    if( wSpace->who_using && wSpace->who_using != dMob )
    {
-      mob_printf( dMob, "%s is already using that workspace.\r\n", wSpace->who_using ? wSpace->who_using : "(null)" );
+      mob_printf( dMob, "%s is already using that workspace.\r\n", wSpace->who_using ? wSpace->who_using->name : "(null)" );
       return;
    }
 
@@ -548,7 +548,17 @@ void cmd_open_workspace( void *passed, char *arg )
 
 void cmd_close_workspace( void *passed, char *arg )
 {
+   D_MOBILE *dMob = (D_MOBILE *)passed;
 
+   if( !dMob->workspace )
+   {
+      mob_printf( dMob, "You do not have a work space open to close.\r\n" );
+      return;
+   }
+   save_workspace( dMob->workspace );
+   unset_mobile_workspace( dMob );
+   mob_printf( dMob, "Workspace closed.\r\n" );
+   return;
 }
 
 

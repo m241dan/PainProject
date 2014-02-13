@@ -272,22 +272,23 @@ void set_mobile_workspace( D_MOBILE *dMob, WORKSPACE *wSpace )
    }
    if( wSpace->who_using )
    {
-      bug( "%s: wSpace is being used, cannot set to a different mobile.", __FUCNTION__ );
+      bug( "%s: wSpace is being used, cannot set to a different mobile.", __FUNCTION__ );
       return;
+   }
 
    dMob->workspace = wSpace;
    wSpace->who_using = dMob;
    return;
 }
 
-void unset_mobile_workspace( D_MOBILE *dMob );
+void unset_mobile_workspace( D_MOBILE *dMob )
 {
    if( !dMob )
    {
       bug( "%s: dMob is NULL.", __FUNCTION__ );
       return;
    }
-   if( !dMob->wSpace )
+   if( !dMob->workspace )
    {
       bug( "%s: dMob '%s' does not have a wSpace set.", __FUNCTION__, dMob->name );
       return;

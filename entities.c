@@ -24,6 +24,7 @@ void clear_entity( ENTITY *ent )
 /* deletion */
 void free_entity( ENTITY *ent )
 {
+   DetachFromList( ent, world_entities );
    ent->content = NULL;
    free( ent );
    return;

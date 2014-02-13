@@ -38,4 +38,4 @@ bool check_work( D_MOBILE *dMob );
 void add_frame_to_workspace( FRAMEWORK *frame, D_MOBILE *dMob );
 WORKSPACE *get_workspace_from_list( const char *name );
 void set_mobile_workspace( D_MOBILE *dMob, WORKSPACE *wSpace );
-void unset_mobile_workspace( D_MOBILE *dMob, WORKSPACE *wSpace );
+void unset_mobile_workspace( D_MOBILE *dMob );

@@ -18,7 +18,7 @@ struct dMobile
    char          * name; /* account data */
    char          * password; /* account data */
    sh_int        level; /* account data */
-   sh_int        race; 
+   sh_int        race;
 
    /***************
     * New Content *
@@ -86,3 +86,6 @@ void cmd_down( void *passed, char *arg );
 /* Building */
 void cmd_load( void *passed, char *arg );
 void cmd_open_workspace( void *passed, char *arg );
+/* to code */
+void cmd_close_workspace( void *passed, char *arg );
+void cmd_create_framework( void *passed, char *arg );
