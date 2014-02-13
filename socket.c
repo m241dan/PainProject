@@ -282,6 +282,8 @@ int init_socket()
   struct sockaddr_in my_addr;
   int sockfd, reuse = 1;
 
+
+
   /* let's grab a socket */
   sockfd = socket(AF_INET, SOCK_STREAM, 0);
 
@@ -390,6 +392,9 @@ bool new_socket(int sock)
   /* negotiate compression */
   text_to_buffer(sock_new, (char *) compress_will2);
   text_to_buffer(sock_new, (char *) compress_will);
+
+   /* set default page length */
+   sock_new->pagewidth = DEFAULT_PAGEWIDTH;
 
   /* send the greeting */
   text_to_buffer(sock_new, greeting);
@@ -583,7 +588,7 @@ void text_to_buffer(D_SOCKET *dsock, const char *txt)
   static char output[8 * MAX_BUFFER];
   bool underline = FALSE, bold = FALSE;
   int iPtr = 0, last = -1, j, k;
-  int length = strlen(txt);
+  int length = strlen( txt );
 
   /* the color struct */
   struct sAnsiColor
@@ -801,8 +806,9 @@ void text_to_mobile(D_MOBILE *dMob, const char *txt)
 {
   if (dMob->socket)
   {
-    text_to_buffer(dMob->socket, txt);
-    dMob->socket->bust_prompt = TRUE;
+     txt = handle_pagewidth( dMob->socket->pagewidth, txt );
+     text_to_buffer(dMob->socket, txt);
+     dMob->socket->bust_prompt = TRUE;
   }
 }
 
@@ -1213,4 +1219,50 @@ void control_account( D_SOCKET *dsock, ACCOUNT *account )
    dsock->account = account;
    account->socket = dsock;
    return;
+}
+
+const char *handle_pagewidth( int width, const char *txt )
+{
+   static char buf[MAX_BUFFER * 2];
+   bool color = FALSE;
+   char *ptr;
+   int x;
+
+   memset( &buf[0], 0, sizeof(buf) );
+   ptr = buf;
+   x = 1;
+
+   while( *txt != '\0' )
+   {
+      if( *txt == '#' && !color )
+         color = TRUE;
+      else if( *txt == '#' && color )
+      {
+         x++;
+         color = FALSE;
+      }
+
+      if( *txt != '#' )
+      {
+         if( color )
+            color = FALSE;
+         else
+            x++;
+      }
+
+      if( *txt == '\n' || *txt == '\r' )
+         x = 2;
+
+      if( x > width )
+      {
+         x = 2;
+         *ptr++ = '\n';
+         *ptr++ = '\r';
+      }
+      *ptr++ = *txt++;
+   }
+
+   buf[strlen(buf)] = '\0';
+
+   return buf;
 }

@@ -45,6 +45,7 @@
 #define EXE_FILE           "../src/SocketMud"     /* the name of the mud binary         */
 
 #define MAX_COORD_HASH     1000
+#define DEFAULT_PAGEWIDTH    80
 
 /* Connection states */
 typedef enum {
@@ -215,6 +216,7 @@ struct dSocket
   sh_int          previous_state;
   sh_int          control;
   sh_int          top_output;
+  sh_int          pagewidth;
   unsigned char   compressing;                 /* MCCP support */
   z_stream      * out_compress;                /* MCCP support */
   unsigned char * out_compress_buf;            /* MCCP support */
@@ -352,6 +354,7 @@ void change_socket_state( D_S *dsock, int state );
 void control_player( D_SOCKET *dsock, D_MOBILE *player );
 void control_nanny( D_SOCKET *dsock, NANNY *nanny );
 void control_account( D_SOCKET *dsock, ACCOUNT *account );
+const char *handle_pagewidth( int width, const char *txt );
 /*
  * interpret.c
  */
