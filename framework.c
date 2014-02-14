@@ -48,8 +48,8 @@ FRAMEWORK *create_framework( D_MOBILE *dMob, int type )
    fWork->long_descr = strdup( "A new framework is here." );
    switch( fWork->type )
    {
-      case ROOM_FRAME:
-         fWork->id = create_new_id( dMob, ROOM_FRAME );
+      case FRAMEWORK_ROOM:
+         fWork->id = create_new_id( dMob, ROOM_FRAMEWORK );
          fWork->content = create_rFramework();
          ((R_FRAMEWORK *)fWork->content)->container = fWork;
          break;
@@ -72,7 +72,7 @@ void free_framework( FRAMEWORK *frame )
 
    switch( frame->type )
    {
-      case ROOM_FRAME:
+      case FRAMEWORK_ROOM:
          free_rFramework( (R_FRAMEWORK *)frame->content );
          break;
    }
@@ -164,7 +164,7 @@ void save_framework( FRAMEWORK *frame )
    fwrite_i_id( frame->id, fp );
    switch( frame->type )
    {
-      case ROOM_FRAME:
+      case FRAMEWORK_ROOM:
          fwrite_rFramework( (R_FRAMEWORK *)frame->content, fp );
          break;
    }
@@ -387,7 +387,7 @@ void set_framework( FRAMEWORK *frame, VALUE value, int type )
             default:
                bug( "%s: bad framework type.", __FUNCTION__ );
                return;
-            case ROOM_FRAME:
+            case FRAMEWORK_ROOM:
                set_rFramework( (R_FRAMEWORK *)frame->content, value, type );
                break;
          }

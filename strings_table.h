@@ -4,10 +4,9 @@
 
 /* Definitions */
 extern const char *const structure_names[MAX_STRUCT+1];
+extern const char *const rFrame_Commands[MAX_RFRAME_STRING+1];
 extern const char *const framework_names[MAX_FRAMEWORK+1];
-extern const char *const rFrame_strings[MAX_RFRAME_STRING+1];
-extern const char *const framework_names_intials[MAX_FRAMEWORK+1];
-extern const char *const id_handler_names[MAX_ID_HANDLER+1];
+extern const char *const id_handler_names[MAX_STRUCT+1];
 extern const char *const nanny_strings[MAX_NANNY_TYPE][MAX_NANNY_STATES];
 extern const char *const race_table[];
 extern const char *const race_desc_table[];

@@ -81,6 +81,18 @@ typedef enum {
 typedef  unsigned char     bool;
 typedef  short int         sh_int;
 
+/*********************
+ * Structure ID Enum *
+ *********************/
+
+typedef enum {
+   MOBILE_ENTITY, ROOM_ENTITY, WORKSPACE_STRUCT, ROOM_FRAMEWORK, MAX_STRUCT
+} structure_ids;
+
+/*********************
+ * End Structure IDs *
+ *********************/
+
 /* The levels an account can be */
 typedef enum {
    LEVEL_BASIC, LEVEL_ENFORCER, LEVEL_DEVELOPER, LEVEL_OWNER, MAX_ACCOUNT_LEVEL
@@ -90,18 +102,10 @@ typedef enum {
 #define MAX_COORD_HASH     1000
 
 typedef enum {
-   DIR_NORTH, DIR_EAST, DIR_SOUTH, DIR_WEST, DIR_UP, DIR_DOWN, MAX_DIRECTION
+   DIR_NORTH, DIR_EAST, DIR_SOUTH, DIR_WEST, DIR_UP, DIR_DOWN, DIR_ROOM, MAX_DIRECTION
 } direction_integers;
 
-typedef enum
-{
-   ROOM_FRAME, MAX_FRAMEWORK
-} framework_name_ids;
-
-typedef enum
-{
-   RFRAME_HANDLER, WORKSPACE_HANDLER, MAX_ID_HANDLER
-} id_handler_types;
+/* Nanny Stuff */
 
 #define MAX_NANNY_STATES 10
 
@@ -116,25 +120,37 @@ typedef enum {
 typedef enum {
    NANNY_CHAR_PASS_CHECK_CONFIRM, MAX_CHAR_PASS_CHECK_STATE
 } char_pass_check_states;
+
+/* Workspace Stuff */
+
 typedef enum
 {
    WORKSPACE_PUBLIC, WORKSPACE_PRIVATE, MAX_WORKSPACE_TYPE
 } workspace_permissions_type;
+
+/* Account Stuff */
 
 typedef enum
 {
    ACT_SOCKET, ACT_LEVEL, ACT_CHARACTERS, ACT_NAME, ACT_PASSWORD, ACT_COMMANDS, ACT_PAGEWIDTH, ACT_SETTINGS, MAX_ACT_TYPE
 } account_varId_types;
 
+/* Frames */
 typedef enum
 {
-   FRAME_NAME, FRAME_SHORT_DESCR, FRAME_LONG_DESCR
-} frame_strings_id;
+   FRAMEWORK_ROOM, FRAMEWORK_MOBILE, MAX_FRAMEWORK
+} framework_name_type_id;
 
 typedef enum
 {
+   FRAME_NAME, FRAME_SHORT_DESCR, FRAME_LONG_DESCR
+} framework_commands_id;
+
+/* rFrames */
+typedef enum
+{
    RFRAME_TITLE = 3, RFRAME_DESCRIPTION, MAX_RFRAME_STRING
-} rFrame_strings_id;
+} rFrame_Commands_id;
 
 
 /******************************
@@ -185,13 +201,6 @@ do                                                                      \
  * End of Macros       *
  ***********************/
 
-/*********************
- * Structure ID Enum *
- *********************/
-typedef enum {
-   MOBILE_ENTITY, ROOM_ENTITY, ROOM_FRAMEWORK, MAX_STRUCT
-} structure_ids;
-
 
 /******************************
  * New structures             *
@@ -215,6 +224,7 @@ typedef struct workspace WORKSPACE;
 typedef struct framework FRAMEWORK;
 typedef struct room_framework R_FRAMEWORK;
 typedef struct character_sheet CHAR_SHEET;
+typedef struct room ROOM;
 
 typedef unsigned long int VALUE;
 

@@ -17,26 +17,22 @@
  **********/
 
 const char *const structure_names[MAX_STRUCT+1] = {
-   "mobile", "room", "rFrame",
+   "mobile", "room", "workspace", "rFrame",
+   ""
+};
+
+const char *const rFrame_Commands[MAX_RFRAME_STRING+1] = {
+   "name", "short_descr", "long_descr", "title", "description",
    ""
 };
 
 const char *const framework_names[MAX_FRAMEWORK+1] = {
-   "rFrame",
+   "rFrame", "mFrame",
    ""
 };
 
-const char *const rFrame_strings[MAX_RFRAME_STRING+1] = {
-   "name", "short_descr", "long_descr", "title", "description", ""
-};
-
-const char *const framework_names_initials[MAX_FRAMEWORK+1] = {
-   "r",
-   ""
-};
-
-const char *const id_handler_names[MAX_ID_HANDLER+1] = {
-   "rFrame_Handler", "Workspace_Handler",
+const char *const id_handler_names[MAX_STRUCT+1] = {
+   "Mobile_Handler", "Room_Handler", "Workspace_Handler", "rFrame_Handler",
    ""
 };
 
@@ -74,7 +70,7 @@ const char *const workspace_permissions[MAX_WORKSPACE_TYPE+1] = {
 /* Directions */
 
 const char *const exit_directions[MAX_DIRECTION+1] = {
-   "North", "East", "South", "West", "Up", "Down", "" /* ALWAYS TERMINATE */
+   "North", "East", "South", "West", "Up", "Down", "Room", "" /* ALWAYS TERMINATE */
 };
 
 /*******************

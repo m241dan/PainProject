@@ -2,7 +2,7 @@
    This is the header file for entities.c
    Written by Davenge */
 
-extern LIST * world_entities;
+extern LIST * world_entities; /* anything instanced is an entity */
 
 struct entity
 {

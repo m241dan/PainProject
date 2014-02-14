@@ -15,7 +15,7 @@ bool load_id_handlers( void )
    int x;
    ID_HANDLER *handler;
 
-   for( x = 0; x < MAX_ID_HANDLER; x++ )
+   for( x = 0; x < MAX_STRUCT; x++ )
    {
       handler = init_id_handler( x );
       if( !load_id_handler( handler ) )
@@ -125,7 +125,7 @@ bool load_id_handler( ID_HANDLER *handler )
    char location[MAX_BUFFER];
    bool found, done = FALSE;
 
-   mud_printf( location, "../system/%s.handler", id_handler_names[handler->type] );
+   mud_printf( location, "../handlers/%s.handler", id_handler_names[handler->type] );
    if( ( fp = fopen( location, "r" ) ) == NULL )
    {
       bug( "%s: unable to open file to read: %s", __FUNCTION__, location );

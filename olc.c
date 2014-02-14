@@ -41,7 +41,7 @@ bool create_workspace( D_MOBILE *dMob, WORKSPACE *wSpace, const char *name )
       text_to_mobile( dMob, "A workspace with that name already exists.\r\n" );
       return FALSE;
    }
-   wSpace->id = create_new_id( dMob, WORKSPACE_HANDLER );
+   wSpace->id = create_new_id( dMob, WORKSPACE_STRUCT );
    wSpace->name = strdup( name );
    AttachToList( wSpace, workspaces );
    return TRUE;
