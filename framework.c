@@ -312,7 +312,7 @@ R_FRAMEWORK *fread_rFramework( FILE *fp )
       switch( word[0] )
       {
          case '#':
-            if( strcasecmp( "#END", word ) ) { done = TRUE; found = TRUE; break; }
+            if( !strcasecmp( "#END", word ) ) { done = TRUE; found = TRUE; break; }
             break;
          case 'D':
             SREAD( "Descr", rFrame->description );

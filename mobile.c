@@ -280,8 +280,20 @@ void mobile_prompt( D_SOCKET *dsock )
 
    buf = buffer_new( MAX_BUFFER );
 
-   if( dMob->workspace && dMob->workspace->name && dMob->workspace->name[0] != '\0' )
-      bprintf( buf, "Workspace: %s\r\n", dMob->workspace->name );
+   if( dMob->workspace && dMob->workspace->name && dMob->workspace->name[0] != '\0' && dsock->account)
+   {
+      FRAMEWORK *fWork;
+      ITERATOR Iter;
+      int width = dsock->account->pagewidth;
+
+      bprintf( buf, "/%s\\\r\n", print_header( dMob->workspace->name, "-", ( width - 2 )  ) );
+
+      AttachIterator( &Iter, dMob->workspace->contents );
+      while( ( fWork = (FRAMEWORK *)NextInList( &Iter ) ) != NULL )
+         bprintf( buf, "| %-*.*s |\r\n", ( width - 4 ), ( width - 4 ), fWork->name );
+      DetachIterator( &Iter );
+      bprintf( buf, "\\%s/\r\n", print_header( "End Workspace", "-", ( width - 2 ) ) );
+   }
 
    bprintf( buf, "Davengine's NULL Prompt:> " );
    text_to_buffer( dsock, buf->data );
@@ -483,6 +495,8 @@ void cmd_open_workspace( void *passed, char *arg )
    char buf[MAX_BUFFER];
    bool creator = FALSE;
 
+   memset( &no_flags_buf[0], 0, sizeof( no_flags_buf ) );
+
    if( dMob->workspace )
    {
       mob_printf( dMob, "You already have a workspace opened: %s\r\n", dMob->workspace->name );
@@ -566,7 +580,7 @@ void cmd_create_framework( void *passed, char *arg )
 {
    D_MOBILE *dMob = (D_MOBILE *)passed;
    FRAMEWORK *framework;
-   char arg1[MAX_BUFFER], arg2[MAX_BUFFER];
+   char arg1[MAX_BUFFER];
    int type;
 
    if( !arg || arg[0] == '\0' )
@@ -579,7 +593,6 @@ void cmd_create_framework( void *passed, char *arg )
       return;
 
    arg = one_arg( arg, arg1 );
-   arg = one_arg( arg, arg2 );
 
    if( arg1[0] == '\0' )
    {
@@ -593,13 +606,13 @@ void cmd_create_framework( void *passed, char *arg )
       return;
    }
 
-   if( arg2[0] == '\0' )
+   if( arg[0] == '\0' )
    {
       mob_printf( dMob, "You need to name your framework.\r\n" );
       return;
    }
 
-   if( check_frame_name( arg2 ) )
+   if( check_frame_name( arg ) )
    {
       mob_printf( dMob, "A framework with that name already exists.\r\n" );
       return;
@@ -612,7 +625,7 @@ void cmd_create_framework( void *passed, char *arg )
       return;
    }
 
-   set_framework( framework, (VALUE)arg2, FRAME_NAME );
+   set_framework( framework, (VALUE)arg, FRAME_NAME );
    add_frame_to_workspace( framework, dMob );
    text_to_mobile( dMob, "A new room framework has been added to your workspace.\r\n" );
    return;

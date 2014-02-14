@@ -210,8 +210,11 @@ void fread_workspace( WORKSPACE *wSpace, FILE *fp )
          case 'F':
             if( !strcmp( word, "Frame" ) )
             {
+               int x1, x2;
                found = TRUE;
-               frame = get_frame( fread_number( fp ), fread_number( fp ) );
+               x1 = fread_number( fp );
+               x2 = fread_number( fp );
+               frame = get_frame( x1, x2 );
                AttachToList( frame, wSpace->contents );
                break;
             }

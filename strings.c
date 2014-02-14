@@ -530,7 +530,7 @@ const char *print_header( const char *title, const char *pattern, int width )
    each_sides_pattern_len = ( width - title_len - 2 ) / 2; /* minus two for preceeding and appending spaces to the title */
    side_pattern_remainder = each_sides_pattern_len % pattern_len;
    loop_limit = each_sides_pattern_len - side_pattern_remainder;
-   extra = width % 2;
+   extra = title_len % 2;
 
    pat_ptr = pattern;
    for( x = 0; x < loop_limit; x++ )
