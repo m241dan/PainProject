@@ -64,7 +64,7 @@ void free_mobile( D_MOBILE *dMob )
 
    if( dMob->ent_wrapper )
       free_entity( dMob->ent_wrapper );
-   dMob->ent_wrapper = NULL; /* this needs work */
+   dMob->ent_wrapper = NULL;
 
    dMob->at_coord = NULL;
    if( dMob->workspace )

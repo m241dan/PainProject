@@ -19,6 +19,7 @@ struct room_framework
    FRAMEWORK *container;
    char *title;
    char *description;
+   bool inside;
 };
 
 /*******************

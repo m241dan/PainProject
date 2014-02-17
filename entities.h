@@ -17,7 +17,7 @@ void clear_entity( ENTITY *ent );
 
 /* deletion */
 void free_entity( ENTITY *ent );
-
+void free_entity_list( LIST *entities );
 /*******************
  * Utility Methods *
  *******************/

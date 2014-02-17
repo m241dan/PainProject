@@ -8,14 +8,13 @@ struct room
    FRAMEWORK *framework;
    ENTITY *ent_wrapper;
    I_ID *id;
-   COORD *at_coord;
 
    char *name;
    char *short_descr;
    char *long_descr;
    char *title;
    char *description;
-   int imposed;
+   bool inside;
 };
 
 /* creation */

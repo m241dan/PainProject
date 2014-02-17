@@ -44,7 +44,7 @@
 #define COPYOVER_FILE      "../txt/copyover.dat"  /* tempfile to store copyover data    */
 #define EXE_FILE           "../src/SocketMud"     /* the name of the mud binary         */
 
-#define MAX_COORD_HASH     1000
+#define COORD_HASH_KEY     1000
 #define DEFAULT_PAGEWIDTH    80
 
 /* Connection states */
@@ -102,7 +102,7 @@ typedef enum {
 #define MAX_COORD_HASH     1000
 
 typedef enum {
-   DIR_NORTH, DIR_EAST, DIR_SOUTH, DIR_WEST, DIR_UP, DIR_DOWN, DIR_ROOM, MAX_DIRECTION
+   DIR_NORTH, DIR_EAST, DIR_SOUTH, DIR_WEST, DIR_UP, DIR_DOWN, DIR_NORTH_EAST, DIR_NORTH_WEST, DIR_SOUTH_EAST, DIR_SOUTH_WEST, MAX_DIRECTION;
 } direction_integers;
 
 /* Nanny Stuff */
@@ -149,7 +149,7 @@ typedef enum
 /* rFrames */
 typedef enum
 {
-   RFRAME_TITLE = 3, RFRAME_DESCRIPTION, MAX_RFRAME_STRING
+   RFRAME_TITLE = 3, RFRAME_DESCRIPTION, RFRAME_INSIDE, MAX_RFRAME_STRING
 } rFrame_Commands_id;
 
 

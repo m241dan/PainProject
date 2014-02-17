@@ -29,6 +29,18 @@ void free_entity( ENTITY *ent )
    free( ent );
    return;
 }
+void free_entity_list( LIST *entities )
+{
+   ENTITY *ent;
+   ITERATOR Iter;
+
+   AttachIterator( &Iter, entities );
+   while( ( ent = (ENTITY *)NextInList( &Iter ) ) != NULL )
+      free_entity( ent );
+   DetachIterator( &Iter );
+
+   return;
+}
 /*******************
  * Utility Methods *
  *******************/

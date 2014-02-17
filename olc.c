@@ -66,6 +66,16 @@ void free_workspace( WORKSPACE *wSpace )
    return;
 }
 
+void delete_instance( void *instance, int type )
+{
+   switch( type )
+   {
+      case ROOM_ENTITY:
+         delete_room( (D_MOBILE *)instance );
+         return;
+   }
+}
+
 /* i/o */
 bool load_workspaces( void )
 {

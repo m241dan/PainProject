@@ -20,13 +20,12 @@ void clear_room( ROOM *room )
    room->framework = NULL;
    room->ent_wrapper = NULL;
    room->id = NULL;
-   room->at_coord = NULL;
    room->name = NULL;
    room->short_descr = NULL;
    room->long_descr = NULL;
    room->title = NULL;
    room->description = NULL;
-   room->imposed = -1;
+   room->inside = FALSE;
    return;
 }
 
@@ -46,5 +45,30 @@ ROOM *create_room( D_MOBILE *dMob, FRAMEWORK *fWork )
    room->long_descr = strdup( fWork->long_descr );
    room->title = strdup( rFrame->title );
    room->description = strdup( rFrame->description );
+
    room->id = create_new_id( dMob, ROOM_ENTITY );
+   room->framework = fWork;
+   return;
 }
+
+/* deletion */
+void free_room( ROOM *room )
+{
+   room->framework = NULL;
+   room->at_coord = NULL;
+
+   if( room->ent_wrapper )
+      free_entity( room->ent_wrapper );
+   if( room->id )
+      free_i_id( room->id );
+   if( room->name )
+      free( room->name );
+   if( room->short_descr )
+      free( room->short_descr );
+   if( room->long_descr )
+      free( room->long_descr );
+
+   free( room );
+   return;
+}
+

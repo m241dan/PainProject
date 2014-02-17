@@ -3,22 +3,33 @@
    Written by Davenge */
 
 
-extern LIST *coord_map[MAX_COORD_HASH];
+extern LIST *coord_map[COORD_HASH_KEY][COORD_HASH_KEY][COORD_HASH_KEY];
 
 struct coordinate
 {
-   COORD *exits[MAX_DIRECTION];
+   COORD *connected[MAX_DIRECTION];
    LIST *entities;
-   /* ROOM_DATA *room */
    int pos_x;
    int pos_y;
    int pos_z;
+   ROOM *room;
+   ENTITY *fill;
 };
 
 /*******************
  * Utility Methods *
  *******************/
+
+/* creation */
+COORD *init_coord( void );
+void clear_coord( COORD *coord );
 COORD *create_coord( int x, int y, int z );
+
+/* deletion */
+void free_coord( COORD *coord );
+void free_coord_list( LIST *coords );
+
+
 COORD *get_coord( int x, int y, int z );
 void link_coordinate( COORD *coordinate );
 bool check_coord( int x, int y, int z );

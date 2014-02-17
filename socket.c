@@ -30,7 +30,7 @@ LIST     * dmobile_list = NULL;   /* the mobile list of active mobiles */
 STACK    * account_free = NULL;   /* the account free list -Davenge    */
 LIST     * account_list = NULL;   /* the account list of active accounts -Davenge */
 LIST     * string_free = NULL;    /* so I can use downcase the way I want -Davenge */
-LIST     * coord_map[MAX_COORD_HASH]; /* hash of the coord maps based on the absolute value of X -Davenge */
+LIST     * coord_map[COORD_HASH_KEY]; /* hash of the coord maps based on the absolute value of X -Davenge */
 LIST     * world_entities = NULL; /* a massive list of all entities in the world */
 LIST     * id_handlers = NULL;
 LIST     * workspaces = NULL;
@@ -53,7 +53,7 @@ int  control;
  */
 int main(int argc, char **argv)
 {
-   int x;
+  int x, y, z;
   bool fCopyOver;
 
   /* get the current time */
@@ -72,11 +72,15 @@ int main(int argc, char **argv)
    id_handlers = AllocList();
    all_frameworks = AllocList();
 
-   for( x = 0; x < MAX_COORD_HASH; x++ )
-      coord_map[x] = AllocList();
-
   /* note that we are booting up */
   log_string("Program starting.");
+
+   log_string( "Initializing the Coordinate Map" );
+   for( x = 0; x < COORD_HASH_KEY; x++ )
+      for( y = 0; y < COORD_HASH_KEY; y++ )
+         for( z = 0; z < COORD_HASH_KEY; z++ )
+            coord_map[x][y][z] = AllocList();
+
 
    log_string( "Loading ID Handlers" );
    if( !load_id_handlers() )

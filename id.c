@@ -58,8 +58,8 @@ I_ID *create_new_id( D_MOBILE *dMob, int type )
    if( ( id = check_free( handler ) ) == NULL )
       id = create_raw_id( use_top_id( handler ) );
 
-   id->created_by = strdup( dMob->name );
-   id->modified_by = strdup( dMob->name );
+   id->created_by = strdup( dMob ? dMob->name : "system" );
+   id->modified_by = strdup( dMob ? dMob->name : "system" );
    return id;
 }
 

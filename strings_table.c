@@ -22,7 +22,7 @@ const char *const structure_names[MAX_STRUCT+1] = {
 };
 
 const char *const rFrame_Commands[MAX_RFRAME_STRING+1] = {
-   "name", "short_descr", "long_descr", "title", "description",
+   "name", "short_descr", "long_descr", "title", "description", "inside"
    ""
 };
 

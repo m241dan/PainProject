@@ -26,6 +26,8 @@ WORKSPACE *init_workspace( void );
 bool create_workspace( D_MOBILE *dMob, WORKSPACE *wSpace, const char *name );
 /* deletion */
 void free_workspace( WORKSPACE *wSpace );
+void delete_instance( void *instance, int type );
+
 /* i/o */
 bool load_workspaces( void );
 void save_workspace( WORKSPACE *wSpace );
