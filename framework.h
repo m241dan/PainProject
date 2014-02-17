@@ -41,6 +41,8 @@ void fwrite_framework( FRAMEWORK *frame, FILE *fp );
 void fread_framework( FRAMEWORK *frame, FILE *fp );
 /* room specific */
 /* creation */
+R_FRAMEWORK *init_rFramework( );
+void clear_rFramework( R_FRAMEWORK *rFrame );
 R_FRAMEWORK *create_rFramework( void );
 /* deletion */
 void free_rFramework( R_FRAMEWORK *rFrame );

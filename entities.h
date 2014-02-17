@@ -8,6 +8,9 @@ struct entity
 {
    void *content;
    int type;
+   char *name;
+   char *short_descr;
+   char *long_descr;
 };
 
 
@@ -18,6 +21,11 @@ void clear_entity( ENTITY *ent );
 /* deletion */
 void free_entity( ENTITY *ent );
 void free_entity_list( LIST *entities );
+
+/* i/o */
+void fwrite_entity_data( ENTITY *ent, FILE *fp );
+ENTITY *fread_entity_data( FILE *fp );
+
 /*******************
  * Utility Methods *
  *******************/

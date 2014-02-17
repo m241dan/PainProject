@@ -20,9 +20,6 @@ void clear_room( ROOM *room )
    room->framework = NULL;
    room->ent_wrapper = NULL;
    room->id = NULL;
-   room->name = NULL;
-   room->short_descr = NULL;
-   room->long_descr = NULL;
    room->title = NULL;
    room->description = NULL;
    room->inside = FALSE;
@@ -40,35 +37,47 @@ ROOM *create_room( D_MOBILE *dMob, FRAMEWORK *fWork )
       return NULL;
    }
    room = init_room();
-   room->name = strdup( fWork->name );
-   room->short_descr = strdup( fWork->short_descr );
-   room->long_descr = strdup( fWork->long_descr );
+   room->ent_wrapper->name = strdup( fWork->name );
+   room->ent_wrapper->short_descr = strdup( fWork->short_descr );
+   room->ent_wrapper->long_descr = strdup( fWork->long_descr );
    room->title = strdup( rFrame->title );
    room->description = strdup( rFrame->description );
 
    room->id = create_new_id( dMob, ROOM_ENTITY );
    room->framework = fWork;
-   return;
+   return room;
 }
 
 /* deletion */
 void free_room( ROOM *room )
 {
    room->framework = NULL;
-   room->at_coord = NULL;
 
    if( room->ent_wrapper )
       free_entity( room->ent_wrapper );
    if( room->id )
       free_i_id( room->id );
-   if( room->name )
-      free( room->name );
-   if( room->short_descr )
-      free( room->short_descr );
-   if( room->long_descr )
-      free( room->long_descr );
-
+   if( room->ent_wrapper )
+      free_entity( room->ent_wrapper );
    free( room );
    return;
 }
 
+void delete_room( ROOM *room )
+{
+   char location[MAX_BUFFER];
+
+   if( !room )
+   {
+      bug( "%s: passed a NULL room.", __FUNCTION__ );
+      return;
+   }
+
+   mud_printf( location, "../instances/rooms/r%d.instance", room->id->id );
+   if( !unlink( location ) )
+      free_room( room );
+   else
+      bug( "%s: could not delete the instance of %s, ID Number %d.", __FUNCTION__, room->ent_wrapper->name, room->id->id );
+
+   return;
+}

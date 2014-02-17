@@ -140,6 +140,7 @@ void save_mobile( D_MOBILE *dMob )
    }
 
    fwrite_mobile( dMob, fp );
+   fwrite_entity_data( dMob->ent_wrapper, fp );
    fprintf( fp, "%s", FILE_TERMINATOR );
    fclose( fp );
    return;
@@ -169,6 +170,15 @@ bool load_mobile( const char *location, D_MOBILE *dMob )
       {
          case 'O':
             if( !strcasecmp( word, "EOF" ) ) { found = TRUE; done = TRUE; break; }
+            break;
+         case 'E':
+            if( !strcmp( word, "#ENTITY" ) )
+            {
+               found = TRUE;
+               if( ( dMob->ent_wrapper = fread_entity_data( fp ) ) == NULL )
+                  found = FALSE;
+               break;
+            }
             break;
          case 'M':
             if( !strcmp( word, "#MOBILE" ) )
@@ -372,7 +382,7 @@ void move_char( D_MOBILE *dMob, int dir )
    }
 
 
-   if( !dMob->at_coord->exits[dir] )
+   if( !dMob->at_coord->connected[dir] )
    {
       if( !IS_ADMIN( dMob ) )
       {
@@ -395,7 +405,7 @@ void move_char( D_MOBILE *dMob, int dir )
       create_coord( x, y, z );
    }
    mob_from_coord( dMob );
-   mob_to_coord( dMob, dMob->at_coord->exits[dir] );
+   mob_to_coord( dMob, dMob->at_coord->connected[dir] );
    bprintf( buf, "You move %s.\r\n", exit_directions[dir] );
    text_to_mobile( dMob, buf->data );
    buffer_clear( buf );
@@ -431,7 +441,7 @@ void cmd_look( void *passed, char *arg )
    bprintf( buf, "----------\r\nExits    |\r\n----------\r\n" );
 
    for( x = 0; x < MAX_DIRECTION; x++ )
-      if( dMob->at_coord->exits[x] )
+      if( dMob->at_coord->connected[x] )
          bprintf( buf, "%-10.10s-\r\n", exit_directions[x] );
    AttachIterator( &Iter, dMob->at_coord->entities );
    while( ( ent = (ENTITY *)NextInList( &Iter ) ) != NULL )

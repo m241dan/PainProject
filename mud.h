@@ -14,6 +14,7 @@
 #include <regex.h>
 #include <dirent.h>
 #include <ctype.h>
+#include <unistd.h>
 #include "list.h"
 #include "stack.h"
 
@@ -44,7 +45,7 @@
 #define COPYOVER_FILE      "../txt/copyover.dat"  /* tempfile to store copyover data    */
 #define EXE_FILE           "../src/SocketMud"     /* the name of the mud binary         */
 
-#define COORD_HASH_KEY     1000
+#define COORD_HASH_KEY      100
 #define DEFAULT_PAGEWIDTH    80
 
 /* Connection states */
@@ -102,7 +103,7 @@ typedef enum {
 #define MAX_COORD_HASH     1000
 
 typedef enum {
-   DIR_NORTH, DIR_EAST, DIR_SOUTH, DIR_WEST, DIR_UP, DIR_DOWN, DIR_NORTH_EAST, DIR_NORTH_WEST, DIR_SOUTH_EAST, DIR_SOUTH_WEST, MAX_DIRECTION;
+   DIR_NORTH, DIR_EAST, DIR_SOUTH, DIR_WEST, DIR_UP, DIR_DOWN, DIR_NORTH_EAST, DIR_NORTH_WEST, DIR_SOUTH_EAST, DIR_SOUTH_WEST, MAX_DIRECTION
 } direction_integers;
 
 /* Nanny Stuff */
@@ -114,7 +115,7 @@ typedef enum {
 } nanny_types;
 
 typedef enum {
-   NANNY_ASK_CHARACTER_NAME, NANNY_ADDITIONAL_PASSWORD, NANNY_CONFIRM_ADDITIONAL_PASSWORD, NANNY_PICK_RACE, MAX_CHARACTER_NANNY_STATE
+   NANNY_ASK_CHARACTER_NAME, NANNY_ADDITIONAL_PASSWORD, NANNY_CONFIRM_ADDITIONAL_PASSWORD, NANNY_PICK_RACE, NANNY_WRITE_SHORT, NANNY_CONFIRM_SHORT, NANNY_WRITE_LONG, NANNY_CONFIRM_LONG, MAX_CHARACTER_NANNY_STATE
 } character_nanny_states;
 
 typedef enum {

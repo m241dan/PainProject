@@ -7,7 +7,12 @@
 /* creation */
 COORD *init_coord( void )
 {
+   COORD *coord;
 
+   CREATE( coord, COORD, 1 );
+   clear_coord( coord );
+   coord->entities = AllocList();
+   return coord;
 }
 
 void clear_coord( COORD *coord )
@@ -16,10 +21,9 @@ void clear_coord( COORD *coord )
 
    for( x = 0; x < MAX_DIRECTION; x++ )
       coord->connected[x] = NULL;
-
-   coord->entities = AllocList();
    coord->room = NULL;
-   coord->entity = NULL;
+   coord->fill = NULL;
+   return;
 }
 
 COORD *create_coord( int x, int y, int z )
@@ -50,13 +54,13 @@ void free_coord( COORD *coord )
    int hash_y = get_coord_hash( coord->pos_y );
    int hash_z = get_coord_hash( coord->pos_z );
 
-   DetachFromList( coord, coord_map[hash_x][hash_y][hash_z];
+   DetachFromList( coord, coord_map[hash_x][hash_y][hash_z] );
    for( x = 0; x < MAX_DIRECTION; x++ )
       coord->connected[x] = NULL;
    if( coord->entities )
       free_entity_list( coord->entities );
-   room = NULL;
-   fill = NULL;
+   coord->room = NULL;
+   coord->fill = NULL;
 }
 
 void free_coord_list( LIST *coords )
@@ -64,10 +68,11 @@ void free_coord_list( LIST *coords )
    COORD *coord;
    ITERATOR Iter;
 
-   AttachIterator( &Iter );
+   AttachIterator( &Iter, coords );
    while( ( coord = (COORD *)NextInList( &Iter ) ) != NULL )
       free_coord( coord );
    DetachIterator( &Iter );
+   FreeList( coords );
 
    return;
 }
@@ -79,14 +84,16 @@ COORD *get_coord( int x, int y, int z )
 {
    COORD *coordinate;
    ITERATOR Iter;
-   int hash = get_coord_hash( x );
+   int hash_x = get_coord_hash( x );
+   int hash_y = get_coord_hash( y );
+   int hash_z = get_coord_hash( z );
 
-   AttachIterator( &Iter, coord_map[hash] );
+   AttachIterator( &Iter, coord_map[hash_x][hash_y][hash_z] );
    while( ( coordinate = (COORD *)NextInList( &Iter ) ) != NULL )
       if( same_coord( coordinate, x, y, z ) )
-         return coordinate;
+         break;
    DetachIterator( &Iter );
-   return NULL;
+   return coordinate;
 }
 
 void link_coordinate( COORD *coordinate )

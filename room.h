@@ -9,9 +9,6 @@ struct room
    ENTITY *ent_wrapper;
    I_ID *id;
 
-   char *name;
-   char *short_descr;
-   char *long_descr;
    char *title;
    char *description;
    bool inside;

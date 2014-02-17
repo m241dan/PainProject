@@ -30,7 +30,7 @@ LIST     * dmobile_list = NULL;   /* the mobile list of active mobiles */
 STACK    * account_free = NULL;   /* the account free list -Davenge    */
 LIST     * account_list = NULL;   /* the account list of active accounts -Davenge */
 LIST     * string_free = NULL;    /* so I can use downcase the way I want -Davenge */
-LIST     * coord_map[COORD_HASH_KEY]; /* hash of the coord maps based on the absolute value of X -Davenge */
+LIST     * coord_map[COORD_HASH_KEY][COORD_HASH_KEY][COORD_HASH_KEY]; /* hash of the coord maps based on the absolute value of X -Davenge */
 LIST     * world_entities = NULL; /* a massive list of all entities in the world */
 LIST     * id_handlers = NULL;
 LIST     * workspaces = NULL;

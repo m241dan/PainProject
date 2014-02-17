@@ -103,6 +103,9 @@ void change_nanny_state( NANNY *nanny, int state, bool message )
  *************************/
 void nanny_handle_input( D_SOCKET *dsock, char *arg )
 {
+   while( isspace( *arg ) )
+      arg++;
+
    if( !dsock->nanny )
    {
       bug( "%s: bad socket state, in state nanny but no nanny created.", __FUNCTION__ );
@@ -110,6 +113,14 @@ void nanny_handle_input( D_SOCKET *dsock, char *arg )
       dsock->state = STATE_ACCOUNT;
       return;
    }
+
+   if( ( !arg || arg[0] == '\0' ) && ( dsock->nanny->state != NANNY_ADDITIONAL_PASSWORD && dsock->nanny->type == NANNY_CREATE_CHARACTER ) )
+   {
+      text_to_buffer( dsock, "Please input something.\r\n" );
+      return;
+   }
+
+
 
    if( !strcmp( arg, "/back" ) )
    {
@@ -164,6 +175,18 @@ void nanny_create_character( D_SOCKET *dsock, char *arg )
       case NANNY_PICK_RACE:
 	 nanny_pick_race( dsock, arg );
 	 return;
+      case NANNY_WRITE_SHORT:
+         nanny_write_short( dsock, arg );
+         return;
+      case NANNY_CONFIRM_SHORT:
+         nanny_confirm_short( dsock, arg );
+         return;
+      case NANNY_WRITE_LONG:
+         nanny_write_long( dsock, arg );
+         return;
+      case NANNY_CONFIRM_LONG:
+         nanny_confirm_long( dsock, arg );
+         return;
    }
 }
 
@@ -176,9 +199,16 @@ void nanny_ask_character_name( D_SOCKET *dsock, char *arg )
    D_MOBILE *player = (D_MOBILE *)dsock->nanny->creation;
    char name[MAX_BUFFER];
 
+   if( !arg || arg[0] == '\0' )
+   {
+      text_to_buffer( dsock, "Please input something...\r\n" );
+      return;
+   }
+
    arg = one_arg( arg, name );
    capitalize_orig( name );
    player->name = strdup( name );
+   player->ent_wrapper->name = strdup( name );
    change_nanny_state( dsock->nanny, NANNY_ADDITIONAL_PASSWORD, TRUE );
    return;
 }
@@ -245,10 +275,77 @@ void nanny_pick_race( D_SOCKET *dsock, char *arg )
       return;
    }
 
-   nanny_complete_character( dsock );
+   change_nanny_state( dsock->nanny, NANNY_WRITE_SHORT, TRUE );
    return;
 }
 
+void nanny_write_short( D_SOCKET *dsock, char *arg )
+{
+   D_MOBILE *player = (D_MOBILE *)dsock->nanny->creation;
+   char short_descr[MAX_BUFFER];
+
+   mud_printf( short_descr, "%s", capitalize( arg ) );
+
+   player->ent_wrapper->short_descr = strdup( short_descr );
+   text_to_buffer( dsock, "'" );
+   text_to_buffer( dsock, short_descr );
+   text_to_buffer( dsock, "'\r\n" );
+   change_nanny_state( dsock->nanny, NANNY_CONFIRM_SHORT, TRUE );
+   return;
+}
+
+void nanny_confirm_short( D_SOCKET *dsock, char *arg )
+{
+   if( !is_prefix( arg, "yes" ) && !is_prefix( arg, "no" ) )
+   {
+      text_to_buffer( dsock, "Yes or No?" );
+      return;
+   }
+   if( is_prefix( arg, "yes" ) )
+   {
+      change_nanny_state( dsock->nanny, NANNY_WRITE_LONG, TRUE );
+      return;
+   }
+   if( is_prefix( arg, "no" ) )
+   {
+      change_nanny_state( dsock->nanny, NANNY_WRITE_SHORT, TRUE );
+      return;
+   }
+}
+void nanny_write_long( D_SOCKET *dsock, char *arg )
+{
+   D_MOBILE *player = (D_MOBILE *)dsock->nanny->creation;
+   char long_descr[MAX_BUFFER];
+
+   mud_printf( long_descr, "%s", capitalize( arg ) );
+   player->ent_wrapper->long_descr = strdup( long_descr );
+   text_to_buffer( dsock, "'" );
+   text_to_buffer( dsock, long_descr );
+   text_to_buffer( dsock, "'\r\n" );
+   change_nanny_state( dsock->nanny, NANNY_CONFIRM_LONG, TRUE );
+   return;
+
+}
+void nanny_confirm_long( D_SOCKET *dsock, char *arg )
+{
+   if( !is_prefix( arg, "yes" ) && !is_prefix( arg, "no" ) )
+   {
+      text_to_buffer( dsock, "Yes or No?" );
+      return;
+   }
+   if( is_prefix( arg, "yes" ) )
+   {
+      nanny_complete_character( dsock );
+      return;
+   }
+   if( is_prefix( arg, "no" ) )
+   {
+      change_nanny_state( dsock->nanny, NANNY_WRITE_LONG, TRUE );
+      return;
+   }
+
+
+}
 /* The finalize method for character creation, all good nannys should have a finalize method
  * You know, where the do what they are supposed to do with the thing that they have created
  * and send the proper message to the player and change their socket state back to normal

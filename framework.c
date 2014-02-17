@@ -85,14 +85,25 @@ void free_framework( FRAMEWORK *frame )
 
 /* -room specific- */
 /* creation */
-R_FRAMEWORK *create_rFramework( void )
+R_FRAMEWORK *init_rFramework( void )
 {
    R_FRAMEWORK *rFrame;
 
    CREATE( rFrame, R_FRAMEWORK, 1 );
+   clear_rFramework( rFrame );
+   return rFrame;
+}
+void clear_rFramework( R_FRAMEWORK *rFrame )
+{
+   rFrame->title = NULL;
+   rFrame->description = NULL;
+   return;
+}
+R_FRAMEWORK *create_rFramework( void )
+{
+   R_FRAMEWORK *rFrame = init_rFramework();;
    rFrame->title = strdup( "A new room" );
    rFrame->description = strdup( "none" );
-
    return rFrame;
 }
 
@@ -300,11 +311,9 @@ void fwrite_rFramework( R_FRAMEWORK *rFrame, FILE *fp )
 }
 R_FRAMEWORK *fread_rFramework( FILE *fp )
 {
-   R_FRAMEWORK *rFrame;
+   R_FRAMEWORK *rFrame = init_rFramework();
    char *word;
    bool found, done = FALSE;
-
-   CREATE( rFrame, R_FRAMEWORK, 1 );
 
    word = ( feof( fp ) ? "#END" : fread_word( fp ) );
    while( !done )

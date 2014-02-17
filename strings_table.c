@@ -37,7 +37,7 @@ const char *const id_handler_names[MAX_STRUCT+1] = {
 };
 
 const char *const nanny_strings[MAX_NANNY_TYPE][MAX_NANNY_STATES] = {
-   { "What would you like to name this character?", "(Optional)Enter an Additional Password(blank space for none): ", "Retype Password to Confirm: ", "Please type in your race: ", "" }, /* type 1 Nanny */
+   { "What would you like to name this character?", "(Optional)Enter an Additional Password(blank space for none): ", "Retype Password to Confirm: ", "Please type in your race: ", "Write a short description, this will be what players who don't know you will see when they act.", "Is this correct?", "Write a long description, this is what players will see when they observe you via the look command.", "Is this correct?", "" }, /* type 1 Nanny */
    { "Password?" }, /* NANNY_CHAR_PASS_CHECK */
    /* The terminator */
    { "" }

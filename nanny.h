@@ -36,6 +36,10 @@ void nanny_ask_character_name( D_SOCKET *dsock, char *arg );
 void nanny_additional_password( D_SOCKET *dsock, char *arg );
 void nanny_confirm_password( D_SOCKET *dsock, char *arg );
 void nanny_pick_race( D_SOCKET *dsock, char *arg );
+void nanny_write_short( D_SOCKET *dsock, char *arg );
+void nanny_confirm_short( D_SOCKET *dsock, char *arg );
+void nanny_write_long( D_SOCKET *dsock, char *arg );
+void nanny_confirm_long( D_SOCKET *dsock, char *arg );
 void nanny_complete_character( D_SOCKET *dsock );
 
 /* CHaracter password Checker */
