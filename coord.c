@@ -173,3 +173,8 @@ int get_directional_opposite( int dir )
    }
    return -1;
 }
+
+bool can_occupy( int x, int y, int z )
+{
+
+}

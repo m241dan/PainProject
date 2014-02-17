@@ -6,11 +6,15 @@ extern LIST * world_entities; /* anything instanced is an entity */
 
 struct entity
 {
+   D_SOCKET *dsock;
    void *content;
    int type;
    char *name;
    char *short_descr;
    char *long_descr;
+   LIST *coordinates_occupied;
+   LIST *events;
+   LIST *commands;
 };
 
 
@@ -30,3 +34,4 @@ ENTITY *fread_entity_data( FILE *fp );
  * Utility Methods *
  *******************/
 void wrap_entity( void *passed, int type );
+bool shift_entity( ENTITY *ent, int x, int y, int z );

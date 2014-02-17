@@ -29,11 +29,10 @@ COORD *create_coord( int x, int y, int z );
 void free_coord( COORD *coord );
 void free_coord_list( LIST *coords );
 
-
+/* utility */
 COORD *get_coord( int x, int y, int z );
 void link_coordinate( COORD *coordinate );
 bool check_coord( int x, int y, int z );
 int get_coord_hash( int x );
 bool same_coord( COORD *coordinate, int x, int y, int z );
 int get_directional_opposite( int dir );
-

@@ -13,8 +13,6 @@
 
 struct dMobile
 {
-   D_SOCKET      * socket;
-   LIST          * events; /*game data */
    char          * name; /* account data */
    char          * password; /* account data */
    sh_int        level; /* account data */
@@ -28,14 +26,7 @@ struct dMobile
    FRAMEWORK *framework;
    ACCOUNT *account;
    ENTITY *ent_wrapper;
-   LIST *commands;
-   COORD *at_coord;
    I_ID *id;
-
-   /* olc stuff */
-   WORKSPACE *workspace;
-   void *editing;
-   int editing_type;
 };
 
 

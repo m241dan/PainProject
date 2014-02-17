@@ -133,7 +133,6 @@ bool load_frameworks( void )
    for( x = 0; x < MAX_FRAMEWORK; x++ )
    {
       mud_printf( dir_name, "../frameworks/%ss/", framework_names[x] );
-      puts( dir_name );
       if( ( directory = opendir( dir_name ) ) == NULL )
       {
          bug( "%s: could not load %s directory.", __FUNCTION__, dir_name );
@@ -215,7 +214,8 @@ bool load_framework( const char *location, FRAMEWORK *frame )
             if( !strcmp( word, "#FRAMEWORK" ) )
             {
                found = TRUE;
-               fread_framework( frame, fp );
+               if( !fread_framework( frame, fp ) )
+                  found = FALSE;
                break;
             }
             break;
@@ -242,7 +242,7 @@ bool load_framework( const char *location, FRAMEWORK *frame )
          return FALSE;
       }
       if( !done )
-         word = fread_word( fp );
+         word = ( feof( fp ) ? FILE_TERMINATOR : fread_word( fp ) );
    }
    fclose( fp );
    return TRUE;
@@ -260,7 +260,7 @@ void fwrite_framework( FRAMEWORK *frame, FILE *fp )
    return;
 }
 
-void fread_framework( FRAMEWORK *frame, FILE *fp )
+bool fread_framework( FRAMEWORK *frame, FILE *fp )
 {
    char *word;
    bool found, done = FALSE;
@@ -291,12 +291,12 @@ void fread_framework( FRAMEWORK *frame, FILE *fp )
       {
          bug( "%s: bad file format %s", __FUNCTION__, word );
          free_framework( frame );
-         return;
+         return FALSE;
       }
       if( !done )
          word = ( feof( fp ) ? "#END" : fread_word( fp ) );
    }
-   return;
+   return TRUE;
 }
 
 /* -room specific- */

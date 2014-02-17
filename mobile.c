@@ -32,7 +32,6 @@ void clear_mobile( D_MOBILE *dMob )
    dMob->race = 0;
    dMob->account = NULL;
    dMob->ent_wrapper = NULL;
-   dMob->at_coord = NULL;
    dMob->workspace = NULL;
    dMob->editing = NULL;
    return;
@@ -66,7 +65,6 @@ void free_mobile( D_MOBILE *dMob )
       free_entity( dMob->ent_wrapper );
    dMob->ent_wrapper = NULL;
 
-   dMob->at_coord = NULL;
    if( dMob->workspace )
       unset_mobile_workspace( dMob );
    dMob->editing = NULL;
@@ -328,7 +326,6 @@ bool char_to_game( D_MOBILE *dMob )
 
 void mob_from_coord( D_MOBILE *dMob )
 {
-   DetachFromList( dMob->ent_wrapper, dMob->at_coord->entities );
    return;
 }
 

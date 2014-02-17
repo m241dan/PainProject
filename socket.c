@@ -35,6 +35,7 @@ LIST     * world_entities = NULL; /* a massive list of all entities in the world
 LIST     * id_handlers = NULL;
 LIST     * workspaces = NULL;
 LIST     * all_frameworks = NULL;
+LIST     * all_shapes = NULL;
 /* mccp support */
 const unsigned char compress_will   [] = { IAC, WILL, TELOPT_COMPRESS,  '\0' };
 const unsigned char compress_will2  [] = { IAC, WILL, TELOPT_COMPRESS2, '\0' };
@@ -71,6 +72,7 @@ int main(int argc, char **argv)
    workspaces = AllocList();
    id_handlers = AllocList();
    all_frameworks = AllocList();
+   all_shapes = AllocList();
 
   /* note that we are booting up */
   log_string("Program starting.");

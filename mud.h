@@ -226,6 +226,9 @@ typedef struct framework FRAMEWORK;
 typedef struct room_framework R_FRAMEWORK;
 typedef struct character_sheet CHAR_SHEET;
 typedef struct room ROOM;
+typedef struct offset OFFSET;
+typedef struct creator CREATOR;
+typedef struct shape SHAPE;
 
 typedef unsigned long int VALUE;
 
@@ -252,6 +255,12 @@ struct dSocket
   /* New Stuff */
   ACCOUNT       * account; /* sockets now hold accounts */
   NANNY         * nanny;
+
+   /* olc stuff */
+   WORKSPACE *workspace;
+   void *editing;
+   int editing_type;
+
 };
 
 struct help_data
@@ -303,6 +312,10 @@ typedef struct buffer_type
 #include "mobile.h"
 #include "id.h"
 #include "strings_table.h"
+#include "offset.h"
+#include "shape.h"
+#include "creator.h"
+
 
 /***************************
  * Global Variables        *

@@ -20,6 +20,7 @@ bool load_id_handlers( void )
       handler = init_id_handler( x );
       if( !load_id_handler( handler ) )
       {
+         free_id_handler( handler );
          bug( "%s: could not load %s id handler.", __FUNCTION__, id_handler_names[x] );
          return FALSE;
       }

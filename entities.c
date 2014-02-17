@@ -11,11 +11,13 @@ ENTITY *init_entity( void )
 
    CREATE( ent, ENTITY, 1 );
    clear_entity( ent );
+   ent->coordinates_occupied = AllocList();
    return ent;
 }
 
 void clear_entity( ENTITY *ent )
 {
+   ent->socket = NULL;
    ent->content = NULL;
    ent->type = -1;
    ent->name = NULL;
@@ -27,6 +29,9 @@ void clear_entity( ENTITY *ent )
 /* deletion */
 void free_entity( ENTITY *ent )
 {
+   COORD *coord;
+   ITERATOR Iter;
+
    DetachFromList( ent, world_entities );
    if( ent->name )
       free( ent->name );
@@ -35,6 +40,13 @@ void free_entity( ENTITY *ent )
    if( ent->long_descr )
       free( ent->long_descr );
    ent->content = NULL;
+
+   AttachIterator( &Iter, ent->coordinates_occupied );
+   while( ( coord = (COORD *)NextInList( &Iter ) ) != NULL )
+      DetachFromList( coord, ent->coordinates_occupied );
+   DetachIterator( &Iter );
+   FreeList( ent->coordinates_occupied );
+
    free( ent );
    return;
 }
@@ -45,8 +57,12 @@ void free_entity_list( LIST *entities )
 
    AttachIterator( &Iter, entities );
    while( ( ent = (ENTITY *)NextInList( &Iter ) ) != NULL )
+   {
+      DetachFromList( ent, entities );
       free_entity( ent );
+   }
    DetachIterator( &Iter );
+   FreeList( entities );
 
    return;
 }
@@ -114,4 +130,27 @@ void wrap_entity( void *passed, int type )
    }
    AttachToList( ent, world_entities );
    return;
+}
+
+bool can_shift_entity( ENTITY *ent, int x, int y, int z )
+{
+   return FALSE;
+/*
+   COORD *coord, *to_coord;
+   ITERATOR Iter;
+   bool can_shift = TRUE;
+
+   AttachIterator( &Iter, ent->coordinates_occupied );
+   while( ( coord = (COORD *)NextInList( &Iter ) ) != NULL )
+   {
+      if( ( to_coord = get_coord( coord->pos_x + x, coord->pos_y + y, coord->pos_z + z ) ) == NULL )
+      {
+         if( x = 0 && y = 0 )
+            continue;
+         else
+         {
+            ent_printf( 
+            return FALSE;
+   }
+*/
 }
