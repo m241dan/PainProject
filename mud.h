@@ -235,7 +235,7 @@ typedef unsigned long int VALUE;
 /* the actual structures */
 struct dSocket
 {
-  D_MOBILE      * player;
+  ENTITY        * entity;
   LIST          * events;
   char          * hostname;
   char            inbuf[MAX_BUFFER];
@@ -394,9 +394,12 @@ void  clear_socket            ( D_S *sock_new, int sock );
 void  recycle_sockets         ( void );
 void *lookup_address          ( void *arg );
 void change_socket_state( D_S *dsock, int state );
-void control_player( D_SOCKET *dsock, D_MOBILE *player );
+void control_entity( D_SOCKET *dsock, ENTITY *ent );
+void uncontrol_entity( ENTITY *ent );
 void control_nanny( D_SOCKET *dsock, NANNY *nanny );
+void uncontrol_nanny( NANNY *nanny );
 void control_account( D_SOCKET *dsock, ACCOUNT *account );
+void uncontrol_account( ACCOUNT *account );
 const char *handle_pagewidth( int width, const char *txt );
 /*
  * interpret.c
@@ -477,6 +480,8 @@ bool valid_mobile( D_MOBILE *dMob );
 bool is_number( const char *arg );
 void load_commands( LIST *commands, const struct typCmd to_load[], int state, int level );
 void unload_commands( LIST *commands, const struct typCmd to_unload[], int state, int level );
+void clear_commands( LIST *commands );
+void free_command_list( LIST *commands );
 /*
  * action_safe.c
  */

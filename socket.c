@@ -83,18 +83,21 @@ int main(int argc, char **argv)
          for( z = 0; z < COORD_HASH_KEY; z++ )
             coord_map[x][y][z] = AllocList();
 
+   log_string( "Loading Accounts" );
+   if( !load_accounts() )
+      exit(EXIT_FAILURE);
 
    log_string( "Loading ID Handlers" );
    if( !load_id_handlers() )
-      return 0;
+      exit(EXIT_FAILURE);
 
    log_string( "Loading Frameworks" );
    if( !load_frameworks() )
-      return 0;
+      exit(EXIT_FAILURE);
 
    log_string( "Loading Workspaces" );
    if( !load_workspaces() )
-      return 0;
+      exit(EXIT_FAILURE);
 
   /* initialize the event queue - part 1 */
   init_event_queue(1);
@@ -436,20 +439,17 @@ void close_socket(D_SOCKET *dsock, bool reconnect)
   {
     if (reconnect)
       text_to_socket(dsock, "This connection has been taken over.\n\r");
-    else if (dsock->player)
+    else if (dsock->entity)
     {
-      dsock->player->socket = NULL;
-      log_string("Closing link to %s", dsock->player->name);
+      dsock->entity->socket = NULL;
+      log_string("Closing link to %s", dsock->entity->name);
     }
   }
-  else if (dsock->player)
-    unload_mobile( dsock->player );
+  else if (dsock->entity && dsock->entity->content && dsock->entity->type == MOBILE_ENTITY )
+    unload_mobile( (D_MOBILE *)dsock->entity->content);
 
    if( dsock->account )
-   {
-      unload_account( dsock->account );
-      dsock->account = NULL;
-   }
+      uncontrol_account( dsock->account );
 
   /* dequeue all events for this socket */
   AttachIterator(&Iter, dsock->events);
@@ -811,15 +811,17 @@ void text_to_buffer(D_SOCKET *dsock, const char *txt)
  */
 void text_to_mobile(D_MOBILE *dMob, const char *txt)
 {
-  if (dMob->socket)
-  {
-     if( dMob->socket && dMob->socket->account )
-        txt = handle_pagewidth( dMob->socket->account->pagewidth, txt );
-     else
-        txt = handle_pagewidth( DEFAULT_PAGEWIDTH, txt );
-     text_to_buffer(dMob->socket, txt);
-     dMob->socket->bust_prompt = TRUE;
-  }
+   D_SOCKET *dSock = NULL;
+
+   if( dMob->ent_wrapper && dMob->ent_wrapper->socket )
+      dSock = dMob->ent_wrapper->socket;
+
+  if( dSock->account )
+     txt = handle_pagewidth( dSock->account->pagewidth, txt );
+  else
+     txt = handle_pagewidth( DEFAULT_PAGEWIDTH, txt );
+  text_to_buffer(dSock, txt);
+  dSock->bust_prompt = TRUE;
 }
 
 void text_to_account( ACCOUNT *account, const char *txt )
@@ -965,13 +967,12 @@ void handle_new_connections(D_SOCKET *dsock, char *arg)
         text_to_buffer(dsock, "Sorry, that's not a legal name, please pick another.\n\rWhat is your name? ");
         break;
       }
-      arg[0] = toupper(arg[0]);
       log_string("%s is trying to connect.", arg);
 
-      mud_printf( aName, "../accounts/%s/account.afile", capitalize( arg ) ); /* format the file location of where such an account may be located */
-      a_new = init_account(); /* initialize a new account structure */
-      if( !load_account( aName, a_new ) )/* attempt to load data into it */
+      mud_printf( aName, "%s", capitalize( arg ) ); /* format the file location of where such an account may be located */
+      if( ( a_new = get_account( aName ) ) == NULL )/* attempt to load data into it */
       {
+         a_new = init_account();
         /* give the player it's name */
         a_new->name = strdup(arg);
 
@@ -987,8 +988,7 @@ void handle_new_connections(D_SOCKET *dsock, char *arg)
       }
       text_to_buffer(dsock, (char *) dont_echo);
 
-      /* socket <-> player */
-      control_account( dsock, a_new );
+      dsock->account = a_new;
       break;
     case STATE_NEW_PASSWORD:
       if (strlen(arg) < 5 || strlen(arg) > 12)
@@ -1020,6 +1020,7 @@ void handle_new_connections(D_SOCKET *dsock, char *arg)
 
         /* put him in the list */
         AttachToList(dsock->account, account_list);
+        control_account( dsock, dsock->account );
 
         log_string("New account: %s has entered the game.", dsock->account->name);
 
@@ -1049,11 +1050,11 @@ void handle_new_connections(D_SOCKET *dsock, char *arg)
       text_to_buffer(dsock, (char *) do_echo);
       if (!strcmp(crypt(arg, dsock->account->name), dsock->account->password))
       {
-        if ((a_new = check_account_reconnect(dsock->account->name)) != NULL)
+        if( dsock->account->socket )
         {
-          /* attach the new player */
-          free_account(dsock->account);
-          control_account( dsock, a_new );
+          /* kick out whoever is already connected */
+          close_socket( dsock->account->socket, TRUE );
+          control_account( dsock, dsock->account );
 
           log_string("%s has reconnected.", dsock->account->name);
 
@@ -1066,9 +1067,7 @@ void handle_new_connections(D_SOCKET *dsock, char *arg)
         }
         else
         {
-          /* put him in the active list */
-          AttachToList(dsock->account, account_list);
-
+          control_account( dsock, dsock->account );
           log_string("%s has entered the game.", dsock->account->name);
 
           /* and let him enter the game */
@@ -1086,7 +1085,6 @@ void handle_new_connections(D_SOCKET *dsock, char *arg)
       else
       {
         text_to_socket(dsock, "Bad password!\n\r");
-        unload_account(dsock->account);
         dsock->account = NULL;
         close_socket(dsock, FALSE);
       }
@@ -1101,7 +1099,7 @@ void clear_socket(D_SOCKET *sock_new, int sock)
   sock_new->control        =  sock;
   sock_new->state          =  STATE_NEW_NAME;
   sock_new->lookup_status  =  TSTATE_LOOKUP;
-  sock_new->player         =  NULL;
+  sock_new->entity         =  NULL;
   sock_new->top_output     =  0;
   sock_new->events         =  AllocList();
 }
@@ -1179,10 +1177,12 @@ void change_socket_state( D_SOCKET *dsock, int state )
    switch( state )
    {
       case STATE_PLAYING:
-         load_mobile_commands( dsock->player );
+         if( dsock->entity && dsock->entity->commands && dsock->entity->type == MOBILE_ENTITY )
+            load_commands( dsock->entity->commands, tabCmd, STATE_PLAYING, ((D_MOBILE *)dsock->entity->content)->level );
          break;
       case STATE_ACCOUNT:
-         load_account_commands( dsock->account );
+         if( dsock->account && dsock->account->commands )
+            load_commands( dsock->account->commands, tabCmd, STATE_ACCOUNT, dsock->account->level );
          break;
    }
    return;
@@ -1190,21 +1190,36 @@ void change_socket_state( D_SOCKET *dsock, int state )
 
 /* Set this socket up to control given player */
 
-void control_player( D_SOCKET *dsock, D_MOBILE *player )
+void control_entity( D_SOCKET *dsock, ENTITY *ent )
 {
    if( !dsock )
    {
       bug( "%s: given a NULL socket.", __FUNCTION__ );
       return;
    }
-   if( !player )
+   if( !ent )
    {
-      bug( "%s: given a NULL player.", __FUNCTION__ );
+      bug( "%s: given a NULL entity.", __FUNCTION__ );
       return;
    }
-   dsock->player = player;
-   player->socket = dsock;
+   dsock->entity = ent;
+   ent->socket = dsock;
    return;
+}
+void uncontrol_entity( ENTITY *ent )
+{
+   if( !ent )
+   {
+      bug( "%s: given a NULL ent.", __FUNCTION__ );
+      return;
+   }
+   if( !ent->socket )
+   {
+      bug( "%s: ent has a NULL socket already.", __FUNCTION__ );
+      return;
+   }
+   ent->socket->entity = NULL;
+   ent->socket = NULL;
 }
 
 void control_nanny( D_SOCKET *dsock, NANNY *nanny )
@@ -1224,6 +1239,22 @@ void control_nanny( D_SOCKET *dsock, NANNY *nanny )
    return;
 }
 
+void uncontrol_nanny( NANNY *nanny )
+{
+   if( !nanny )
+   {
+      bug( "%s: given a NULL nanny.", __FUNCTION__ );
+      return;
+   }
+   if( !nanny->socket )
+   {
+      bug( "%s: given a nanny with a NULL socket.", __FUNCTION__ );
+      return;
+   }
+   nanny->socket->nanny = NULL;
+   nanny->socket = NULL;
+}
+
 void control_account( D_SOCKET *dsock, ACCOUNT *account )
 {
    if( !dsock )
@@ -1241,6 +1272,21 @@ void control_account( D_SOCKET *dsock, ACCOUNT *account )
    return;
 }
 
+void uncontrol_account( ACCOUNT *account )
+{
+   if( !account )
+   {
+      bug( "%s: given a NULL account.", __FUNCTION__ );
+      return;
+   }
+   if( !account->socket )
+   {
+      bug( "%s: given an account with a NULL socket.", __FUNCTION__ );
+      return;
+   }
+   account->socket->account = NULL;
+   account->socket = NULL;
+}
 const char *handle_pagewidth( int width, const char *txt )
 {
    static char buf[MAX_BUFFER * 2];

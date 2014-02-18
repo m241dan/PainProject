@@ -6,7 +6,7 @@ extern LIST * world_entities; /* anything instanced is an entity */
 
 struct entity
 {
-   D_SOCKET *dsock;
+   D_SOCKET *socket;
    void *content;
    int type;
    char *name;

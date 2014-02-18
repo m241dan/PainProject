@@ -17,9 +17,6 @@ D_MOBILE *init_mobile( void )
 
    CREATE( dMob, D_MOBILE, 1 );
    clear_mobile( dMob );
-   wrap_entity( dMob, MOBILE_ENTITY );
-   dMob->events = AllocList();
-   dMob->commands = AllocList();
    return dMob;
 }
 
@@ -69,39 +66,6 @@ void free_mobile( D_MOBILE *dMob )
       unset_mobile_workspace( dMob );
    dMob->editing = NULL;
    free( dMob );
-}
-
-void clear_mobile_command_list( D_MOBILE *dMob )
-{
-   COMMAND *com;
-   ITERATOR Iter;
-
-   if( !dMob->commands )
-      return;
-
-   AttachIterator(&Iter, dMob->commands );
-   while( ( com = (COMMAND *)NextInList(&Iter) ) != NULL )
-   {
-      DetachFromList( com, dMob->commands );
-      free_command( com );
-   }
-   DetachIterator(&Iter);
-   return;
-}
-
-void clear_mobile_event_list( D_MOBILE *dMob )
-{
-   EVENT_DATA *pEvent;
-   ITERATOR Iter;
-
-   if( !dMob->events )
-      return;
-
-   AttachIterator(&Iter, dMob->events);
-   while ((pEvent = (EVENT_DATA *) NextInList(&Iter)) != NULL)
-     dequeue_event(pEvent);
-   DetachIterator(&Iter);
-   return;
 }
 
 void save_mobile( D_MOBILE *dMob )
@@ -267,13 +231,6 @@ bool fread_mobile( D_MOBILE *dMob, FILE *fp )
 }
 
 /* utility */
-
-void load_mobile_commands( D_MOBILE *dMob )
-{
-   clear_mobile_command_list( dMob ); /* clear it out before we lost new commands */
-   load_commands( dMob->commands, tabCmd, STATE_PLAYING, dMob->level );
-   return;
-}
 
 void mobile_prompt( D_SOCKET *dsock )
 {

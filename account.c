@@ -129,6 +129,39 @@ void clear_account_command_list( ACCOUNT *account )
 }
 
 /* i/o */
+bool load_accounts( void )
+{
+   ACCOUNT *account;
+   char dir_name[MAX_BUFFER];
+   char location[MAX_BUFFER];
+   DIR *directory;
+   struct dirent *entry;
+
+   mud_printf( dir_name, "../accounts/" );
+   if( ( directory = opendir( dir_name ) ) == NULL )
+   {
+      bug( "%s: could not load $s directory.", __FUNCTION__, dir_name );
+      return FALSE;
+   }
+
+   for( entry = readdir( directory ); entry; entry = readdir( directory ) )
+   {
+      if( !strcmp( entry->d_name, "." ) || !strcmp( entry->d_name, ".." ) )
+         continue;
+
+      account = init_account();
+      mud_printf( location, "%s%s/account.afile", dir_name, entry->d_name );
+      if( !load_account( location, account ) )
+      {
+         free_account( account );
+         bug( "%s: could not load framework %s from file.", __FUNCTION__, location );
+         continue;
+      }
+      AttachToList( account, account_list );
+   }
+   return TRUE;
+}
+
 void save_account( ACCOUNT *account )
 {
    FILE *fp;
@@ -479,6 +512,20 @@ const char *get_loc_from_char_sheet( CHAR_SHEET *cSheet )
          return buf;
    }
    return buf;
+}
+
+ACCOUNT *get_account( const char *name )
+{
+   ACCOUNT *account;
+   ITERATOR Iter;
+
+   AttachIterator( &Iter, account_list );
+   while( ( account = (ACCOUNT *)NextInList( &Iter ) ) != NULL )
+      if( !strcmp( account->name, name ) )
+         break;
+   DetachIterator( &Iter );
+
+   return account;
 }
 
 /* set_account

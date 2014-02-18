@@ -175,8 +175,8 @@ D_MOBILE *check_reconnect(char *player)
   {
     if (!strcasecmp(dMob->name, player))
     {
-      if (dMob->socket)
-        close_socket(dMob->socket, TRUE);
+      if( dMob->ent_wrapper && dMob->ent_wrapper->socket )
+        close_socket(dMob->ent_wrapper->socket, TRUE);
 
       break;
     }
@@ -285,4 +285,26 @@ void unload_commands( LIST *commands, const struct typCmd to_unload[], int state
       DetachIterator( &Iter );
    }
    return;
+}
+
+void clear_commands( LIST *commands )
+{
+   COMMAND *com;
+   ITERATOR Iter;
+
+   AttachIterator( &Iter, commands );
+   while( ( com = (COMMAND *)NextInList( &Iter ) ) != NULL )
+   {
+      DetachFromList( com, commands );
+      free_command( com );
+   }
+   DetachIterator( &Iter );
+
+   return;
+}
+
+void free_command_list( LIST *commands )
+{
+   clear_commands( commands );
+   FreeList( commands );
 }

@@ -9,6 +9,7 @@
 
 void handle_cmd_input(D_SOCKET *dsock, char *arg)
 {
+/*
   D_MOBILE *dMob;
   char command[MAX_BUFFER];
   bool found_cmd = FALSE;
@@ -31,7 +32,8 @@ void handle_cmd_input(D_SOCKET *dsock, char *arg)
   }
 
   if (!found_cmd)
-    text_to_mobile(dMob, "No such command.\n\r");
+    text_to_mobile(dMob, "No such command.\n\r"); */
+   return;
 }
 
 /*
@@ -95,7 +97,7 @@ void new_handle_cmd_input(D_SOCKET *dsock, char *arg)
    ITERATOR Iter;
    LIST *cmd_table;
    COMMAND *com;
-   void *entity;
+   void *currently_controlling;
    char command[MAX_BUFFER];
    bool found_cmd = FALSE;
 
@@ -104,12 +106,12 @@ void new_handle_cmd_input(D_SOCKET *dsock, char *arg)
    switch( dsock->state )
    {
       case STATE_ACCOUNT:
-         if( ( entity = dsock->account ) == NULL )
+         if( ( current_controlling = dsock->account ) == NULL )
             return;
          cmd_table = dsock->account->commands;
          break;
       case STATE_PLAYING:
-         if( ( entity = dsock->player ) == NULL )
+         if( ( currently_controlling = dsock->player ) == NULL )
             return;
          cmd_table = dsock->player->commands;
          break;

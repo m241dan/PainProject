@@ -12,6 +12,8 @@ ENTITY *init_entity( void )
    CREATE( ent, ENTITY, 1 );
    clear_entity( ent );
    ent->coordinates_occupied = AllocList();
+   ent->events = AllocList();
+   ent->comands = AllocList();
    return ent;
 }
 
@@ -39,6 +41,7 @@ void free_entity( ENTITY *ent )
       free( ent->short_descr );
    if( ent->long_descr )
       free( ent->long_descr );
+
    ent->content = NULL;
 
    AttachIterator( &Iter, ent->coordinates_occupied );
@@ -46,6 +49,10 @@ void free_entity( ENTITY *ent )
       DetachFromList( coord, ent->coordinates_occupied );
    DetachIterator( &Iter );
    FreeList( ent->coordinates_occupied );
+
+   FreeList( ent->events );
+
+   free_command_list( ent->commands );
 
    free( ent );
    return;
@@ -57,10 +64,7 @@ void free_entity_list( LIST *entities )
 
    AttachIterator( &Iter, entities );
    while( ( ent = (ENTITY *)NextInList( &Iter ) ) != NULL )
-   {
       DetachFromList( ent, entities );
-      free_entity( ent );
-   }
    DetachIterator( &Iter );
    FreeList( entities );
 
@@ -116,10 +120,8 @@ ENTITY *fread_entity_data( FILE *fp )
  * Utility Methods *
  *******************/
 
-void wrap_entity( void *passed, int type )
+void insert_into_entity( ENTITY *ent, void *passed, int type )
 {
-   ENTITY *ent = init_entity();
-
    ent->type = type;
    ent->content = passed;
    switch( type )

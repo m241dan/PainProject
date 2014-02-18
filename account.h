@@ -52,6 +52,7 @@ void clear_account_command_list( ACCOUNT *account );
 
 
 /* i/o */
+bool load_accounts( void );
 void save_account( ACCOUNT *account );
 bool load_account( const char *location, ACCOUNT *account );
 void fwrite_account( ACCOUNT *account, FILE *fp );
@@ -69,6 +70,7 @@ ACCOUNT *get_account_from_name( const char *name );
 
 /* retrieval */
 const char *get_loc_from_char_sheet( CHAR_SHEET *cSheet );
+ACCOUNT *get_account( const char *name );
 
 /* setting */
 void set_account( ACCOUNT *account, VALUE value, int type );
