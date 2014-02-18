@@ -111,9 +111,9 @@ void new_handle_cmd_input(D_SOCKET *dsock, char *arg)
          cmd_table = dsock->account->commands;
          break;
       case STATE_PLAYING:
-         if( ( currently_controlling = dsock->player ) == NULL )
+         if( ( currently_controlling = dsock->entity ) == NULL )
             return;
-         cmd_table = dsock->player->commands;
+         cmd_table = dsock->entity->commands;
          break;
    }
 

@@ -13,9 +13,10 @@
 
 struct dMobile
 {
-   char          * name; /* account data */
-   char          * password; /* account data */
-   sh_int        level; /* account data */
+   char          * name;
+   char          * account /* name of account this mobile belongs to */
+   char          * password;
+   sh_int        level;
    sh_int        race;
 
    /***************
@@ -24,7 +25,6 @@ struct dMobile
 
    /* Utility Variables */
    FRAMEWORK *framework;
-   ACCOUNT *account;
    ENTITY *ent_wrapper;
    I_ID *id;
 };
