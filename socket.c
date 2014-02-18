@@ -83,10 +83,6 @@ int main(int argc, char **argv)
          for( z = 0; z < COORD_HASH_KEY; z++ )
             coord_map[x][y][z] = AllocList();
 
-   log_string( "Loading Accounts" );
-   if( !load_accounts() )
-      exit(EXIT_FAILURE);
-
    log_string( "Loading ID Handlers" );
    if( !load_id_handlers() )
       exit(EXIT_FAILURE);
@@ -969,10 +965,10 @@ void handle_new_connections(D_SOCKET *dsock, char *arg)
       }
       log_string("%s is trying to connect.", arg);
 
-      mud_printf( aName, "%s", capitalize( arg ) ); /* format the file location of where such an account may be located */
-      if( ( a_new = get_account( aName ) ) == NULL )/* attempt to load data into it */
+      mud_printf( aName, "../accounts/%s/account.afile", capitalize( arg ) ); /* format the file location of where such an account may be located */
+      a_new = init_account(); /* initialize a new account structure */
+      if( !load_account( aName, a_new ) )/* attempt to load data into it */
       {
-         a_new = init_account();
         /* give the player it's name */
         a_new->name = strdup(arg);
 
@@ -988,7 +984,7 @@ void handle_new_connections(D_SOCKET *dsock, char *arg)
       }
       text_to_buffer(dsock, (char *) dont_echo);
 
-      dsock->account = a_new;
+      control_account( dsock, a_new );
       break;
     case STATE_NEW_PASSWORD:
       if (strlen(arg) < 5 || strlen(arg) > 12)
@@ -1050,11 +1046,11 @@ void handle_new_connections(D_SOCKET *dsock, char *arg)
       text_to_buffer(dsock, (char *) do_echo);
       if (!strcmp(crypt(arg, dsock->account->name), dsock->account->password))
       {
-        if( dsock->account->socket )
+        if ((a_new = check_account_reconnect(dsock->account->name)) != NULL)
         {
           /* kick out whoever is already connected */
-          close_socket( dsock->account->socket, TRUE );
-          control_account( dsock, dsock->account );
+          free_account( dsock->account );
+          control_account( dsock, a_new );
 
           log_string("%s has reconnected.", dsock->account->name);
 
@@ -1067,7 +1063,7 @@ void handle_new_connections(D_SOCKET *dsock, char *arg)
         }
         else
         {
-          control_account( dsock, dsock->account );
+          AttachToList( dsock->account, account_list );
           log_string("%s has entered the game.", dsock->account->name);
 
           /* and let him enter the game */
@@ -1085,6 +1081,7 @@ void handle_new_connections(D_SOCKET *dsock, char *arg)
       else
       {
         text_to_socket(dsock, "Bad password!\n\r");
+        unload_account( dsock->account );
         dsock->account = NULL;
         close_socket(dsock, FALSE);
       }
