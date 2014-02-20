@@ -14,7 +14,7 @@
 struct dMobile
 {
    char          * name;
-   char          * account /* name of account this mobile belongs to */
+   char          * account; /* name of account this mobile belongs to */
    char          * password;
    sh_int        level;
    sh_int        race;

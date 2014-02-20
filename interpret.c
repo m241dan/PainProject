@@ -106,7 +106,7 @@ void new_handle_cmd_input(D_SOCKET *dsock, char *arg)
    switch( dsock->state )
    {
       case STATE_ACCOUNT:
-         if( ( current_controlling = dsock->account ) == NULL )
+         if( ( currently_controlling = dsock->account ) == NULL )
             return;
          cmd_table = dsock->account->commands;
          break;
@@ -122,7 +122,7 @@ void new_handle_cmd_input(D_SOCKET *dsock, char *arg)
    {
       if( is_prefix( command, com->cmd_name ) )
       {
-         (*com->cmd_funct)( entity, arg );
+         (*com->cmd_funct)( currently_controlling, arg );
          found_cmd = TRUE;
          break;
       }
